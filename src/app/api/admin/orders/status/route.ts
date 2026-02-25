@@ -8,7 +8,14 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        console.warn('RESEND_API_KEY not set - emails disabled');
+        return null;
+    }
+    return new Resend(apiKey);
+}
 
 export async function POST(req: Request) {
     try {
@@ -33,12 +40,17 @@ export async function POST(req: Request) {
         // Send status update email
         if (order.customer_email) {
             try {
-                await resend.emails.send({
-                    from: "Crave Bakery <onboarding@resend.dev>",
-                    to: order.customer_email,
-                    subject: `Order Update — PB-${order.order_ref.substring(0, 8).toUpperCase()}`,
-                    html: emailTemplates.statusUpdate(order.customer_name, order.order_ref, status),
-                });
+                const resend = getResend();
+                if (resend) {
+                    await resend.emails.send({
+                        from: "Crave Bakery <onboarding@resend.dev>",
+                        to: order.customer_email,
+                        subject: `Order Update — PB-${order.order_ref.substring(0, 8).toUpperCase()}`,
+                        html: emailTemplates.statusUpdate(order.customer_name, order.order_ref, status),
+                    });
+                } else {
+                    console.log('Email skipped - Resend not configured');
+                }
             } catch (emailErr) {
                 console.warn("Status update email failed:", emailErr);
             }
@@ -46,12 +58,17 @@ export async function POST(req: Request) {
             // If Delivered, send Review Request email
             if (status === "delivered") {
                 try {
-                    await resend.emails.send({
-                        from: "Crave Bakery <onboarding@resend.dev>",
-                        to: order.customer_email,
-                        subject: "How did we do? ⭐️",
-                        html: emailTemplates.reviewRequest(order.customer_name, order.id),
-                    });
+                    const resend = getResend();
+                    if (resend) {
+                        await resend.emails.send({
+                            from: "Crave Bakery <onboarding@resend.dev>",
+                            to: order.customer_email,
+                            subject: "How did we do? ⭐️",
+                            html: emailTemplates.reviewRequest(order.customer_name, order.id),
+                        });
+                    } else {
+                        console.log('Email skipped - Resend not configured');
+                    }
                 } catch (reviewErr) {
                     console.warn("Review request email failed:", reviewErr);
                 }

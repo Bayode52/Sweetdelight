@@ -2,7 +2,14 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { emailTemplates } from '@/lib/email-templates';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        console.warn('RESEND_API_KEY not set - emails disabled');
+        return null;
+    }
+    return new Resend(apiKey);
+}
 
 export async function POST(req: Request) {
     try {
@@ -55,19 +62,25 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: 'Invalid notification type' }, { status: 400 });
         }
 
-        const resendRes = await resend.emails.send({
-            from: 'Crave Bakery <onboarding@resend.dev>', // Use verified sender identity once added to Resend
-            to: email,
-            subject,
-            html,
-        });
+        const resend = getResend();
+        if (resend) {
+            const resendRes = await resend.emails.send({
+                from: 'Crave Bakery <onboarding@resend.dev>', // Use verified sender identity once added to Resend
+                to: email,
+                subject,
+                html,
+            });
 
-        if (resendRes.error) {
-            console.error("Resend Error:", resendRes.error);
-            throw resendRes.error;
+            if (resendRes.error) {
+                console.error("Resend Error:", resendRes.error);
+                throw resendRes.error;
+            }
+
+            return NextResponse.json({ success: true, id: resendRes.data?.id });
+        } else {
+            console.log('Email skipped - Resend not configured');
+            return NextResponse.json({ success: true, warning: 'Email skipped - Resend not configured' });
         }
-
-        return NextResponse.json({ success: true, id: resendRes.data?.id });
     } catch (e: any) {
         console.error("Notification API Error:", e);
         return NextResponse.json({ error: e.message }, { status: 500 });

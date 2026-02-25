@@ -8,7 +8,14 @@ export const dynamic = "force-dynamic";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-01-28.clover" });
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        console.warn('RESEND_API_KEY not set - emails disabled');
+        return null;
+    }
+    return new Resend(apiKey);
+}
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -60,22 +67,32 @@ export async function POST(req: Request) {
                     qty: item.quantity,
                     price: item.price
                 }));
-                await resend.emails.send({
-                    from: "Crave Bakery <onboarding@resend.dev>",
-                    to: order.customer_email,
-                    subject: `✅ Order Confirmed — PB-${order.order_ref.substring(0, 8).toUpperCase()}`,
-                    html: emailTemplates.orderConfirmed(order.customer_name, order.id, items, order.total_amount),
-                });
+                const resend = getResend();
+                if (resend) {
+                    await resend.emails.send({
+                        from: "Crave Bakery <onboarding@resend.dev>",
+                        to: order.customer_email,
+                        subject: `✅ Order Confirmed — PB-${order.order_ref.substring(0, 8).toUpperCase()}`,
+                        html: emailTemplates.orderConfirmed(order.customer_name, order.id, items, order.total_amount),
+                    });
+                } else {
+                    console.log('Email skipped - Resend not configured');
+                }
             } catch (e) { console.warn("Email send failed:", e); }
 
             // Send alert to admin
             try {
-                await resend.emails.send({
-                    from: "Crave Bakery Orders <onboarding@resend.dev>",
-                    to: process.env.ADMIN_EMAIL || "admin@example.com",
-                    subject: `🆕 New Order — PB-${order.order_ref.substring(0, 8).toUpperCase()} (£${order.total_amount?.toFixed(2)})`,
-                    html: emailTemplates.adminNewOrder(order.id, order.total_amount),
-                });
+                const resend = getResend();
+                if (resend) {
+                    await resend.emails.send({
+                        from: "Crave Bakery Orders <onboarding@resend.dev>",
+                        to: process.env.ADMIN_EMAIL || "admin@example.com",
+                        subject: `🆕 New Order — PB-${order.order_ref.substring(0, 8).toUpperCase()} (£${order.total_amount?.toFixed(2)})`,
+                        html: emailTemplates.adminNewOrder(order.id, order.total_amount),
+                    });
+                } else {
+                    console.log('Email skipped - Resend not configured');
+                }
             } catch (e) { console.warn("Admin email failed:", e); }
 
             // Check referral commission
@@ -95,12 +112,17 @@ export async function POST(req: Request) {
 
             if (order?.customer_email) {
                 try {
-                    await resend.emails.send({
-                        from: "Crave Bakery <orders@cravebakery.co.uk>",
-                        to: order.customer_email,
-                        subject: "Payment Failed — Crave Bakery",
-                        html: `<p>Hi ${order.customer_name}, unfortunately your payment for order ${order.order_ref} did not go through. Please try again or contact us.</p>`,
-                    });
+                    const resend = getResend();
+                    if (resend) {
+                        await resend.emails.send({
+                            from: "Crave Bakery <orders@cravebakery.co.uk>",
+                            to: order.customer_email,
+                            subject: "Payment Failed — Crave Bakery",
+                            html: `<p>Hi ${order.customer_name}, unfortunately your payment for order ${order.order_ref} did not go through. Please try again or contact us.</p>`,
+                        });
+                    } else {
+                        console.log('Email skipped - Resend not configured');
+                    }
                 } catch (e) { console.warn("Failure email error:", e); }
             }
         }
@@ -145,12 +167,17 @@ async function triggerReferralCommission(customerId: string, subtotal: number, o
     const profile = updatedReferral?.profiles as any;
     if (profile?.email) {
         try {
-            await resend.emails.send({
-                from: "Crave Bakery <onboarding@resend.dev>",
-                to: profile.email,
-                subject: "You've Got Store Credit! 💸",
-                html: emailTemplates.referralCredited(profile.full_name || "Friend", commission),
-            });
+            const resend = getResend();
+            if (resend) {
+                await resend.emails.send({
+                    from: "Crave Bakery <onboarding@resend.dev>",
+                    to: profile.email,
+                    subject: "You've Got Store Credit! 💸",
+                    html: emailTemplates.referralCredited(profile.full_name || "Friend", commission),
+                });
+            } else {
+                console.log('Email skipped - Resend not configured');
+            }
         } catch (e) { console.warn("Referral email failed:", e); }
     }
 }
