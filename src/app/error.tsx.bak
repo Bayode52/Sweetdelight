@@ -1,0 +1,55 @@
+"use client";
+
+import { useEffect } from "react";
+import { motion } from "framer-motion";
+import { RefreshCcw } from "lucide-react";
+import Link from "next/link";
+
+export default function Error({
+    error,
+    reset,
+}: {
+    error: Error & { digest?: string };
+    reset: () => void;
+}) {
+    useEffect(() => {
+        console.error("Application Error:", error);
+    }, [error]);
+
+    return (
+        <div className="min-h-screen bg-bakery-background flex flex-col items-center justify-center p-6 text-center">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="max-w-md w-full bg-white rounded-[40px] p-12 luxury-shadow border border-bakery-primary/5"
+            >
+                <div className="w-20 h-20 bg-bakery-error/10 rounded-3xl flex items-center justify-center text-bakery-error mx-auto mb-8">
+                    <RefreshCcw size={40} />
+                </div>
+
+                <h1 className="text-3xl font-playfair font-black text-bakery-primary mb-4">
+                    Something went wrong
+                </h1>
+                <p className="text-bakery-primary/60 mb-10 font-medium">
+                    We encountered an unexpected error. Don&apos;t worry, your cart is safe.
+                    Please try refreshing the page.
+                </p>
+
+                <div className="space-y-4">
+                    <button
+                        onClick={() => reset()}
+                        className="w-full h-16 bg-bakery-primary text-white rounded-2xl font-black luxury-shadow flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                    >
+                        Try Again
+                    </button>
+                    <Link
+                        href="/"
+                        className="w-full h-16 bg-bakery-primary/5 text-bakery-primary rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-bakery-primary/10 transition-all"
+                    >
+                        Return Home
+                    </Link>
+                </div>
+            </motion.div>
+        </div>
+    );
+}

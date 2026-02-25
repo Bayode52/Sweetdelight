@@ -1,0 +1,1 @@
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS order_type text default 'standard' check (order_type in ('standard', 'custom')); ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS custom_spec jsonb;

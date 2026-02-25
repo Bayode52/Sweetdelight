@@ -1,0 +1,92 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+    LayoutDashboard,
+    Package,
+    ShoppingBag,
+    Star,
+    Users,
+    Settings,
+    LogOut,
+    ChevronRight,
+    FileEdit,
+    MessageSquare,
+    BookOpen,
+    Zap
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui";
+
+const ADMIN_LINKS = [
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Live Chat", href: "/admin/chat", icon: MessageSquare },
+    { name: "Knowledge Base", href: "/admin/chat/knowledge", icon: BookOpen },
+    { name: "Products", href: "/admin/products", icon: Package },
+    { name: "Orders", href: "/admin/orders", icon: ShoppingBag },
+    { name: "Reviews", href: "/admin/reviews", icon: Star },
+    { name: "Referrals", href: "/admin/referrals", icon: Users },
+    { name: "Automations", href: "/admin/automations", icon: Zap },
+    { name: "Website Content", href: "/admin/content", icon: FileEdit },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
+];
+
+export function AdminSidebar() {
+    const pathname = usePathname();
+
+    return (
+        <aside className="fixed left-0 top-0 h-full w-64 bg-bakery-primary text-white flex flex-col border-r border-white/5 z-40">
+            {/* Header */}
+            <div className="p-8 pb-12">
+                <Link href="/" className="text-2xl font-playfair font-black tracking-tighter">
+                    Crave<span className="text-bakery-cta">.</span>Admin
+                </Link>
+            </div>
+
+            {/* Nav */}
+            <nav className="flex-1 px-4 space-y-2">
+                {ADMIN_LINKS.map((link) => {
+                    const isActive = pathname === link.href;
+                    return (
+                        <Link
+                            key={link.name}
+                            href={link.href}
+                            className={cn(
+                                "group flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300",
+                                isActive
+                                    ? "bg-bakery-cta text-white luxury-shadow"
+                                    : "text-white/60 hover:bg-white/5 hover:text-white"
+                            )}
+                        >
+                            <div className="flex items-center gap-4">
+                                <link.icon size={20} className={cn("transition-transform", isActive ? "scale-110" : "group-hover:scale-110")} />
+                                <span className="font-bold text-sm tracking-wide">{link.name}</span>
+                            </div>
+                            {isActive && <ChevronRight size={16} />}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 mt-auto">
+                <div className="bg-white/5 rounded-3xl p-4 flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-bakery-cta flex items-center justify-center font-bold">
+                            AD
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold">Admin User</p>
+                            <p className="text-[10px] text-white/40 uppercase tracking-widest">Master Cloud</p>
+                        </div>
+                    </div>
+                </div>
+                <Button variant="ghost" fullWidth className="text-white/60 hover:text-white hover:bg-bakery-error/20">
+                    <LogOut size={18} className="mr-2" />
+                    Sign Out
+                </Button>
+            </div>
+        </aside>
+    );
+}

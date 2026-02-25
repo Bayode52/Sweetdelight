@@ -1,0 +1,3 @@
+src/components/reviews/ReviewForm.tsx(265,25): error TS2322: Type '{ rating: number; onRatingChange: Dispatch<SetStateAction<number>>; interactive: true; size: "lg"; }' is not assignable to type 'IntrinsicAttributes & StarRatingProps'.
+  Property 'onRatingChange' does not exist on type 'IntrinsicAttributes & StarRatingProps'.
+src/middleware.ts(3,10): error TS2305: Module '"@supabase/auth-helpers-nextjs"' has no exported member 'createMiddlewareClient'.
