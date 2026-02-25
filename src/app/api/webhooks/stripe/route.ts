@@ -6,7 +6,14 @@ import { emailTemplates } from "@/lib/email-templates";
 
 export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-01-28.clover" });
+function getStripe() {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+        console.warn('STRIPE_SECRET_KEY not set - Stripe disabled');
+        return null;
+    }
+    return new Stripe(apiKey, { apiVersion: "2026-01-28.clover" });
+}
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 function getResend() {
     const apiKey = process.env.RESEND_API_KEY;
@@ -18,6 +25,11 @@ function getResend() {
 }
 
 export async function POST(req: Request) {
+    const stripe = getStripe();
+    if (!stripe) {
+        return new NextResponse("Stripe not configured", { status: 503 });
+    }
+
     const body = await req.text();
     const sig = req.headers.get("stripe-signature")!;
 

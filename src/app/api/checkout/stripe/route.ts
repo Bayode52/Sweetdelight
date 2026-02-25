@@ -4,10 +4,22 @@ import { supabase } from "@/lib/supabase";
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+function getStripe() {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+        console.warn('STRIPE_SECRET_KEY not set - Stripe disabled');
+        return null;
+    }
+    return new Stripe(apiKey, {
         apiVersion: "2026-01-28.clover",
     });
+}
+
+export async function POST(req: Request) {
+    const stripe = getStripe();
+    if (!stripe) {
+        return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
+    }
     try {
         const { cartItems, customerDetails, subtotal, deliveryFee, discountAmount, storeCreditApplied, total } = await req.json();
 
