@@ -201,6 +201,12 @@ export function ContactPageClient({ content }: { content: ContentMap }) {
                         {FAQS.map((f) => <FaqItem key={f.q} q={f.q} a={f.a} />)}
                     </div>
                 </div>
+
+                {/* ── LEGAL LINKS ── */}
+                <div className="pt-16 pb-8 border-t border-bakery-primary/10 mt-16 flex flex-wrap justify-center gap-6 text-sm font-bold text-bakery-primary/50">
+                    <Link href="/terms" className="hover:text-bakery-cta transition-colors">Terms & Conditions</Link>
+                    <Link href="/privacy" className="hover:text-bakery-cta transition-colors">Privacy Policy</Link>
+                </div>
             </div>
         </div>
     );

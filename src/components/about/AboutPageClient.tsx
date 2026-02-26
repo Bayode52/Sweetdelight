@@ -53,12 +53,16 @@ export function AboutPageClient({ content }: { content: ContentMap }) {
                     <FadeIn>
                         <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden luxury-shadow">
                             <Image
-                                src="/baker-woman.png"
+                                src="https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&q=80&w=800"
                                 alt="Our founder and head baker in her kitchen"
                                 fill
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 className="object-cover object-top"
                                 priority
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = "https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&q=80&w=800";
+                                }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-bakery-primary/40 to-transparent" />
                         </div>

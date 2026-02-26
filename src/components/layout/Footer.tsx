@@ -43,6 +43,8 @@ export function Footer({ content }: { content?: ContentMap }) {
                             { label: "Blog", href: "/blog" },
                             { label: "Reviews", href: "/reviews" },
                             { label: "Track Order", href: "/track-order" },
+                            { label: "Terms", href: "/terms" },
+                            { label: "Privacy Policy", href: "/privacy" },
                         ].map((link) => (
                             <li key={link.label}>
                                 <Link href={link.href} className="text-bakery-primary/60 hover:text-bakery-cta text-sm font-bold transition-colors">

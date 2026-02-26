@@ -20,7 +20,7 @@ export default function ChatWidget() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const quickReplies = ["🛍️ I want to order", "📦 Track my order", "🎂 Custom cake", "❓ General question"];
+    const quickReplies = ["🛍️ Browse Menu", "🎂 Custom Cake", "📦 Track Order", "🚚 Delivery Info"];
 
     // Initialize session token and fetch initial messages
     useEffect(() => {
@@ -227,10 +227,10 @@ export default function ChatWidget() {
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2C1810] to-[#5a3625] flex items-center justify-center text-white text-xs font-black shadow-md border border-white/20">
                                     CB
                                 </div>
-                                <div className="bg-white px-4 py-4 rounded-2xl rounded-bl-sm shadow-sm border border-black/5 text-sm text-[#2C1810] flex gap-1.5 items-center justify-center w-16">
-                                    <div className="w-1.5 h-1.5 bg-[#2C1810]/40 rounded-full animate-bounce"></div>
-                                    <div className="w-1.5 h-1.5 bg-[#2C1810]/40 rounded-full animate-bounce delay-150"></div>
-                                    <div className="w-1.5 h-1.5 bg-[#2C1810]/40 rounded-full animate-bounce delay-300"></div>
+                                <div className="bg-white px-4 py-4 rounded-2xl rounded-bl-sm shadow-sm border border-black/5 flex gap-1 items-center justify-center">
+                                    <div className="w-2 h-2 bg-[#2C1810]/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                    <div className="w-2 h-2 bg-[#2C1810]/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                    <div className="w-2 h-2 bg-[#2C1810]/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                                 </div>
                             </div>
                         )}
