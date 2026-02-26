@@ -1,15 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { useEffect, useState } from 'react';
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { useUIStore } from "@/store/useUIStore";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import NavbarAuthButton from "./NavbarAuthButton";
+import { createBrowserClient } from '@supabase/ssr';
 
 const NAV_LINKS = [
     { name: "Home", href: "/" },
@@ -20,6 +21,106 @@ const NAV_LINKS = [
     { name: "Blog", href: "/blog" },
     { name: "Reviews", href: "/reviews" },
 ];
+
+function AuthButton() {
+    const [isAdmin, setIsAdmin] = useState(false)
+    const [name, setName] = useState('')
+    const [loaded, setLoaded] = useState(false)
+    const router = useRouter()
+
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+                supabase
+                    .from('profiles')
+                    .select('full_name, role')
+                    .eq('id', session.user.id)
+                    .single()
+                    .then(({ data }) => {
+                        setName(data?.full_name?.split(' ')[0] || 'Account')
+                        setIsAdmin(data?.role === 'admin')
+                        setLoaded(true)
+                    })
+            } else {
+                setLoaded(true)
+            }
+        })
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                if (session?.user) {
+                    supabase
+                        .from('profiles')
+                        .select('full_name, role')
+                        .eq('id', session.user.id)
+                        .single()
+                        .then(({ data }) => {
+                            setName(data?.full_name?.split(' ')[0] || 'Account')
+                            setIsAdmin(data?.role === 'admin')
+                        })
+                } else {
+                    setName('')
+                    setIsAdmin(false)
+                }
+                router.refresh()
+            }
+        )
+        return () => subscription.unsubscribe()
+    }, [supabase.auth, router])
+
+    if (!loaded) return <div className="w-20 h-9 bg-gray-100 rounded-full animate-pulse" />
+
+    if (!name) {
+        return (
+            <Link
+                href="/auth/signup"
+                className="bg-[#2C1810] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-[#3d2418] transition-colors"
+            >
+                Sign Up
+            </Link>
+        )
+    }
+
+    return (
+        <div className="relative group">
+            <button className="bg-[#D4421A] text-white px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2">
+                <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold">
+                    {name.charAt(0).toUpperCase()}
+                </span>
+                {name} ▾
+            </button>
+            <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-2">
+                    <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50">👤 My Account</Link>
+                    <Link href="/account/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50">📦 My Orders</Link>
+                    <Link href="/track-order" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50">🚚 Track Order</Link>
+                    {isAdmin && (
+                        <>
+                            <div className="border-t my-1" />
+                            <Link href="/admin" className="block px-4 py-2 text-sm font-bold text-[#D4421A] hover:bg-orange-50">⚡ Admin Panel</Link>
+                        </>
+                    )}
+                    <div className="border-t my-1" />
+                    <button
+                        onClick={async () => {
+                            await supabase.auth.signOut()
+                            router.push('/')
+                            router.refresh()
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-red-50 hover:text-red-600"
+                    >
+                        🚪 Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 export function Navbar() {
     const pathname = usePathname();
@@ -88,7 +189,7 @@ export function Navbar() {
                     </button>
 
                     <div className="hidden md:block">
-                        <NavbarAuthButton />
+                        <AuthButton />
                     </div>
 
                     <button
@@ -121,7 +222,7 @@ export function Navbar() {
                         ))}
                         <div className="h-px w-full bg-white/10 my-4" />
 
-                        <NavbarAuthButton />
+                        <AuthButton />
                     </motion.div>
                 )}
             </AnimatePresence>

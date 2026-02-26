@@ -81,13 +81,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl)
     }
 
-    // Protect /admin routes — must be logged in AND admin role
     if (path.startsWith('/admin')) {
         if (!user) {
-            return NextResponse.redirect(new URL('/auth/login?redirect=/admin', request.url))
+            return NextResponse.redirect(
+                new URL('/auth/login?redirect=/admin', request.url)
+            )
         }
-
-        // Check admin role
         const { data: profile } = await supabase
             .from('profiles')
             .select('role')
@@ -95,8 +94,7 @@ export async function middleware(request: NextRequest) {
             .single()
 
         if (profile?.role !== 'admin') {
-            // Not admin — redirect to home with message
-            return NextResponse.redirect(new URL('/?error=unauthorized', request.url))
+            return NextResponse.redirect(new URL('/', request.url))
         }
     }
 
