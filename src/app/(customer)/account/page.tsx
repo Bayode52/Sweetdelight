@@ -87,6 +87,19 @@ export default function AccountPage() {
                                         {tab.label}
                                     </button>
                                 ))}
+
+                                {user?.role === "admin" && (
+                                    <Link
+                                        href="/admin"
+                                        className="w-full flex items-center justify-between gap-4 px-6 py-4 rounded-2xl bg-bakery-cta text-white luxury-shadow-sm font-black text-sm hover:scale-[1.02] transition-all mt-4"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <Settings size={20} />
+                                            Admin Dashboard
+                                        </div>
+                                        <ChevronRight size={16} />
+                                    </Link>
+                                )}
                             </nav>
                         </div>
                     </div>

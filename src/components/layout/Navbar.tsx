@@ -9,7 +9,7 @@ import { useUIStore } from "@/store/useUIStore";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import NavbarAuth from "./NavbarAuth";
 
 const NAV_LINKS = [
     { name: "Home", href: "/" },
@@ -25,8 +25,6 @@ export function Navbar() {
     const pathname = usePathname();
     const [isScrolled, setIsScrolled] = React.useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-    const [isAdmin, setIsAdmin] = React.useState(false);
-    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
     const itemCount = useCartStore((state) => state.itemCount);
     const openCart = useUIStore((state) => state.openCart);
@@ -35,30 +33,6 @@ export function Navbar() {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    React.useEffect(() => {
-        const checkUser = async () => {
-            const supabase = createBrowserClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-            );
-
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                setIsLoggedIn(true);
-                const { data: profile } = await supabase
-                    .from("profiles")
-                    .select("role")
-                    .eq("id", session.user.id)
-                    .single();
-
-                if (profile?.role === "admin") {
-                    setIsAdmin(true);
-                }
-            }
-        };
-        checkUser();
     }, []);
 
     return (
@@ -113,25 +87,9 @@ export function Navbar() {
                         )}
                     </button>
 
-                    {isAdmin ? (
-                        <Link href="/admin">
-                            <Button variant="primary" size="md" className="hidden md:flex bg-bakery-cta hover:bg-bakery-cta/90 text-white border-none pb-2">
-                                Admin Panel
-                            </Button>
-                        </Link>
-                    ) : isLoggedIn ? (
-                        <Link href="/account">
-                            <Button variant="secondary" size="md" className="hidden md:flex">
-                                Account
-                            </Button>
-                        </Link>
-                    ) : (
-                        <Link href="/auth/signup">
-                            <Button variant="secondary" size="md" className="hidden md:flex">
-                                Sign Up
-                            </Button>
-                        </Link>
-                    )}
+                    <div className="hidden md:block">
+                        <NavbarAuth />
+                    </div>
 
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -163,26 +121,7 @@ export function Navbar() {
                         ))}
                         <div className="h-px w-full bg-white/10 my-4" />
 
-                        {isAdmin && (
-                            <Link href="/admin" className="w-full">
-                                <Button fullWidth variant="primary" size="lg" className="bg-bakery-cta text-white border-transparent">Admin Panel</Button>
-                            </Link>
-                        )}
-
-                        {isLoggedIn ? (
-                            <Link href="/account" className="w-full">
-                                <Button fullWidth variant="secondary" size="lg">My Account</Button>
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href="/auth/login" className="w-full">
-                                    <Button fullWidth variant="primary" size="lg">Sign In</Button>
-                                </Link>
-                                <Link href="/auth/signup" className="w-full">
-                                    <Button fullWidth variant="secondary" size="lg">Sign Up</Button>
-                                </Link>
-                            </>
-                        )}
+                        <NavbarAuth />
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -43,17 +43,10 @@ export default function AdminReviewsPage() {
 
     const reviewActionMutation = useMutation({
         mutationFn: async ({ id, action, payload }: { id: string, action: string, payload?: any }) => {
-            const { data: { user } } = await supabase.auth.getUser();
-
-            const res = await fetch('/api/dev/reviews', {
+            const res = await fetch('/api/admin/reviews/actions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id,
-                    action,
-                    payload,
-                    admin_id: user?.id
-                })
+                body: JSON.stringify({ id, action, payload })
             });
 
             if (!res.ok) {
@@ -64,17 +57,13 @@ export default function AdminReviewsPage() {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
             if (variables.action === "delete") {
-                toast.success("Review deleted unconditionally.");
+                toast.success("Review deleted successfully.");
                 setSelectedReview(null);
             } else {
-                toast.success(`Review ${variables.action.replace(/_/g, " ")} successfully.`);
+                toast.success(`Review updated successfully.`);
             }
             setIsEditing(false);
-            // Wait for queries to invalidate before closing modal to show updated state? 
-            // Better to just let the list update and close modal for some actions, but for edits maybe keep open.
-            if (["delete"].includes(variables.action)) {
-                setSelectedReview(null);
-            } else if (selectedReview && variables.payload) {
+            if (selectedReview && variables.payload) {
                 setSelectedReview({ ...selectedReview, ...variables.payload });
             }
         },
@@ -293,8 +282,13 @@ export default function AdminReviewsPage() {
                                                         onClick={() => {
                                                             reviewActionMutation.mutate({
                                                                 id: selectedReview.id,
-                                                                action: "edited_content",
-                                                                payload: { title: editData.title, text: editData.text, rating: editData.rating, admin_edited: true }
+                                                                action: "edit_content",
+                                                                payload: {
+                                                                    title: editData.title,
+                                                                    text: editData.text,
+                                                                    rating: editData.rating,
+                                                                    original_text: selectedReview.original_text || selectedReview.text
+                                                                }
                                                             });
                                                         }}
                                                         className="px-6 py-2 bg-bakery-cta text-white text-sm font-black rounded-xl hover:brightness-110"
@@ -335,26 +329,26 @@ export default function AdminReviewsPage() {
                                 <div className="flex gap-2 flex-wrap pb-4 border-b border-bakery-primary/5">
                                     <p className="w-full text-xs font-black uppercase tracking-widest text-bakery-primary/40">Status & Visiblity Actions</p>
 
-                                    {selectedReview.status !== 'approved' && selectedReview.status !== 'featured' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_approved", payload: { status: 'approved' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-cta/10 text-bakery-cta rounded-2xl font-black text-sm hover:bg-bakery-cta hover:text-white transition-all flex items-center justify-center gap-2">
+                                    {selectedReview.status !== 'approved' && (
+                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'approved' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-cta/10 text-bakery-cta rounded-2xl font-black text-sm hover:bg-bakery-cta hover:text-white transition-all flex items-center justify-center gap-2">
                                             <Check size={16} /> Approve
                                         </button>
                                     )}
 
                                     {selectedReview.status !== 'featured' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_featured", payload: { status: 'featured' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-primary text-white rounded-2xl font-black text-sm hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'featured' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-primary text-white rounded-2xl font-black text-sm hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
                                             <Sparkles size={16} /> Feature
                                         </button>
                                     )}
 
                                     {selectedReview.status !== 'hidden' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_hidden", payload: { status: 'hidden' } })} className="flex-1 min-w-[120px] h-12 bg-zinc-200 text-zinc-700 rounded-2xl font-black text-sm hover:bg-zinc-300 transition-all flex items-center justify-center gap-2">
+                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'hidden' } })} className="flex-1 min-w-[120px] h-12 bg-zinc-200 text-zinc-700 rounded-2xl font-black text-sm hover:bg-zinc-300 transition-all flex items-center justify-center gap-2">
                                             Hold (Hide)
                                         </button>
                                     )}
 
                                     {selectedReview.status !== 'rejected' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_rejected", payload: { status: 'rejected' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-error/10 text-bakery-error rounded-2xl font-black text-sm hover:bg-bakery-error hover:text-white transition-all flex items-center justify-center gap-2">
+                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'rejected' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-error/10 text-bakery-error rounded-2xl font-black text-sm hover:bg-bakery-error hover:text-white transition-all flex items-center justify-center gap-2">
                                             <X size={16} /> Reject
                                         </button>
                                     )}
@@ -364,7 +358,7 @@ export default function AdminReviewsPage() {
                                 <div className="flex justify-between items-center pt-2">
                                     <div className="flex gap-2">
                                         <button
-                                            onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: selectedReview.is_pinned ? "unpinned" : "pinned", payload: { is_pinned: !selectedReview.is_pinned } })}
+                                            onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "toggle_pin", payload: { is_pinned: !selectedReview.is_pinned } })}
                                             className={`h-12 px-6 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${selectedReview.is_pinned ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-bakery-primary/5 text-bakery-primary/60 hover:bg-bakery-primary/10'}`}
                                         >
                                             📌 {selectedReview.is_pinned ? "Unpin Review" : "Pin Review"}

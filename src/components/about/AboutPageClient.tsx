@@ -53,16 +53,12 @@ export function AboutPageClient({ content }: { content: ContentMap }) {
                     <FadeIn>
                         <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden luxury-shadow">
                             <Image
-                                src="https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&q=80&w=800"
-                                alt="Our founder and head baker in her kitchen"
+                                src={content['story.image'] || "https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&q=80&w=800"}
+                                alt="Our story"
                                 fill
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 className="object-cover object-top"
                                 priority
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = "https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&q=80&w=800";
-                                }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-bakery-primary/40 to-transparent" />
                         </div>
@@ -74,19 +70,13 @@ export function AboutPageClient({ content }: { content: ContentMap }) {
                                 {content['hero.badge'] || 'Our Story'}
                             </span>
                             <h2 className="text-4xl md:text-5xl font-playfair font-black text-bakery-primary">
-                                {content['story.heading'] || 'From Lagos to London'}
+                                {content['story.title'] || 'From Lagos to London'}
                             </h2>
                         </div>
 
                         <div className="space-y-6 text-bakery-primary/70 leading-relaxed text-lg">
                             <p>
-                                {content['story.paragraph_1'] || 'Crave Bakery was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
-                            </p>
-                            <p>
-                                {content['story.paragraph_2'] || 'What began as weekend baking for friends and fellow Nigerians at community gatherings quickly grew into something much bigger. Word spread — first through WhatsApp groups, then through social media — about these incredible authentic pastries. Small chops at naming ceremonies, custom cakes for birthdays, chin chin for Christmas hampers.'}
-                            </p>
-                            <p>
-                                {content['story.paragraph_3'] || 'Today, Crave Bakery proudly serves the Nigerian and African community across the UK, while introducing British food lovers to the rich, warm flavours of West African baking. Every product is handmade fresh, using traditional recipes — no shortcuts, no preservatives, just honest, delicious food.'}
+                                {content['story.content'] || 'Crave Bakery was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
                             </p>
                         </div>
                     </FadeIn>

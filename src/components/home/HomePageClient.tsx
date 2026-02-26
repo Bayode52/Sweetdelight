@@ -88,24 +88,22 @@ export function HomePageClient({ content }: { content: ContentMap }) {
             </div>
 
             <h1 className="text-6xl md:text-8xl font-playfair font-black text-bakery-primary leading-[0.9] tracking-tighter">
-              {content['hero.heading_line1'] || 'Baking Joy,'} <br />
-              <span className="text-bakery-cta italic">{content['hero.heading_line2'] || 'One Bite'}</span> <br />
-              {content['hero.heading_line3'] || 'At A Time.'}
+              {content['hero.headline'] || 'Baking Joy, One Bite At A Time.'}
             </h1>
 
             <p className="text-lg md:text-xl text-bakery-primary/60 max-w-lg leading-relaxed font-medium">
-              {content['hero.subheading'] || 'Experience the perfect blend of London sophistication and Nigerian soul. Handcrafted pastries delivered warm to your doorstep.'}
+              {content['hero.subheadline'] || 'Experience the perfect blend of London sophistication and Nigerian soul. Handcrafted pastries delivered warm to your doorstep.'}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link href={content['hero.button_primary_url'] || '/menu'}>
+              <Link href={'/menu'}>
                 <Button size="xl" className="shadow-2xl shadow-bakery-cta/20 group">
-                  {content['hero.button_primary_text'] || 'Order Fresh Now'}
+                  {content['hero.cta_text'] || 'Order Fresh Now'}
                   <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href={content['hero.button_secondary_url'] || '/menu'}>
-                <Button variant="outline" size="xl">{content['hero.button_secondary_text'] || 'View Our Menu'}</Button>
+              <Link href={'/menu'}>
+                <Button variant="outline" size="xl">View Our Menu</Button>
               </Link>
             </div>
 
@@ -137,7 +135,7 @@ export function HomePageClient({ content }: { content: ContentMap }) {
             {/* Floating cake image */}
             <div className="relative hero-cake-float" style={{ borderRadius: "24px", overflow: "hidden", width: "100%", maxWidth: "480px", aspectRatio: "1/1" }}>
               <Image
-                src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=900"
+                src={content['hero.hero_image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=900"}
                 alt="Elegant Celebration Cake"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"

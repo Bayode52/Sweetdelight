@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import {
     LayoutDashboard,
     Package,
@@ -14,26 +16,54 @@ import {
     FileEdit,
     MessageSquare,
     BookOpen,
-    Zap
+    Zap,
+    BarChart3,
+    Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui";
 
 const ADMIN_LINKS = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Live Chat", href: "/admin/chat", icon: MessageSquare },
-    { name: "Knowledge Base", href: "/admin/chat/knowledge", icon: BookOpen },
-    { name: "Products", href: "/admin/products", icon: Package },
     { name: "Orders", href: "/admin/orders", icon: ShoppingBag },
+    { name: "Products", href: "/admin/products", icon: Package },
+    { name: "Customers", href: "/admin/customers", icon: Users },
     { name: "Reviews", href: "/admin/reviews", icon: Star },
+    { name: "Edit Website", href: "/admin/content", icon: FileEdit },
+    { name: "Chatbot", href: "/admin/chat", icon: MessageSquare },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { name: "Security", href: "/admin/security", icon: Shield },
     { name: "Referrals", href: "/admin/referrals", icon: Users },
     { name: "Automations", href: "/admin/automations", icon: Zap },
-    { name: "Website Content", href: "/admin/content", icon: FileEdit },
     { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const [userProfile, setUserProfile] = useState<{ full_name: string | null; email: string | null }>({ full_name: null, email: null });
+
+    useEffect(() => {
+        async function getProfile() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("full_name, email")
+                    .eq("id", user.id)
+                    .single();
+                if (profile) {
+                    setUserProfile({ full_name: profile.full_name, email: profile.email });
+                }
+            }
+        }
+        getProfile();
+    }, []);
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push("/auth/login");
+    };
 
     return (
         <aside className="fixed left-0 top-0 h-full w-64 bg-bakery-primary text-white flex flex-col border-r border-white/5 z-40">
@@ -73,16 +103,21 @@ export function AdminSidebar() {
             <div className="p-4 mt-auto">
                 <div className="bg-white/5 rounded-3xl p-4 flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-bakery-cta flex items-center justify-center font-bold">
-                            AD
+                        <div className="w-10 h-10 rounded-full bg-bakery-cta flex items-center justify-center font-bold text-white uppercase">
+                            {userProfile.full_name?.charAt(0) || "A"}
                         </div>
-                        <div>
-                            <p className="text-sm font-bold">Admin User</p>
-                            <p className="text-[10px] text-white/40 uppercase tracking-widest">Master Cloud</p>
+                        <div className="overflow-hidden">
+                            <p className="text-sm font-bold truncate">{userProfile.full_name || "Admin User"}</p>
+                            <p className="text-[10px] text-white/40 uppercase tracking-widest">Administrator</p>
                         </div>
                     </div>
                 </div>
-                <Button variant="ghost" fullWidth className="text-white/60 hover:text-white hover:bg-bakery-error/20">
+                <Button
+                    variant="ghost"
+                    fullWidth
+                    className="text-white/60 hover:text-white hover:bg-bakery-error/20"
+                    onClick={handleSignOut}
+                >
                     <LogOut size={18} className="mr-2" />
                     Sign Out
                 </Button>

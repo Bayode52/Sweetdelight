@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || "");
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-1.5-flash",
 });
 
 const ESCALATION_PHRASE = "Let me connect you with our team! Someone will be with you shortly. You can also WhatsApp us directly for a faster response 💬";
@@ -168,10 +168,12 @@ Escalation response: '${ESCALATION_PHRASE}'`;
                 if (botMessage.includes(ESCALATION_PHRASE)) {
                     isEscalated = true;
                 }
-            } catch (err) {
-                console.error("Gemini API Error:", err);
+            } catch (err: any) {
+                console.error("❌ Gemini API Error:", err);
                 botMessage = `I am currently offline. ${ESCALATION_PHRASE}`;
                 isEscalated = true;
+                // Add internal details to console but keep user response safe
+                if (err.message?.includes("ACL")) console.warn("Credential issue detected.");
             }
         } else {
             // Mock response mode if no API key is provided

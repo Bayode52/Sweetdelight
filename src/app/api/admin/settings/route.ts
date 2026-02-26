@@ -46,7 +46,24 @@ export async function PUT(req: Request) {
 
     try {
         const body = await req.json();
-        const updates = { ...body, updated_at: new Date().toISOString() };
+
+        // Allowed fields for update
+        const allowedFields = [
+            "delivery_fee", "free_delivery_threshold", "min_order_amount",
+            "referral_commission_percent", "admin_whatsapp_number",
+            "order_alerts_enabled", "review_alerts_enabled",
+            "store_name", "store_address", "contact_email", "contact_phone",
+            "opening_hours", "social_links", "is_live"
+        ];
+
+        const filteredBody = Object.keys(body)
+            .filter(key => allowedFields.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = body[key];
+                return obj;
+            }, {} as any);
+
+        const updates = { ...filteredBody, updated_at: new Date().toISOString() };
 
         // Settings is traditionally a singleton table with an 'id' = 1 or just one row.
         const { data: existing } = await adminClient.from("settings").select("id").limit(1).single();
@@ -61,7 +78,7 @@ export async function PUT(req: Request) {
         const { data, error } = await query.select().single();
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
         return NextResponse.json(data);
-    } catch {
-        return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    } catch (err: any) {
+        return NextResponse.json({ error: "Invalid request: " + err.message }, { status: 400 });
     }
 }

@@ -61,15 +61,15 @@ export function Footer({ content }: { content?: ContentMap }) {
                     <ul className="space-y-4">
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Phone size={18} className="text-bakery-cta" />
-                            <a href="https://wa.me/447000000000" className="text-sm font-bold hover:text-bakery-cta transition-colors">+44 7000 000000</a>
+                            <a href={`tel:${content?.['footer.contact.phone'] || '447000000000'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{content?.['footer.contact.phone'] || '+44 7000 000000'}</a>
                         </li>
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Instagram size={18} className="text-bakery-cta" />
-                            <a href="https://instagram.com/cravebakery" target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-bakery-cta transition-colors">@cravebakery</a>
+                            <a href={`https://instagram.com/${content?.['footer.socials.instagram'] || 'cravebakery'}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-bakery-cta transition-colors">@{content?.['footer.socials.instagram'] || 'cravebakery'}</a>
                         </li>
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Mail size={18} className="text-bakery-cta" />
-                            <a href="mailto:hello@cravebakery.co.uk" className="text-sm font-bold hover:text-bakery-cta transition-colors">hello@cravebakery.co.uk</a>
+                            <a href={`mailto:${content?.['footer.contact.email'] || 'hello@cravebakery.co.uk'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{content?.['footer.contact.email'] || 'hello@cravebakery.co.uk'}</a>
                         </li>
                     </ul>
                 </div>
