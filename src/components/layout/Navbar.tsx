@@ -9,7 +9,7 @@ import { useUIStore } from "@/store/useUIStore";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import NavbarAuth from "./NavbarAuth";
+import NavbarAuthButton from "./NavbarAuthButton";
 
 const NAV_LINKS = [
     { name: "Home", href: "/" },
@@ -88,7 +88,7 @@ export function Navbar() {
                     </button>
 
                     <div className="hidden md:block">
-                        <NavbarAuth />
+                        <NavbarAuthButton />
                     </div>
 
                     <button
@@ -121,7 +121,7 @@ export function Navbar() {
                         ))}
                         <div className="h-px w-full bg-white/10 my-4" />
 
-                        <NavbarAuth />
+                        <NavbarAuthButton />
                     </motion.div>
                 )}
             </AnimatePresence>
