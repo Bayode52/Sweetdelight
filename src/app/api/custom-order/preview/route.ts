@@ -27,7 +27,9 @@ export async function POST(req: Request) {
             console.warn("GOOGLE_GENERATIVE_AI_API_KEY is missing. Using mock response.");
             return NextResponse.json({
                 visualDescription: `A stunning and bespoke ${productType}, handcrafted exactly to your preferences. Our expert bakers will bring this vision to life using the finest ingredients.`,
-                specifications: Object.entries(answers).map(([k, v]) => ({ label: k, value: Array.isArray(v) ? v.join(", ") : v })),
+                specifications: Object.entries(answers)
+                    .filter(([k]) => !k.endsWith('_custom'))
+                    .map(([k, v]) => ({ label: k, value: typeof v === 'object' && v !== null ? (Array.isArray(v) ? v.join(", ") : Object.values(v).join(' - ')) : String(v || '') })),
                 priceEstimate: `${getBasePrice(productType)} - Estimated`,
                 imageQuery: productType.split(" ")[0].toLowerCase() + ", food"
             });
@@ -72,9 +74,9 @@ export async function POST(req: Request) {
                     .filter(([k]) => !k.endsWith('_custom'))
                     .map(([k, v]) => {
                         const customVal = answers[`${k}_custom`];
-                        const displayVal = Array.isArray(v)
-                            ? v.map(item => item.startsWith('Custom') && customVal ? `Custom: ${customVal}` : item).join(', ')
-                            : (typeof v === 'string' && v.startsWith('Custom') && customVal ? `Custom: ${customVal}` : String(v));
+                        const displayVal = typeof v === 'object' && v !== null
+                            ? (Array.isArray(v) ? v.map(item => item.startsWith?.('Custom') && customVal ? `Custom: ${customVal}` : item).join(', ') : Object.values(v).join(' - '))
+                            : (typeof v === 'string' && v.startsWith('Custom') && customVal ? `Custom: ${customVal}` : String(v || ''));
                         return { label: k, value: displayVal };
                     }),
                 priceEstimate: `${getBasePrice(productType)} - Estimated`,
@@ -84,16 +86,29 @@ export async function POST(req: Request) {
 
         // Parse the JSON response
         try {
-            const parsedData = JSON.parse(responseText.trim());
+            const cleanText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            const parsedData = JSON.parse(cleanText);
+
+            if (Array.isArray(parsedData.specifications)) {
+                parsedData.specifications = parsedData.specifications.map((spec: any) => ({
+                    label: spec.label,
+                    value: typeof spec.value === 'object' && spec.value !== null
+                        ? (Array.isArray(spec.value) ? spec.value.join(', ') : Object.values(spec.value).join(' - '))
+                        : String(spec.value || '')
+                }));
+            }
             return NextResponse.json(parsedData);
         } catch (parseError) {
             console.error("Failed to parse Gemini response as JSON:", responseText);
             // Fallback if parsing fails
             return NextResponse.json({
-                visualDescription: `A stunning and bespoke ${productType}, handcrafted exactly to your preferences.`,
+                visualDescription: "A stunning and bespoke creation, handcrafted exactly to your preferences.",
                 specifications: Object.entries(answers)
                     .filter(([k]) => !k.endsWith('_custom'))
-                    .map(([k, v]) => ({ label: k, value: Array.isArray(v) ? v.join(", ") : String(v) })),
+                    .map(([k, v]) => ({
+                        label: k,
+                        value: typeof v === 'object' && v !== null ? (Array.isArray(v) ? v.join(", ") : Object.values(v).join(" - ")) : String(v || '')
+                    })),
                 priceEstimate: "Price calculated at checkout",
                 imageQuery: "bakery"
             });

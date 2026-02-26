@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronRight, Sparkles, Cake, Gift, Coffee, ShoppingBag, ArrowLeft, Check } from "lucide-react";
 import { getQuestionsForType } from "./questions";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 type ProductType = "Celebration Cake" | "Small Chops Platter" | "Puff Puff" | "Pastry Box" | "Custom Gift Box" | "Chin Chin Bag" | null;
 
@@ -259,309 +260,315 @@ export default function CustomOrderPage() {
     };
 
     return (
-        <main className="min-h-screen bg-bakery-background pt-32 pb-24 text-bakery-primary">
-            <div className="max-w-5xl mx-auto px-6">
+        <ErrorBoundary>
+            <main className="min-h-screen bg-bakery-background pt-32 pb-24 text-bakery-primary">
+                <div className="max-w-5xl mx-auto px-6">
 
-                {/* Header Section */}
-                <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bakery-cta/10 text-bakery-cta text-sm font-bold mb-6">
-                        <Sparkles size={16} />
-                        <span>AI-Powered Custom Orders</span>
+                    {/* Header Section */}
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bakery-cta/10 text-bakery-cta text-sm font-bold mb-6">
+                            <Sparkles size={16} />
+                            <span>AI-Powered Custom Orders</span>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-playfair font-black tracking-tight mb-6 leading-tight">
+                            Design Your Perfect Bake
+                        </h1>
+                        <p className="text-lg text-bakery-primary/70 max-w-2xl mx-auto leading-relaxed">
+                            Tell us exactly what you're craving. Our AI baker will visualise your dream product, provide an instant price estimate, and prepare it for our kitchen.
+                        </p>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-playfair font-black tracking-tight mb-6 leading-tight">
-                        Design Your Perfect Bake
-                    </h1>
-                    <p className="text-lg text-bakery-primary/70 max-w-2xl mx-auto leading-relaxed">
-                        Tell us exactly what you're craving. Our AI baker will visualise your dream product, provide an instant price estimate, and prepare it for our kitchen.
-                    </p>
-                </div>
 
-                {/* Main Content Area */}
-                <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-bakery-primary/5">
+                    {/* Main Content Area */}
+                    <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-bakery-primary/5">
 
-                    {/* STEP 1: Product Selection */}
-                    {step === 1 && (
-                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h2 className="text-2xl font-black font-playfair mb-8 text-center">What are we baking today?</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {PRODUCT_TYPES.map((product) => (
-                                    <button
-                                        key={product.id}
-                                        onClick={() => handleProductSelect(product.id)}
-                                        className="group text-left p-6 rounded-2xl border-2 border-bakery-primary/5 hover:border-bakery-cta hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
-                                    >
-                                        <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <div className="w-8 h-8 rounded-full bg-bakery-cta/10 flex items-center justify-center text-bakery-cta">
-                                                <ChevronRight size={16} />
-                                            </div>
-                                        </div>
-                                        <div className="w-12 h-12 rounded-xl bg-bakery-primary/5 group-hover:bg-bakery-cta/10 flex items-center justify-center text-bakery-primary mb-6 transition-colors">
-                                            <product.icon size={24} className="group-hover:text-bakery-cta transition-colors" />
-                                        </div>
-                                        <h3 className="font-bold text-lg mb-2">{product.title}</h3>
-                                        <p className="text-sm text-bakery-primary/60 leading-relaxed">{product.desc}</p>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 2: Questionnaire */}
-                    {step === 2 && currentQuestion && (
-                        <div className="animate-in fade-in slide-in-from-right-4 duration-500 max-w-2xl mx-auto">
-                            <button
-                                onClick={handleBack}
-                                className="text-sm font-bold text-bakery-primary/60 hover:text-bakery-cta mb-8 transition-colors flex items-center gap-2"
-                            >
-                                <ArrowLeft size={16} /> Back
-                            </button>
-
-                            {/* Progress Bar */}
-                            <div className="mb-8">
-                                <div className="flex justify-between text-sm font-bold text-bakery-primary/40 mb-2">
-                                    <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
-                                    <span>{Math.round(((currentQuestionIndex) / questions.length) * 100)}%</span>
-                                </div>
-                                <div className="w-full h-2 bg-bakery-primary/5 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-bakery-cta transition-all duration-500 ease-out rounded-full"
-                                        style={{ width: `${((currentQuestionIndex) / questions.length) * 100}%` }}
-                                    />
-                                </div>
-                            </div>
-
-                            <div key={currentQuestion.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <h2 className="text-2xl md:text-3xl font-black font-playfair mb-8">{currentQuestion.question}</h2>
-
-                                <div className="mb-10">
-                                    {renderInput()}
-                                </div>
-
-                                <div className="flex justify-end">
-                                    <button
-                                        onClick={handleNext}
-                                        disabled={isNextDisabled()}
-                                        className="bg-bakery-cta text-white px-8 py-3.5 rounded-xl font-black disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 transition-all shadow-lg shadow-bakery-cta/20 flex items-center gap-2"
-                                    >
-                                        {currentQuestionIndex === questions.length - 1 ? "Generate Preview ✨" : "Next"}
-                                        {currentQuestionIndex !== questions.length - 1 && <ChevronRight size={18} />}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 3: AI Loading/Result */}
-                    {step === 3 && (
-                        <div className="animate-in fade-in duration-500">
-                            {isGenerating ? (
-                                <div className="text-center py-20 space-y-6 flex flex-col items-center">
-                                    <div className="w-16 h-16 border-4 border-bakery-primary/10 border-t-bakery-cta rounded-full animate-spin"></div>
-                                    <h2 className="text-2xl font-black font-playfair">Our AI baker is preparing your preview...</h2>
-                                    <p className="text-bakery-primary/60">Mixing the ingredients of your imagination.</p>
-                                </div>
-                            ) : aiPreview && (
-                                <div className="max-w-4xl mx-auto">
-                                    <button
-                                        onClick={() => setStep(2)}
-                                        className="text-sm font-bold text-bakery-primary/60 hover:text-bakery-cta mb-8 transition-colors flex items-center gap-2"
-                                    >
-                                        <ArrowLeft size={16} /> Edit Details
-                                    </button>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                        {/* Image Section */}
-                                        <div className="relative aspect-square md:aspect-auto md:h-full min-h-[400px] rounded-3xl overflow-hidden shadow-2xl bg-bakery-primary/5">
-                                            {aiPreview.imageQuery ? (
-                                                <Image
-                                                    src={`https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=1089&auto=format&fit=crop`} // Fallback static image just in case fetch fails
-                                                    alt="AI Generated Reference"
-                                                    fill
-                                                    className="object-cover"
-                                                    unoptimized
-                                                />
-                                            ) : (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-bakery-primary/5">
-                                                    <Cake size={64} className="text-bakery-primary/20" />
+                        {/* STEP 1: Product Selection */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <h2 className="text-2xl font-black font-playfair mb-8 text-center">What are we baking today?</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {PRODUCT_TYPES.map((product) => (
+                                        <button
+                                            key={product.id}
+                                            onClick={() => handleProductSelect(product.id)}
+                                            className="group text-left p-6 rounded-2xl border-2 border-bakery-primary/5 hover:border-bakery-cta hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+                                        >
+                                            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="w-8 h-8 rounded-full bg-bakery-cta/10 flex items-center justify-center text-bakery-cta">
+                                                    <ChevronRight size={16} />
                                                 </div>
-                                            )}
-                                            {/* We use Pollinations AI, which generates an image on the fly! This is faster and much more powerful than simple stock search. */}
-                                            {aiPreview.imageQuery && (
-                                                <img
-                                                    src={`https://image.pollinations.ai/prompt/${encodeURIComponent(aiPreview.imageQuery + ", delicious bakery food, high quality photo, 4k")}?width=800&height=1000&nologo=true`}
-                                                    alt="AI Reference"
-                                                    className="object-cover w-full h-full absolute inset-0 z-10"
-                                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                                />
-                                            )}
+                                            </div>
+                                            <div className="w-12 h-12 rounded-xl bg-bakery-primary/5 group-hover:bg-bakery-cta/10 flex items-center justify-center text-bakery-primary mb-6 transition-colors">
+                                                <product.icon size={24} className="group-hover:text-bakery-cta transition-colors" />
+                                            </div>
+                                            <h3 className="font-bold text-lg mb-2">{product.title}</h3>
+                                            <p className="text-sm text-bakery-primary/60 leading-relaxed">{product.desc}</p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-20 flex items-end p-8">
-                                                <div className="text-white">
-                                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold mb-3">
-                                                        <Sparkles size={14} /> AI Visualisation
+                        {/* STEP 2: Questionnaire */}
+                        {step === 2 && currentQuestion && (
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500 max-w-2xl mx-auto">
+                                <button
+                                    onClick={handleBack}
+                                    className="text-sm font-bold text-bakery-primary/60 hover:text-bakery-cta mb-8 transition-colors flex items-center gap-2"
+                                >
+                                    <ArrowLeft size={16} /> Back
+                                </button>
+
+                                {/* Progress Bar */}
+                                <div className="mb-8">
+                                    <div className="flex justify-between text-sm font-bold text-bakery-primary/40 mb-2">
+                                        <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
+                                        <span>{Math.round(((currentQuestionIndex) / questions.length) * 100)}%</span>
+                                    </div>
+                                    <div className="w-full h-2 bg-bakery-primary/5 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-bakery-cta transition-all duration-500 ease-out rounded-full"
+                                            style={{ width: `${((currentQuestionIndex) / questions.length) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div key={currentQuestion.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <h2 className="text-2xl md:text-3xl font-black font-playfair mb-8">{currentQuestion.question}</h2>
+
+                                    <div className="mb-10">
+                                        {renderInput()}
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={handleNext}
+                                            disabled={isNextDisabled()}
+                                            className="bg-bakery-cta text-white px-8 py-3.5 rounded-xl font-black disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 transition-all shadow-lg shadow-bakery-cta/20 flex items-center gap-2"
+                                        >
+                                            {currentQuestionIndex === questions.length - 1 ? "Generate Preview ✨" : "Next"}
+                                            {currentQuestionIndex !== questions.length - 1 && <ChevronRight size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: AI Loading/Result */}
+                        {step === 3 && (
+                            <div className="animate-in fade-in duration-500">
+                                {isGenerating ? (
+                                    <div className="text-center py-20 space-y-6 flex flex-col items-center">
+                                        <div className="w-16 h-16 border-4 border-bakery-primary/10 border-t-bakery-cta rounded-full animate-spin"></div>
+                                        <h2 className="text-2xl font-black font-playfair">Our AI baker is preparing your preview...</h2>
+                                        <p className="text-bakery-primary/60">Mixing the ingredients of your imagination.</p>
+                                    </div>
+                                ) : aiPreview && (
+                                    <div className="max-w-4xl mx-auto">
+                                        <button
+                                            onClick={() => setStep(2)}
+                                            className="text-sm font-bold text-bakery-primary/60 hover:text-bakery-cta mb-8 transition-colors flex items-center gap-2"
+                                        >
+                                            <ArrowLeft size={16} /> Edit Details
+                                        </button>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                            {/* Image Section */}
+                                            <div className="relative aspect-square md:aspect-auto md:h-full min-h-[400px] rounded-3xl overflow-hidden shadow-2xl bg-bakery-primary/5">
+                                                {aiPreview.imageQuery ? (
+                                                    <Image
+                                                        src={`https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=1089&auto=format&fit=crop`} // Fallback static image just in case fetch fails
+                                                        alt="AI Generated Reference"
+                                                        fill
+                                                        className="object-cover"
+                                                        unoptimized
+                                                    />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-bakery-primary/5">
+                                                        <Cake size={64} className="text-bakery-primary/20" />
                                                     </div>
-                                                    <h3 className="text-2xl font-playfair font-black">{productType}</h3>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                )}
+                                                {/* We use Pollinations AI, which generates an image on the fly! This is faster and much more powerful than simple stock search. */}
+                                                {aiPreview.imageQuery && (
+                                                    <img
+                                                        src={`https://image.pollinations.ai/prompt/${encodeURIComponent(aiPreview.imageQuery + ", delicious bakery food, high quality photo, 4k")}?width=800&height=1000&nologo=true`}
+                                                        alt="AI Reference"
+                                                        className="object-cover w-full h-full absolute inset-0 z-10"
+                                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                    />
+                                                )}
 
-                                        {/* Content Section */}
-                                        <div className="space-y-8 flex flex-col justify-center">
-                                            <div>
-                                                <h2 className="text-3xl font-black font-playfair mb-4">Your Custom Creation</h2>
-                                                <p className="text-lg text-bakery-primary/80 leading-relaxed italic">
-                                                    "{aiPreview.visualDescription}"
-                                                </p>
-                                            </div>
-
-                                            <div className="bg-bakery-primary/5 rounded-2xl p-6">
-                                                <h4 className="font-bold mb-4 flex items-center gap-2"><Check size={18} className="text-bakery-cta" /> Specifications</h4>
-                                                <dl className="space-y-3 text-sm">
-                                                    {aiPreview.specifications?.map((spec: any, i: number) => (
-                                                        <div key={i} className="flex justify-between border-b border-bakery-primary/10 pb-2 last:border-0 last:pb-0">
-                                                            <dt className="text-bakery-primary/60 font-medium">{spec.label}</dt>
-                                                            <dd className="font-bold text-right max-w-[60%] line-clamp-2">{spec.value}</dd>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-20 flex items-end p-8">
+                                                    <div className="text-white">
+                                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold mb-3">
+                                                            <Sparkles size={14} /> AI Visualisation
                                                         </div>
-                                                    ))}
-                                                </dl>
-                                            </div>
-
-                                            <div className="flex items-end justify-between border-t border-bakery-primary/10 pt-6">
-                                                <div>
-                                                    <p className="text-sm font-bold text-bakery-primary/60 mb-1">Estimated Price</p>
-                                                    <p className="text-3xl font-black font-playfair text-bakery-cta">{aiPreview.priceEstimate}</p>
+                                                        <h3 className="text-2xl font-playfair font-black">{productType}</h3>
+                                                    </div>
                                                 </div>
-                                                <button
-                                                    onClick={() => setStep(4)}
-                                                    className="bg-bakery-cta text-white px-8 py-4 rounded-xl font-black hover:-translate-y-1 transition-all shadow-lg shadow-bakery-cta/20 flex items-center gap-2"
-                                                >
-                                                    Proceed to Checkout <ChevronRight size={18} />
-                                                </button>
+                                            </div>
+
+                                            {/* Content Section */}
+                                            <div className="space-y-8 flex flex-col justify-center">
+                                                <div>
+                                                    <h2 className="text-3xl font-black font-playfair mb-4">Your Custom Creation</h2>
+                                                    <p className="text-lg text-bakery-primary/80 leading-relaxed italic">
+                                                        "{aiPreview.visualDescription}"
+                                                    </p>
+                                                </div>
+
+                                                <div className="bg-bakery-primary/5 rounded-2xl p-6">
+                                                    <h4 className="font-bold mb-4 flex items-center gap-2"><Check size={18} className="text-bakery-cta" /> Specifications</h4>
+                                                    <dl className="space-y-3 text-sm">
+                                                        {aiPreview.specifications?.map((spec: any, i: number) => (
+                                                            <div key={i} className="flex justify-between border-b border-bakery-primary/10 pb-2 last:border-0 last:pb-0">
+                                                                <dt className="text-bakery-primary/60 font-medium">{spec.label}</dt>
+                                                                <dd className="font-bold text-right max-w-[60%] line-clamp-2">
+                                                                    {typeof spec.value === 'object' && spec.value !== null
+                                                                        ? (Array.isArray(spec.value) ? spec.value.join(', ') : Object.values(spec.value).join(' - '))
+                                                                        : String(spec.value || '')}
+                                                                </dd>
+                                                            </div>
+                                                        ))}
+                                                    </dl>
+                                                </div>
+
+                                                <div className="flex items-end justify-between border-t border-bakery-primary/10 pt-6">
+                                                    <div>
+                                                        <p className="text-sm font-bold text-bakery-primary/60 mb-1">Estimated Price</p>
+                                                        <p className="text-3xl font-black font-playfair text-bakery-cta">{aiPreview.priceEstimate}</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setStep(4)}
+                                                        className="bg-bakery-cta text-white px-8 py-4 rounded-xl font-black hover:-translate-y-1 transition-all shadow-lg shadow-bakery-cta/20 flex items-center gap-2"
+                                                    >
+                                                        Proceed to Checkout <ChevronRight size={18} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Step 4: Order Placement Form */}
-                    {step === 4 && !orderSuccess && (
-                        <div className="animate-in fade-in slide-in-from-right-4 duration-500 max-w-2xl mx-auto">
-                            <button
-                                onClick={() => setStep(3)}
-                                className="text-sm font-bold text-bakery-primary/60 hover:text-bakery-cta mb-8 transition-colors flex items-center gap-2"
-                            >
-                                <ArrowLeft size={16} /> Back to Preview
-                            </button>
-
-                            <div className="text-center mb-8">
-                                <h2 className="text-3xl font-black font-playfair mb-4">Complete Your Order</h2>
-                                <p className="text-bakery-primary/60">Finalize your details to send this brief to our kitchen.</p>
+                                )}
                             </div>
+                        )}
 
-                            <form onSubmit={handleSubmitOrder} className="space-y-6">
-                                {/* Contact Info */}
-                                <div className="space-y-4">
-                                    <h3 className="font-bold text-lg border-b border-bakery-primary/10 pb-2">Contact Details</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-bold mb-2">Full Name *</label>
-                                            <input required type="text" value={customerDetails.name} onChange={e => setCustomerDetails({ ...customerDetails, name: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold mb-2">Email *</label>
-                                            <input required type="email" value={customerDetails.email} onChange={e => setCustomerDetails({ ...customerDetails, email: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold mb-2">Phone Number *</label>
-                                        <input required type="tel" value={customerDetails.phone} onChange={e => setCustomerDetails({ ...customerDetails, phone: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none" />
-                                    </div>
+                        {/* Step 4: Order Placement Form */}
+                        {step === 4 && !orderSuccess && (
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-500 max-w-2xl mx-auto">
+                                <button
+                                    onClick={() => setStep(3)}
+                                    className="text-sm font-bold text-bakery-primary/60 hover:text-bakery-cta mb-8 transition-colors flex items-center gap-2"
+                                >
+                                    <ArrowLeft size={16} /> Back to Preview
+                                </button>
+
+                                <div className="text-center mb-8">
+                                    <h2 className="text-3xl font-black font-playfair mb-4">Complete Your Order</h2>
+                                    <p className="text-bakery-primary/60">Finalize your details to send this brief to our kitchen.</p>
                                 </div>
 
-                                {/* Delivery Info */}
-                                <div className="space-y-4 pt-4">
-                                    <h3 className="font-bold text-lg border-b border-bakery-primary/10 pb-2">Delivery Options</h3>
-                                    <div className="grid grid-cols-2 gap-4 mb-4">
-                                        <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, deliveryType: 'collection' })} className={`p-4 rounded-xl border-2 font-bold transition-all ${customerDetails.deliveryType === 'collection' ? "border-bakery-cta bg-bakery-cta/5 text-bakery-cta" : "border-bakery-primary/10 text-bakery-primary"}`}>
-                                            Collection
-                                        </button>
-                                        <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, deliveryType: 'delivery' })} className={`p-4 rounded-xl border-2 font-bold transition-all ${customerDetails.deliveryType === 'delivery' ? "border-bakery-cta bg-bakery-cta/5 text-bakery-cta" : "border-bakery-primary/10 text-bakery-primary"}`}>
-                                            Delivery
-                                        </button>
-                                    </div>
-
-                                    {customerDetails.deliveryType === 'delivery' && (
-                                        <div>
-                                            <label className="block text-sm font-bold mb-2">Full Delivery Address *</label>
-                                            <textarea required rows={3} value={customerDetails.address} onChange={e => setCustomerDetails({ ...customerDetails, address: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none resize-none" />
+                                <form onSubmit={handleSubmitOrder} className="space-y-6">
+                                    {/* Contact Info */}
+                                    <div className="space-y-4">
+                                        <h3 className="font-bold text-lg border-b border-bakery-primary/10 pb-2">Contact Details</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-bold mb-2">Full Name *</label>
+                                                <input required type="text" value={customerDetails.name} onChange={e => setCustomerDetails({ ...customerDetails, name: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-bold mb-2">Email *</label>
+                                                <input required type="email" value={customerDetails.email} onChange={e => setCustomerDetails({ ...customerDetails, email: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none" />
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
+                                        <div>
+                                            <label className="block text-sm font-bold mb-2">Phone Number *</label>
+                                            <input required type="tel" value={customerDetails.phone} onChange={e => setCustomerDetails({ ...customerDetails, phone: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none" />
+                                        </div>
+                                    </div>
 
-                                {/* Payment Info */}
-                                <div className="space-y-4 pt-4">
-                                    <h3 className="font-bold text-lg border-b border-bakery-primary/10 pb-2">Payment Option</h3>
-                                    <p className="text-sm text-bakery-primary/60 mb-2">Once approved, we will send an invoice or payment link.</p>
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, paymentMethod: 'dm_whatsapp' })} className={`p-4 rounded-xl border-2 font-bold transition-all text-left flex items-center justify-between ${customerDetails.paymentMethod === 'dm_whatsapp' ? "border-[#25D366] bg-[#25D366]/5 text-[#25D366]" : "border-bakery-primary/10 text-bakery-primary"}`}>
-                                            <span>Continue via WhatsApp</span>
-                                            {customerDetails.paymentMethod === 'dm_whatsapp' && <Check size={18} />}
-                                        </button>
-                                        <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, paymentMethod: 'stripe' })} className={`p-4 rounded-xl border-2 font-bold transition-all text-left flex items-center justify-between ${customerDetails.paymentMethod === 'stripe' ? "border-bakery-cta bg-bakery-cta/5 text-bakery-cta" : "border-bakery-primary/10 text-bakery-primary"}`}>
-                                            <span>Send Invoice to Email</span>
-                                            {customerDetails.paymentMethod === 'stripe' && <Check size={18} />}
+                                    {/* Delivery Info */}
+                                    <div className="space-y-4 pt-4">
+                                        <h3 className="font-bold text-lg border-b border-bakery-primary/10 pb-2">Delivery Options</h3>
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, deliveryType: 'collection' })} className={`p-4 rounded-xl border-2 font-bold transition-all ${customerDetails.deliveryType === 'collection' ? "border-bakery-cta bg-bakery-cta/5 text-bakery-cta" : "border-bakery-primary/10 text-bakery-primary"}`}>
+                                                Collection
+                                            </button>
+                                            <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, deliveryType: 'delivery' })} className={`p-4 rounded-xl border-2 font-bold transition-all ${customerDetails.deliveryType === 'delivery' ? "border-bakery-cta bg-bakery-cta/5 text-bakery-cta" : "border-bakery-primary/10 text-bakery-primary"}`}>
+                                                Delivery
+                                            </button>
+                                        </div>
+
+                                        {customerDetails.deliveryType === 'delivery' && (
+                                            <div>
+                                                <label className="block text-sm font-bold mb-2">Full Delivery Address *</label>
+                                                <textarea required rows={3} value={customerDetails.address} onChange={e => setCustomerDetails({ ...customerDetails, address: e.target.value })} className="w-full p-3 rounded-xl border-2 border-bakery-primary/10 focus:border-bakery-cta outline-none resize-none" />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Payment Info */}
+                                    <div className="space-y-4 pt-4">
+                                        <h3 className="font-bold text-lg border-b border-bakery-primary/10 pb-2">Payment Option</h3>
+                                        <p className="text-sm text-bakery-primary/60 mb-2">Once approved, we will send an invoice or payment link.</p>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, paymentMethod: 'dm_whatsapp' })} className={`p-4 rounded-xl border-2 font-bold transition-all text-left flex items-center justify-between ${customerDetails.paymentMethod === 'dm_whatsapp' ? "border-[#25D366] bg-[#25D366]/5 text-[#25D366]" : "border-bakery-primary/10 text-bakery-primary"}`}>
+                                                <span>Continue via WhatsApp</span>
+                                                {customerDetails.paymentMethod === 'dm_whatsapp' && <Check size={18} />}
+                                            </button>
+                                            <button type="button" onClick={() => setCustomerDetails({ ...customerDetails, paymentMethod: 'stripe' })} className={`p-4 rounded-xl border-2 font-bold transition-all text-left flex items-center justify-between ${customerDetails.paymentMethod === 'stripe' ? "border-bakery-cta bg-bakery-cta/5 text-bakery-cta" : "border-bakery-primary/10 text-bakery-primary"}`}>
+                                                <span>Send Invoice to Email</span>
+                                                {customerDetails.paymentMethod === 'stripe' && <Check size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-8 flex justify-end">
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting || !customerDetails.name || !customerDetails.email || !customerDetails.phone || (customerDetails.deliveryType === 'delivery' && !customerDetails.address)}
+                                            className="bg-bakery-cta text-white px-8 py-4 rounded-xl font-black disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 transition-all shadow-lg shadow-bakery-cta/20 w-full sm:w-auto"
+                                        >
+                                            {isSubmitting ? "Placing Order..." : "Confirm Custom Order ✨"}
                                         </button>
                                     </div>
-                                </div>
+                                </form>
+                            </div>
+                        )}
 
-                                <div className="pt-8 flex justify-end">
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting || !customerDetails.name || !customerDetails.email || !customerDetails.phone || (customerDetails.deliveryType === 'delivery' && !customerDetails.address)}
-                                        className="bg-bakery-cta text-white px-8 py-4 rounded-xl font-black disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 transition-all shadow-lg shadow-bakery-cta/20 w-full sm:w-auto"
+                        {/* Step 5: Success State */}
+                        {orderSuccess && (
+                            <div className="text-center py-16 animate-in zoom-in duration-500 max-w-xl mx-auto">
+                                <div className="w-20 h-20 bg-[#25D366]/10 text-[#25D366] rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Check size={40} />
+                                </div>
+                                <h2 className="text-3xl font-black font-playfair mb-4">Request Received!</h2>
+                                <p className="text-lg text-bakery-primary/70 mb-8">
+                                    Thank you for choosing Crave Bakery. Our team is reviewing your custom order details. We will be in touch shortly to confirm everything and arrange payment.
+                                </p>
+
+                                {customerDetails.paymentMethod === 'dm_whatsapp' ? (
+                                    <a
+                                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '447000000000'}?text=Hi, I just submitted a custom order for a ${encodeURIComponent(productType || '')}. My email is ${encodeURIComponent(customerDetails.email)}.`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 bg-[#25D366] text-white px-8 py-4 rounded-xl font-black shadow-lg hover:-translate-y-1 transition-all"
                                     >
-                                        {isSubmitting ? "Placing Order..." : "Confirm Custom Order ✨"}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
-
-                    {/* Step 5: Success State */}
-                    {orderSuccess && (
-                        <div className="text-center py-16 animate-in zoom-in duration-500 max-w-xl mx-auto">
-                            <div className="w-20 h-20 bg-[#25D366]/10 text-[#25D366] rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Check size={40} />
+                                        Message us on WhatsApp
+                                    </a>
+                                ) : (
+                                    <a
+                                        href="/"
+                                        className="inline-flex items-center gap-2 bg-bakery-cta text-white px-8 py-4 rounded-xl font-black shadow-lg hover:-translate-y-1 transition-all"
+                                    >
+                                        Return to Home
+                                    </a>
+                                )}
                             </div>
-                            <h2 className="text-3xl font-black font-playfair mb-4">Request Received!</h2>
-                            <p className="text-lg text-bakery-primary/70 mb-8">
-                                Thank you for choosing Crave Bakery. Our team is reviewing your custom order details. We will be in touch shortly to confirm everything and arrange payment.
-                            </p>
+                        )}
 
-                            {customerDetails.paymentMethod === 'dm_whatsapp' ? (
-                                <a
-                                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '447000000000'}?text=Hi, I just submitted a custom order for a ${encodeURIComponent(productType || '')}. My email is ${encodeURIComponent(customerDetails.email)}.`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 bg-[#25D366] text-white px-8 py-4 rounded-xl font-black shadow-lg hover:-translate-y-1 transition-all"
-                                >
-                                    Message us on WhatsApp
-                                </a>
-                            ) : (
-                                <a
-                                    href="/"
-                                    className="inline-flex items-center gap-2 bg-bakery-cta text-white px-8 py-4 rounded-xl font-black shadow-lg hover:-translate-y-1 transition-all"
-                                >
-                                    Return to Home
-                                </a>
-                            )}
-                        </div>
-                    )}
-
+                    </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </ErrorBoundary>
     );
 }
