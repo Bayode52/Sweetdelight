@@ -26,6 +26,19 @@ export async function middleware(req: NextRequest) {
     );
     const { data: { session } } = await supabase.auth.getSession();
 
+    // ─── Ban Enforcement ─────────────────────────────────────────────
+    if (session) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('banned, is_bot')
+            .eq('id', session.user.id)
+            .single();
+
+        if (profile?.banned) {
+            return NextResponse.redirect(new URL('/banned', req.url));
+        }
+    }
+
     const { pathname } = req.nextUrl;
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
 
@@ -108,13 +121,7 @@ export async function middleware(req: NextRequest) {
             .eq('id', session.user.id)
             .single();
 
-        // Check Store Status (is_live)
-        const { data: settings } = await supabase.from('settings').select('is_live').single();
 
-        // If not live, only allow admins
-        if (settings && !settings.is_live && profile?.role !== 'admin' && !pathname.startsWith('/maintenance') && !pathname.startsWith('/auth') && !pathname.startsWith('/_next') && !pathname.startsWith('/api')) {
-            return NextResponse.redirect(new URL('/maintenance', req.url));
-        }
 
         if (!profile || profile.role !== 'admin') {
             return NextResponse.redirect(new URL('/', req.url));
@@ -123,24 +130,7 @@ export async function middleware(req: NextRequest) {
         return res;
     }
 
-    // ─── Maintenance Mode for Public Routes ──────────────────────────
-    const publicPaths = ['/', '/menu', '/about', '/contact'];
-    if (publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))) {
-        const { data: settings } = await supabase.from('settings').select('is_live').single();
-        if (settings && !settings.is_live) {
-            // Check if logged in user is admin
-            let isAdmin = false;
-            if (session) {
-                const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
-                isAdmin = profile?.role === 'admin';
-            }
-            if (!isAdmin) {
-                return NextResponse.redirect(new URL('/maintenance', req.url));
-            }
-        }
-    }
 
-    return res;
 
     return res;
 }

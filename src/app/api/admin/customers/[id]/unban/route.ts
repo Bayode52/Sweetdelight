@@ -11,15 +11,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const { data: admin } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     if (admin?.role !== "admin") return new Response("Forbidden", { status: 403 });
 
-    const { reason } = await req.json();
-    if (!reason) return NextResponse.json({ error: "Reason is required" }, { status: 400 });
-
     const { error } = await supabase
         .from("profiles")
         .update({
-            banned: true,
-            ban_reason: reason,
-            banned_at: new Date().toISOString()
+            banned: false,
+            ban_reason: null,
+            banned_at: null
         })
         .eq("id", customerId);
 

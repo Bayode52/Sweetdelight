@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { TrendingUp, TrendingDown, ShoppingBag, Clock, Star, Wallet, ArrowRight } from "lucide-react";
+import { TrendingUp, TrendingDown, ShoppingBag, Clock, Star, Wallet } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertTriangle, Sparkles, ArrowRight, Plus, RefreshCw, ChevronRight } from "lucide-react";
 
 interface DashboardData {
     metrics: { revenueToday: number; ordersToday: number; ordersDiff: number; pendingOrders: number; pendingReviews: number };
@@ -41,6 +43,15 @@ export default function AdminDashboard() {
         refetchInterval: 300000,
     });
 
+    const { data: products } = useQuery({
+        queryKey: ["admin-products-summary"],
+        queryFn: async () => {
+            const res = await fetch("/api/admin/products");
+            if (!res.ok) return [];
+            return res.json();
+        }
+    });
+
     useEffect(() => {
         async function fetchInitial() {
             const { data: { user } } = await supabase.auth.getUser();
@@ -72,22 +83,88 @@ export default function AdminDashboard() {
 
     if (isLoading) return <div className="p-8"><div className="w-8 h-8 border-4 border-bakery-cta border-t-transparent rounded-full animate-spin" /></div>;
 
+    // Setup Checker Logic
+    const { data: dbContent } = useQuery({
+        queryKey: ["site-content-summary"],
+        queryFn: async () => {
+            const res = await fetch("/api/admin/content?all=true");
+            return res.json();
+        }
+    });
+
+    const getSetupIssues = () => {
+        const issues = [];
+        const contentMap = (dbContent || []).reduce((acc: any, item: any) => {
+            acc[`${item.page}.${item.section}.${item.field}`] = item.value;
+            return acc;
+        }, {});
+
+        if (!contentMap["contact.info.whatsapp"]) {
+            issues.push({ id: 'whatsapp', label: 'WhatsApp Number Missing', description: 'Customers cannot contact you directly via WhatsApp.', link: '/admin/content?page=contact' });
+        }
+        if (!contentMap["about.baker.image"]) {
+            issues.push({ id: 'baker', label: 'Baker Photo Missing', description: 'Your brand story needs a face! Upload a photo in About Us.', link: '/admin/content?page=about' });
+        }
+        if (products && products.length > 0 && products.some((p: any) => !p.images || p.images.length === 0)) {
+            issues.push({ id: 'products', label: 'Missing Product Images', description: 'Some products have no photos. Customers eat with their eyes first!', link: '/admin/products' });
+        }
+        return issues;
+    };
+
+    const setupIssues = getSetupIssues();
+
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-[1600px] mx-auto pb-24">
+        <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-playfair font-black text-bakery-primary">
-                        {getGreeting()}, {adminName.split(' ')[0]}! 👋
-                    </h1>
-                    <p className="text-bakery-primary/60 font-medium mt-1">Here&apos;s what&apos;s happening with your bakery today.</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-1">
+                    <h1 className="text-5xl font-playfair font-black text-bakery-primary tracking-tight italic">Dashboard</h1>
+                    <p className="text-bakery-primary/40 font-medium uppercase tracking-[0.2em] text-[10px] ml-1">Live Store Analytics & Control</p>
                 </div>
-                <div className="bg-white px-5 py-2.5 rounded-2xl border border-bakery-primary/10">
-                    <p className="text-xs font-black text-bakery-primary uppercase tracking-widest">
-                        {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                    </p>
+
+                <div className="flex bg-white rounded-[28px] p-2 luxury-shadow border border-bakery-primary/5">
+                    <button className="px-6 py-3 bg-bakery-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-bakery-primary/20">Overview</button>
+                    <button className="px-6 py-3 text-bakery-primary/40 hover:text-bakery-primary rounded-2xl font-black text-[10px] uppercase tracking-widest transition-colors">Reports</button>
                 </div>
             </div>
+
+            {/* Setup Checker Alert */}
+            <AnimatePresence>
+                {setupIssues.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="bg-orange-50 border-2 border-orange-100 rounded-[40px] p-8 space-y-6 relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-8 text-orange-200/50">
+                            <Sparkles size={120} />
+                        </div>
+
+                        <div className="relative z-10 flex items-center gap-4">
+                            <div className="w-12 h-12 bg-orange-200/30 rounded-2xl flex items-center justify-center text-orange-600">
+                                <AlertTriangle size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-playfair font-black text-bakery-primary">Complete Your Store Setup</h3>
+                                <p className="text-sm font-medium text-bakery-primary/60 uppercase tracking-widest">We found {setupIssues.length} critical items needing attention</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                            {setupIssues.map((issue) => (
+                                <Link key={issue.id} href={issue.link}>
+                                    <div className="bg-white p-5 rounded-3xl border border-orange-200/50 hover:border-orange-400 transition-all group overflow-hidden relative">
+                                        <h4 className="font-black text-bakery-primary text-sm mb-1">{issue.label}</h4>
+                                        <p className="text-xs text-bakery-primary/50 font-medium leading-relaxed">{issue.description}</p>
+                                        <ArrowRight size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-orange-200 group-hover:text-orange-600 transition-colors" />
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-3">

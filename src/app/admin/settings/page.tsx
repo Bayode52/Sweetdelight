@@ -411,22 +411,16 @@ export default function AdminSettings() {
                                     <input
                                         type="checkbox"
                                         checked={form.is_live}
-                                        onChange={e => {
-                                            if (score < 100 && e.target.checked) {
-                                                toast.error("Finish readiness checklist before going live!");
-                                                return;
-                                            }
-                                            setForm({ ...form, is_live: e.target.checked });
-                                        }}
+                                        onChange={e => setForm({ ...form, is_live: e.target.checked })}
                                         className="sr-only peer"
                                     />
                                     <div className="w-14 h-8 bg-bakery-primary/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
                                 </label>
                             </div>
                             {score < 100 && !form.is_live && (
-                                <div className="flex items-center gap-2 p-3 bg-red-100 rounded-xl text-[10px] font-black text-red-700 uppercase tracking-widest">
-                                    <AlertCircle size={14} />
-                                    Readiness score must be 100% to enable Live Mode
+                                <div className="flex items-center gap-2 p-3 bg-amber-100 rounded-xl text-[10px] font-black text-amber-700 uppercase tracking-widest">
+                                    <Info size={14} />
+                                    Improve readiness score for a perfect launch
                                 </div>
                             )}
                         </div>

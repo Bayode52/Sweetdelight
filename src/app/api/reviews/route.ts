@@ -23,6 +23,34 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
+        // 🛡️ Anti-Spam Guard
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("created_at, banned")
+            .eq("id", session.user.id)
+            .single();
+
+        if (profile?.banned) return NextResponse.json({ error: "Terminated" }, { status: 403 });
+
+        const accountAgeHours = (Date.now() - new Date(profile?.created_at || 0).getTime()) / (1000 * 60 * 60);
+        if (accountAgeHours < 24) {
+            return NextResponse.json({ error: "Security check: Account must be 24h old to post reviews" }, { status: 403 });
+        }
+
+        if (body.text.toLowerCase().includes("http") || body.text.toLowerCase().includes("www") || body.text.toLowerCase().includes(".com")) {
+            return NextResponse.json({ error: "No external links allowed in reviews" }, { status: 400 });
+        }
+
+        // Check for exact duplicates from same user
+        const { data: existing } = await supabase
+            .from("reviews")
+            .select("id")
+            .eq("user_id", session.user.id)
+            .eq("text", body.text)
+            .maybeSingle();
+
+        if (existing) return NextResponse.json({ error: "Duplicate review detected" }, { status: 400 });
+
         const { data, error } = await supabase
             .from("reviews")
             .insert({
@@ -32,8 +60,9 @@ export async function POST(req: Request) {
                 rating: body.rating,
                 title: body.title,
                 text: body.text,
+                original_text: body.text, // Save original
                 media_urls: body.mediaUrls,
-                status: body.status || 'pending',
+                status: 'pending', // Always start pending
                 helpful_count: 0
             })
             .select()

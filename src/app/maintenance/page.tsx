@@ -67,7 +67,7 @@ export default function MaintenancePage() {
 
                 <div className="mt-16 pt-8 border-t border-bakery-primary/5">
                     <p className="text-[10px] font-black uppercase tracking-widest text-bakery-primary/30">
-                        © 2024 Crave Bakery Ltd. · London & Lagos
+                        © 2026 Crave Bakery. All rights reserved.
                     </p>
                 </div>
             </motion.div>

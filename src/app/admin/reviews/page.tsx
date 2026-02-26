@@ -18,6 +18,24 @@ export default function AdminReviewsPage() {
     const [selectedReview, setSelectedReview] = useState<any>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({ title: "", text: "", rating: 5 });
+    const [selectedBulk, setSelectedBulk] = useState<string[]>([]);
+
+    const bulkAction = async (status: ReviewStatus) => {
+        try {
+            await Promise.all(selectedBulk.map(id =>
+                fetch('/api/admin/reviews/actions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, action: "status_update", payload: { status } })
+                })
+            ));
+            toast.success(`Successfully updated ${selectedBulk.length} reviews`);
+            setSelectedBulk([]);
+            queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
+        } catch (err) {
+            toast.error("Failed to perform bulk action");
+        }
+    };
 
     const { data: reviews, isLoading } = useQuery({
         queryKey: ["admin-reviews", statusFilter],
@@ -112,19 +130,32 @@ export default function AdminReviewsPage() {
 
             {/* Controls */}
             <div className="bg-white p-4 rounded-[32px] luxury-shadow border border-bakery-primary/5 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-                    {["all", "pending", "approved", "featured", "rejected", "hidden"].map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setStatusFilter(status as any)}
-                            className={`px-6 h-12 rounded-2xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all ${statusFilter === status
-                                ? "bg-bakery-primary text-white"
-                                : "bg-bakery-primary/5 text-bakery-primary/60 hover:bg-bakery-primary/10"
-                                }`}
-                        >
-                            {status}
-                        </button>
-                    ))}
+                <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                    <div className="flex gap-2">
+                        {["all", "pending", "approved", "featured", "rejected", "hidden"].map((status) => (
+                            <button
+                                key={status}
+                                onClick={() => setStatusFilter(status as any)}
+                                className={`px-6 h-12 rounded-2xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all ${statusFilter === status
+                                    ? "bg-bakery-primary text-white"
+                                    : "bg-bakery-primary/5 text-bakery-primary/60 hover:bg-bakery-primary/10"
+                                    }`}
+                            >
+                                {status}
+                            </button>
+                        ))}
+                    </div>
+
+                    {selectedBulk.length > 0 && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-bakery-cta/10 rounded-2xl animate-in fade-in zoom-in duration-200">
+                            <span className="text-xs font-black text-bakery-cta uppercase tracking-widest whitespace-nowrap">{selectedBulk.length} Selected</span>
+                            <div className="flex gap-1">
+                                <button onClick={() => bulkAction("approved")} className="p-2 bg-white rounded-lg text-green-600 hover:bg-green-600 hover:text-white transition-all shadow-sm"><Check size={14} /></button>
+                                <button onClick={() => bulkAction("hidden")} className="p-2 bg-white rounded-lg text-amber-600 hover:bg-amber-600 hover:text-white transition-all shadow-sm"><X size={14} /></button>
+                                <button onClick={() => bulkAction("rejected")} className="p-2 bg-white rounded-lg text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm"><X size={14} /></button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="relative w-full md:w-auto">
@@ -154,13 +185,26 @@ export default function AdminReviewsPage() {
                     {filteredReviews?.map((review) => (
                         <div
                             key={review.id}
-                            onClick={() => {
+                            className="bg-white p-6 rounded-[32px] luxury-shadow border border-bakery-primary/5 hover:border-bakery-cta/30 transition-all cursor-pointer flex flex-col md:flex-row gap-6 items-start md:items-center group relative overflow-hidden"
+                            onClick={(e) => {
+                                // Prevent modal if clicking checkbox
+                                if ((e.target as any).tagName === "INPUT") return;
                                 setSelectedReview(review);
                                 setIsEditing(false);
                                 setEditData({ title: review.title || "", text: review.text || "", rating: review.rating || 5 });
                             }}
-                            className="bg-white p-6 rounded-[32px] luxury-shadow border border-bakery-primary/5 hover:border-bakery-cta/30 transition-all cursor-pointer flex flex-col md:flex-row gap-6 items-start md:items-center"
                         >
+                            <div className="shrink-0 pt-1">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedBulk.includes(review.id)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setSelectedBulk(prev => [...prev, review.id]);
+                                        else setSelectedBulk(prev => prev.filter(id => id !== review.id));
+                                    }}
+                                    className="w-5 h-5 rounded-lg border-bakery-primary/20 text-bakery-cta focus:ring-bakery-cta transition-all"
+                                />
+                            </div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
                                     <div className="flex gap-1">

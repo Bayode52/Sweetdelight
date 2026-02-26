@@ -1,85 +1,73 @@
-"use server"
+import { createClient } from "@/lib/supabase/client";
 
-import { createServerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+export type ContentMap = Record<string, string>;
 
-export type ContentMap = Record<string, string>
-
-export async function getContent(page: string): Promise<ContentMap> {
-    const cookieStore = cookies()
-
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) { return cookieStore.get(name)?.value; },
-                set(name: string, value: string, options: Record<string, unknown>) {
-                    cookieStore.set({ name, value, ...options });
-                },
-                remove(name: string, options: Record<string, unknown>) {
-                    cookieStore.set({ name, value: '', ...options });
-                },
-            },
-        }
-    )
-
-    const { data, error } = await supabase
-        .from('site_content')
-        .select('section, field, value')
-        .eq('page', page)
-
-    if (error) {
-        console.error('Error fetching content for page:', page, error)
-        return {}
-    }
-
-    const contentMap: ContentMap = {}
-    if (data) {
-        data.forEach((item: { section: string; field: string; value: string | null }) => {
-            const key = `${item.section}.${item.field}`
-            if (item.value !== null && item.value !== undefined) {
-                contentMap[key] = item.value
-            }
-        })
-    }
-
-    return contentMap
+export interface ContentField {
+    page: string;
+    section: string;
+    field: string;
+    value: string;
 }
 
-export async function updateContent(page: string, section: string, field: string, value: string): Promise<void> {
-    const cookieStore = cookies()
+const DEFAULT_CONTENT: Record<string, string> = {
+    // Homepage Hero
+    "home.hero.badge": "🇬🇧 Premium Bakery",
+    "home.hero.headline": "Baking Joy, One Bite At A Time.",
+    "home.hero.subheadline": "Experience the perfect blend of tradition and craftsmanship. Handcrafted pastries delivered warm to your doorstep.",
+    "home.hero.cta_text": "Order Fresh Now",
+    "home.hero.hero_image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=900",
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) { return cookieStore.get(name)?.value; },
-                set(name: string, val: string, options: Record<string, unknown>) {
-                    cookieStore.set({ name, value: val, ...options });
-                },
-                remove(name: string, options: Record<string, unknown>) {
-                    cookieStore.set({ name, value: '', ...options });
-                },
-            },
-        }
-    )
+    // Homepage Stats
+    "home.hero.stats_customers": "1000+",
+    "home.hero.stats_rating": "4.9/5",
 
-    const { error } = await supabase
-        .from('site_content')
-        .upsert({
-            page,
-            section,
-            field,
-            value,
-            updated_at: new Date().toISOString()
-        }, {
-            onConflict: 'page,section,field'
-        })
+    // Delivery Banner
+    "home.delivery_banner.text": "🚚 Free delivery on orders over £50 · Minimum order £20 · 📍 Delivering across London",
+
+    // Categories
+    "home.categories.badge": "Shop by Category",
+    "home.categories.heading": "Explore Our Bakery",
+    "home.categories.button_text": "View Full Menu",
+
+    // Footer
+    "footer.about.text": "Premium cakes and pastries crafted with the finest ingredients and a touch of magic. Celebrating life's most beautiful moments.",
+
+    // About
+    "about.header.title": "Our Story",
+    "about.header.subtitle": "A journey of passion, flour, and a whole lot of heart.",
+
+    // Contact
+    "contact.header.title": "Get in Touch",
+    "contact.header.subtitle": "Have a question or a special request? We'd love to hear from you."
+};
+
+/**
+ * Fetches and manages site content from Supabase
+ */
+export async function getContent(page: string): Promise<ContentMap> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from("site_content")
+        .select("*")
+        .eq("page", page);
 
     if (error) {
-        console.error(`Error updating content ${page}.${section}.${field}:`, error)
-        throw new Error('Failed to update content')
+        console.error("Content fetch error:", error);
+        return {};
     }
+
+    const contentMap: ContentMap = {};
+    data?.forEach(item => {
+        contentMap[`${item.section}.${item.field}`] = item.value;
+    });
+
+    return contentMap;
+}
+
+/**
+ * Simple helper to resolve content with static fallback
+ */
+export function content(key: string, contentMap: ContentMap, page?: string) {
+    const fullKey = page ? `${page}.${key}` : key;
+    return contentMap[key] || DEFAULT_CONTENT[fullKey] || "";
 }

@@ -124,11 +124,17 @@ export function AboutPageClient({ content }: { content: ContentMap }) {
                                 {content['food_safety.description'] || 'Our kitchen is registered with the local authority and maintains a Food Hygiene Rating. All our products are made fresh to order with no artificial preservatives. Full allergen information is available for every product in compliance with UK Natasha\'s Law.'}
                             </p>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {["Registered Kitchen", "No Preservatives", "Full Allergen Info", "Fresh Daily"].map((item) => (
-                                    <div key={item} className="bg-white/10 rounded-2xl p-4 text-center">
-                                        <CheckCircle className="mx-auto mb-2 text-green-400" size={20} />
-                                        <p className="text-xs font-bold text-white/70">{item}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {[
+                                    { label: "Founded", value: "2024", sub: "London" },
+                                    { label: "Registered Kitchen", value: "✅", sub: "Local Authority" },
+                                    { label: "No Preservatives", value: "💯", sub: "Real Ingredients" },
+                                    { label: "Fresh Daily", value: "🗓️", sub: "Made to Order" }
+                                ].map((item) => (
+                                    <div key={item.label} className="bg-white/10 rounded-2xl p-4 text-center">
+                                        <div className="mx-auto mb-2 text-green-400 text-xl">{item.value}</div>
+                                        <p className="text-xs font-bold text-white/70">{item.label}</p>
+                                        <p className="text-[10px] text-white/50">{item.sub}</p>
                                     </div>
                                 ))}
                             </div>

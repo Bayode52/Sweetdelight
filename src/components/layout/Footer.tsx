@@ -85,7 +85,7 @@ export function Footer({ content }: { content?: ContentMap }) {
             </div>
 
             <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-bakery-primary/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold uppercase tracking-widest text-bakery-primary/20 text-center md:text-left">
-                <p>&copy; {new Date().getFullYear()} {content?.['bottom.copyright'] || 'Crave Bakery. All rights reserved.'}</p>
+                <p>&copy; 2026 {content?.['bottom.copyright'] || 'Crave Bakery. All rights reserved.'}</p>
                 <div className="flex items-center gap-2">
                     <span>{content?.['bottom.made_with'] || 'Made with'}</span>
                     <Heart size={12} className="fill-bakery-cta text-bakery-cta" />
