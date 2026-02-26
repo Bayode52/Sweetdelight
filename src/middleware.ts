@@ -1,46 +1,47 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 // Simple in-memory rate limiting for the middleware instance
 const rateLimitMap = new Map<string, { count: number, reset: number }>();
 const RATE_LIMIT_THRESHOLD = 100; // requests per minute
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 
-export async function middleware(req: NextRequest) {
-    const res = NextResponse.next();
+export async function middleware(request: NextRequest) {
+    let response = NextResponse.next({ request })
 
-    // Auto-refresh Supabase session on every request
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                getAll() { return req.cookies.getAll(); },
+                getAll() { return request.cookies.getAll() },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
-                    cookiesToSet.forEach(({ name, value, options }) => res.cookies.set({ name, value, ...options }));
+                    cookiesToSet.forEach(({ name, value }) =>
+                        request.cookies.set(name, value))
+                    response = NextResponse.next({ request })
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        response.cookies.set(name, value, options))
                 },
             },
         }
-    );
-    const { data: { session } } = await supabase.auth.getSession();
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const path = request.nextUrl.pathname
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
 
     // ─── Ban Enforcement ─────────────────────────────────────────────
-    if (session) {
+    if (user) {
         const { data: profile } = await supabase
             .from('profiles')
             .select('banned, is_bot')
-            .eq('id', session.user.id)
+            .eq('id', user.id)
             .single();
 
         if (profile?.banned) {
-            return NextResponse.redirect(new URL('/banned', req.url));
+            return NextResponse.redirect(new URL('/banned', request.url));
         }
     }
-
-    const { pathname } = req.nextUrl;
-    const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
 
     // ─── Rate Limiting ───────────────────────────────────────────────
     const now = Date.now();
@@ -58,36 +59,12 @@ export async function middleware(req: NextRequest) {
         return new NextResponse('Too Many Requests', { status: 429 });
     }
 
-    // ─── Bot Protection (Honeypot) ──────────────────────────────────
-    // If it's a POST request and has a "honeypot" field that's filled, it's a bot
-    if (req.method === 'POST' && !pathname.startsWith('/api/security/log')) {
-        const contentType = req.headers.get('content-type') || '';
-        if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
-            const formData = await req.clone().formData();
-            if (formData.get('hp_field')) { // Our hidden honeypot field name
-                // Log the bot event silently via the internal API
-                await fetch(`${req.nextUrl.origin}/api/security/log`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        event_type: 'bot_detection',
-                        severity: 'high',
-                        description: `Honeypot triggered by ${ip}`,
-                        metadata: { path: pathname, ip }
-                    })
-                }).catch(() => { });
-
-                return new NextResponse('Bot detected', { status: 403 });
-            }
-        }
-    }
-
-
-    // ─── Referral cookie: /ref/[code] ────────────────────────────────
-    if (pathname.startsWith('/ref/')) {
-        const parts = pathname.split('/');
+    // ─── Referral handling ───────────────────────────────────────────
+    if (path.startsWith('/ref/')) {
+        const parts = path.split('/');
         const code = parts[2];
         if (code) {
-            const nextRes = NextResponse.next();
+            const nextRes = NextResponse.next({ request });
             nextRes.cookies.set('referral_code', code, {
                 maxAge: 60 * 60 * 24 * 30, // 30 days
                 path: '/',
@@ -95,44 +72,35 @@ export async function middleware(req: NextRequest) {
             });
             return nextRes;
         }
-        return res;
     }
 
-    // ─── Protect /account/* ──────────────────────────────────────────
-    if (pathname.startsWith('/account')) {
-        if (!session) {
-            const loginUrl = new URL('/auth/login', req.url);
-            loginUrl.searchParams.set('redirect', pathname);
-            return NextResponse.redirect(loginUrl);
-        }
-        return res;
+    // Protect /account routes — must be logged in
+    if (path.startsWith('/account') && !user) {
+        const loginUrl = new URL('/auth/login', request.url)
+        loginUrl.searchParams.set('redirect', path)
+        return NextResponse.redirect(loginUrl)
     }
 
-    // ─── Protect /admin/* ────────────────────────────────────────────
-    if (pathname.startsWith('/admin')) {
-        if (!session) {
-            return NextResponse.redirect(new URL('/auth/login', req.url));
+    // Protect /admin routes — must be logged in AND admin role
+    if (path.startsWith('/admin')) {
+        if (!user) {
+            return NextResponse.redirect(new URL('/auth/login?redirect=/admin', request.url))
         }
 
-        // Check user role from profiles table
+        // Check admin role
         const { data: profile } = await supabase
             .from('profiles')
             .select('role')
-            .eq('id', session.user.id)
-            .single();
+            .eq('id', user.id)
+            .single()
 
-
-
-        if (!profile || profile.role !== 'admin') {
-            return NextResponse.redirect(new URL('/', req.url));
+        if (profile?.role !== 'admin') {
+            // Not admin — redirect to home with message
+            return NextResponse.redirect(new URL('/?error=unauthorized', request.url))
         }
-
-        return res;
     }
 
-
-
-    return res;
+    return response
 }
 
 export const config = {
@@ -144,6 +112,6 @@ export const config = {
         '/admin/:path*',
         '/account/:path*',
         '/ref/:path*',
-    ],
-};
+    ]
+}
 

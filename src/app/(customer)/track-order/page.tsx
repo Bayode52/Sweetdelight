@@ -1,5 +1,8 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
+import { Suspense } from "react";
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, Package, CheckCircle, ChefHat, Gift, Truck, Loader2 } from "lucide-react";

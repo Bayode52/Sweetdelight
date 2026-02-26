@@ -55,11 +55,7 @@ export default function ProductModal({ product, onClose, onSuccess }: { product:
             ...form,
             price: parseFloat(form.price),
             sale_price: form.on_sale && form.sale_price ? parseFloat(form.sale_price) : null,
-            images: form.images.map(url => ({
-                id: Math.random().toString(36).substring(7),
-                url: url,
-                alt: form.name || "Product Image"
-            })),
+            images: form.images, // Now matches database text[]
             image_url: form.images[0] || ""
         };
 

@@ -30,11 +30,7 @@ const ADMIN_LINKS = [
     { name: "Customers", href: "/admin/customers", icon: Users },
     { name: "Reviews", href: "/admin/reviews", icon: Star },
     { name: "Edit Website", href: "/admin/content", icon: FileEdit },
-    { name: "Chatbot", href: "/admin/chat", icon: MessageSquare },
-    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { name: "Security", href: "/admin/security", icon: Shield },
-    { name: "Referrals", href: "/admin/referrals", icon: Users },
-    { name: "Automations", href: "/admin/automations", icon: Zap },
+    { name: "Messages", href: "/admin/chat", icon: MessageSquare },
     { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -68,10 +64,22 @@ export function AdminSidebar() {
     return (
         <aside className="fixed left-0 top-0 h-full w-64 bg-bakery-primary text-white flex flex-col border-r border-white/5 z-40">
             {/* Header */}
-            <div className="p-8 pb-12">
-                <Link href="/" className="text-2xl font-playfair font-black tracking-tighter">
+            <div className="p-8 pb-6">
+                <Link href="/" className="text-2xl font-playfair font-black tracking-tighter block mb-6">
                     Crave<span className="text-bakery-cta">.</span>Admin
                 </Link>
+
+                <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-bakery-cta flex items-center justify-center font-bold text-white uppercase shrink-0">
+                        {userProfile.full_name?.charAt(0) || "A"}
+                    </div>
+                    <div className="overflow-hidden">
+                        <p className="text-sm font-bold truncate">{userProfile.full_name || "Admin User"}</p>
+                        <span className="inline-block px-2 py-0.5 bg-bakery-cta/20 text-bakery-cta text-[10px] font-black uppercase tracking-widest rounded-full">
+                            Admin
+                        </span>
+                    </div>
+                </div>
             </div>
 
             {/* Nav */}
@@ -101,17 +109,6 @@ export function AdminSidebar() {
 
             {/* Footer */}
             <div className="p-4 mt-auto">
-                <div className="bg-white/5 rounded-3xl p-4 flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-bakery-cta flex items-center justify-center font-bold text-white uppercase">
-                            {userProfile.full_name?.charAt(0) || "A"}
-                        </div>
-                        <div className="overflow-hidden">
-                            <p className="text-sm font-bold truncate">{userProfile.full_name || "Admin User"}</p>
-                            <p className="text-[10px] text-white/40 uppercase tracking-widest">Administrator</p>
-                        </div>
-                    </div>
-                </div>
                 <Button
                     variant="ghost"
                     fullWidth

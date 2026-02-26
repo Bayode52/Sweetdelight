@@ -105,7 +105,10 @@ export default function AdminDashboard() {
         if (!contentMap["about.baker.image"]) {
             issues.push({ id: 'baker', label: 'Baker Photo Missing', description: 'Your brand story needs a face! Upload a photo in About Us.', link: '/admin/content?page=about' });
         }
-        if (products && products.length > 0 && products.some((p: any) => !p.images || p.images.length === 0)) {
+        if (!contentMap["about.baker.bio"]) {
+            issues.push({ id: 'bio', label: 'Baker Bio Missing', description: 'Introduce yourself to your customers! Add a bio in About Us.', link: '/admin/content?page=about' });
+        }
+        if (products && (products as any).products?.some((p: any) => !p.images || p.images.length === 0)) {
             issues.push({ id: 'products', label: 'Missing Product Images', description: 'Some products have no photos. Customers eat with their eyes first!', link: '/admin/products' });
         }
         return issues;

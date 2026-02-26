@@ -45,6 +45,11 @@ const DEFAULT_CONTENT: Record<string, string> = {
  * Fetches and manages site content from Supabase
  */
 export async function getContent(page: string): Promise<ContentMap> {
+    // Skip fetching during build to prevent failures if DB is unreachable or tables missing
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+        return {};
+    }
+
     const supabase = createClient();
     const { data, error } = await supabase
         .from("site_content")
@@ -52,7 +57,10 @@ export async function getContent(page: string): Promise<ContentMap> {
         .eq("page", page);
 
     if (error) {
-        console.error("Content fetch error:", error);
+        // Only log if it's not a "table not found" error (common if migrations haven't run yet)
+        if (error.code !== 'PGRST205') {
+            console.error("Content fetch error:", error);
+        }
         return {};
     }
 

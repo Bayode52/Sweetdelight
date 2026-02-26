@@ -6,6 +6,8 @@ import LayoutClient from "./layout-client";
 import { getContent } from "@/lib/content";
 import "./globals.css";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://cravebakery.co.uk"),
   title: {

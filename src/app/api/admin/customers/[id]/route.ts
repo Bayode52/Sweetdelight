@@ -1,136 +1,126 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import { createClient } from "@supabase/supabase-js"
 
-export const dynamic = "force-dynamic";
-
+// Admin client with service role to bypass RLS for write operations
 const adminClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+)
 
-async function verifyAdmin() {
-    const cookieStore = cookies();
+async function getAdminSupabase() {
+    const cookieStore = cookies()
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                get: (name) => cookieStore.get(name)?.value,
-                set: () => { },
-                remove: () => { },
+                get(name: string) { return cookieStore.get(name)?.value },
             },
         }
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data: profile } = await adminClient.from("profiles").select("role").eq("id", user.id).single();
-    if (profile?.role !== "admin") return null;
-    return user;
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+
+    if (profile?.role !== "admin") return null
+    return supabase
 }
 
 export async function GET(
     request: Request,
     { params }: { params: { id: string } }
 ) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await getAdminSupabase()
+    if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const customerId = params.id;
+    const { data: profile, error } = await adminClient
+        .from("profiles")
+        .select(`
+      *,
+      orders:orders(*)
+    `)
+        .eq("id", params.id)
+        .single()
 
-    // Fetch profile, orders, and reviews
-    const [
-        { data: profile, error: profileError },
-        { data: orders, error: ordersError },
-        { data: reviews, error: reviewsError }
-    ] = await Promise.all([
-        adminClient.from("profiles").select("*").eq("id", customerId).single(),
-        adminClient.from("orders").select("*").eq("user_id", customerId).order("created_at", { ascending: false }),
-        adminClient.from("reviews").select("*, products(name)").eq("user_id", customerId).order("created_at", { ascending: false })
-    ]);
-
-    if (profileError) {
-        return NextResponse.json({ error: profileError.message }, { status: 404 });
-    }
-
-    // Calculate spent
-    const spent = (orders || [])
-        .filter(o => o.payment_status === "paid")
-        .reduce((sum, o) => sum + (o.total_amount || 0), 0);
-
-    return NextResponse.json({
-        profile,
-        orders: orders || [],
-        reviews: reviews || [],
-        stats: {
-            spent: Math.round(spent * 100) / 100,
-            orders_total: orders?.length || 0,
-            reviews_total: reviews?.length || 0
-        }
-    });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(profile)
 }
 
 export async function PUT(
     request: Request,
     { params }: { params: { id: string } }
 ) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await getAdminSupabase()
+    if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const customerId = params.id;
-    const body = await request.json();
+    const body = await request.json()
+    const { role, banned, is_bot, full_name, phone } = body
 
     const { data, error } = await adminClient
         .from("profiles")
         .update({
-            full_name: body.full_name,
-            phone: body.phone,
-            role: body.role
+            role,
+            banned,
+            is_bot,
+            full_name,
+            phone,
+            updated_at: new Date().toISOString()
         })
-        .eq("id", customerId)
+        .eq("id", params.id)
         .select()
-        .single();
+        .single()
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json(data);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data)
 }
 
 export async function DELETE(
     request: Request,
     { params }: { params: { id: string } }
 ) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await getAdminSupabase()
+    if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const customerId = params.id;
+    const customerId = params.id
 
-    // Check if user has orders
-    const { data: orders } = await adminClient.from("orders").select("id").eq("user_id", customerId).limit(1);
+    // Check for existing orders
+    const { data: orders } = await adminClient
+        .from("orders")
+        .select("id")
+        .eq("customer_id", customerId)
+        .limit(1)
 
     if (orders && orders.length > 0) {
-        // Anonymize
+        // Anonymize instead of deleting if they have orders
         const { error } = await adminClient
             .from("profiles")
             .update({
-                full_name: "Anonymized User",
-                email: `anonymized_${customerId}@cravebakery.co.uk`,
+                full_name: "Deleted User",
+                email: `deleted_${customerId}@cravebakery.uk`,
                 phone: null,
-                avatar_url: null,
                 banned: true,
-                ban_reason: "Account deleted by owner. Data anonymized due to order history."
+                ban_reason: "Account deleted/anonymized by admin."
             })
-            .eq("id", customerId);
+            .eq("id", customerId)
 
-        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-        return NextResponse.json({ message: "User anonymized successfully" });
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ success: true, message: "User anonymized due to order history" })
     } else {
-        // Full delete
-        const { error } = await adminClient.from("profiles").delete().eq("id", customerId);
-        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-        return NextResponse.json({ message: "User deleted successfully" });
+        // Hard delete if no orders
+        const { error } = await adminClient
+            .from("profiles")
+            .delete()
+            .eq("id", customerId)
+
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ success: true, message: "User deleted successfully" })
     }
 }

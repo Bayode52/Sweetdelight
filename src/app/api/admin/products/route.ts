@@ -1,88 +1,96 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
-
-export const dynamic = "force-dynamic";
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import { createClient } from "@supabase/supabase-js"
 
 const adminClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+)
 
-async function verifyAdmin() {
-    const cookieStore = cookies();
+async function getAdminSupabase() {
+    const cookieStore = cookies()
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { get: (n) => cookieStore.get(n)?.value, set: () => { }, remove: () => { } } }
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data: p } = await adminClient.from("profiles").select("role").eq("id", user.id).single();
-    return p?.role === "admin" ? user : null;
+        {
+            cookies: {
+                get(name: string) { return cookieStore.get(name)?.value },
+            },
+        }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+
+    if (profile?.role !== "admin") return null
+    return supabase
 }
 
-// GET /api/admin/products
 export async function GET(req: Request) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await getAdminSupabase()
+    if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { searchParams } = new URL(req.url);
-    const search = searchParams.get("search") ?? "";
-    const category = searchParams.get("category") ?? "All";
-    const status = searchParams.get("status") ?? "All";
-    const page = parseInt(searchParams.get("page") ?? "1");
-    const limit = parseInt(searchParams.get("limit") ?? "50");
-    const offset = (page - 1) * limit;
+    const { searchParams } = new URL(req.url)
+    const category = searchParams.get("category") ?? "All"
+    const status = searchParams.get("status") ?? "All"
+    const search = searchParams.get("search") ?? ""
 
-    let query = adminClient.from("products").select("*", { count: "exact" });
+    let query = adminClient.from("products").select("*", { count: "exact" })
 
-    if (search) query = query.ilike("name", `%${search}%`);
-    if (category !== "All") query = query.eq("category", category);
-    if (status === "Available") query = query.eq("is_available", true);
-    if (status === "Unavailable") query = query.eq("is_available", false);
-    if (status === "On Sale") query = query.not("sale_price", "is", null);
-    if (status === "Featured") query = query.eq("is_featured", true);
+    if (search) query = query.ilike("name", `%${search}%`)
+    if (category !== "All") query = query.eq("category", category)
+    if (status === "Available") query = query.eq("is_available", true)
+    if (status === "Unavailable") query = query.eq("is_available", false)
+    if (status === "Featured") query = query.eq("is_featured", true)
 
-    const { data, error, count } = await query.order("sort_order").order("created_at", { ascending: false }).range(offset, offset + limit - 1);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    const { data, error, count } = await query
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false })
 
-    return NextResponse.json({ products: data, total: count });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ products: data, total: count })
 }
 
-// POST /api/admin/products
 export async function POST(req: Request) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await getAdminSupabase()
+    if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     try {
-        const body = await req.json();
-        const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-        const { data, error } = await adminClient.from("products").insert({
-            name: body.name,
-            slug: body.slug ?? slug,
-            category: body.category,
-            short_description: body.short_description ?? null,
-            description: body.description ?? null,
-            price: body.price,
-            sale_price: body.sale_price ?? null,
-            images: body.images ?? [],
-            image_url: body.images?.[0]?.url ?? body.image_url ?? null,
-            meta_title: body.meta_title ?? null,
-            meta_description: body.meta_description ?? null,
-            badge: body.badge ?? null,
-            serves: body.serves ?? null,
-            allergens: body.allergens ?? [],
-            may_contain: body.may_contain ?? [],
-            kitchen_handles: body.kitchen_handles ?? "gluten, dairy, eggs, nuts",
-            is_available: body.is_available ?? true,
-            is_featured: body.is_featured ?? false,
-            sort_order: body.sort_order ?? 0,
-        }).select().single();
-        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-        return NextResponse.json(data, { status: 201 });
-    } catch {
-        return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+        const body = await req.json()
+        const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+
+        // We use adminClient to bypass RLS for inserts if needed, 
+        // though is_admin() helper usually handles it.
+        const { data, error } = await adminClient
+            .from("products")
+            .insert({
+                name: body.name,
+                slug: body.slug || slug,
+                category: body.category,
+                description: body.description,
+                price: body.price,
+                sale_price: body.on_sale ? body.sale_price : null,
+                images: body.images || [], // Array of {id, url, alt}
+                image_url: body.images?.[0]?.url || body.image_url || "",
+                is_available: body.is_available ?? true,
+                is_featured: body.is_featured ?? false,
+                meta_title: body.meta_title,
+                meta_description: body.meta_description,
+                sort_order: body.sort_order || 0
+            })
+            .select()
+            .single()
+
+        if (error) throw error
+        return NextResponse.json(data, { status: 201 })
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }

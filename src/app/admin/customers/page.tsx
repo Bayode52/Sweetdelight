@@ -28,7 +28,7 @@ interface Customer {
 export default function CustomersPage() {
     const queryClient = useQueryClient();
     const [search, setSearch] = useState("");
-    const [filter, setFilter] = useState<"all" | "active" | "banned" | "bots">("all");
+    const [filter, setFilter] = useState<"all" | "active" | "banned" | "bots" | "admins">("all");
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
     const { data: customers, isLoading } = useQuery({
@@ -109,6 +109,7 @@ export default function CustomersPage() {
 
         if (filter === "banned") return c.banned;
         if (filter === "bots") return c.is_bot;
+        if (filter === "admins") return c.role === "admin";
         if (filter === "active") return !c.banned;
         return true;
     });
@@ -147,7 +148,7 @@ export default function CustomersPage() {
                     </div>
 
                     <div className="flex bg-bakery-primary/5 p-1.5 rounded-2xl">
-                        {(["all", "active", "banned", "bots"] as const).map((t) => (
+                        {(["all", "active", "banned", "bots", "admins"] as const).map((t) => (
                             <button
                                 key={t}
                                 onClick={() => setFilter(t)}
@@ -318,8 +319,8 @@ export default function CustomersPage() {
                                             setSelectedCustomer(null);
                                         }}
                                         className={`p-6 rounded-[32px] border-2 transition-all text-left flex flex-col gap-3 group ${selectedCustomer.banned
-                                                ? "border-green-100 bg-green-50/50 hover:bg-green-50"
-                                                : "border-red-100 bg-red-50/50 hover:bg-red-50"
+                                            ? "border-green-100 bg-green-50/50 hover:bg-green-50"
+                                            : "border-red-100 bg-red-50/50 hover:bg-red-50"
                                             }`}
                                     >
                                         <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${selectedCustomer.banned ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
