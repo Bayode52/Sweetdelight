@@ -29,6 +29,8 @@ interface Review {
     menu_items?: {
         name?: string;
     };
+    reviewer_name?: string | null;
+    reviewer_location?: string | null;
 }
 
 function StarDisplay({ rating }: { rating: number }) {
@@ -189,6 +191,40 @@ export default function ReviewsPage() {
                     </div>
                 </div>
 
+                {/* Overall Rating Summary */}
+                {!isLoading && reviews && reviews.length > 0 && (
+                    <div className="bg-white p-8 rounded-[40px] luxury-shadow border border-bakery-primary/5 mb-12 flex flex-col md:flex-row gap-12 items-center">
+                        <div className="text-center md:text-left shrink-0">
+                            <h2 className="text-6xl font-black font-playfair text-bakery-primary mb-2">
+                                {(reviews.reduce((acc: number, r: Review) => acc + r.rating, 0) / reviews.length).toFixed(1)}
+                            </h2>
+                            <div className="mb-2">
+                                <StarDisplay rating={Math.round(reviews.reduce((acc: number, r: Review) => acc + r.rating, 0) / reviews.length)} />
+                            </div>
+                            <p className="text-sm font-bold text-bakery-primary/60 uppercase tracking-widest">
+                                Based on {reviews.length} reviews
+                            </p>
+                        </div>
+                        <div className="flex-1 w-full space-y-3">
+                            {[5, 4, 3, 2, 1].map((rating) => {
+                                const count = reviews.filter((r: Review) => r.rating === rating).length;
+                                const percentage = Math.round((count / reviews.length) * 100) || 0;
+                                return (
+                                    <div key={rating} className="flex items-center gap-4 text-sm font-bold text-bakery-primary/60">
+                                        <div className="w-12 shrink-0 flex items-center justify-end gap-1">
+                                            {rating} <Star size={12} fill="currentColor" />
+                                        </div>
+                                        <div className="flex-1 h-2 bg-bakery-primary/5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-bakery-cta" style={{ width: `${percentage}%` }} />
+                                        </div>
+                                        <div className="w-12 shrink-0 text-right">{percentage}%</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {/* Reviews Grid */}
                 {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -197,10 +233,14 @@ export default function ReviewsPage() {
                         ))}
                     </div>
                 ) : reviews?.length === 0 ? (
-                    <div className="text-center py-24 bg-white rounded-[40px] luxury-shadow border border-bakery-primary/5">
-                        <MessageSquareQuote size={48} className="mx-auto text-bakery-primary/20 mb-6" />
-                        <h3 className="text-2xl font-black font-playfair text-bakery-primary mb-2">No reviews found</h3>
-                        <p className="text-bakery-primary/60">Try adjusting your filters to see more sweet words.</p>
+                    <div className="text-center py-20 bg-white rounded-[40px] luxury-shadow border border-bakery-primary/5">
+                        <div className="text-6xl mb-4">⭐</div>
+                        <h3 className="text-xl font-semibold text-brown-900 mb-2">
+                            No reviews yet
+                        </h3>
+                        <p className="text-gray-600">
+                            Be the first to review your order!
+                        </p>
                         <button
                             onClick={() => { setRatingFilter("all"); setProductFilter("all"); }}
                             className="mt-8 px-8 py-4 bg-bakery-primary/5 text-bakery-primary font-black rounded-full hover:bg-bakery-primary/10 transition-all text-sm uppercase tracking-widest"
@@ -222,13 +262,28 @@ export default function ReviewsPage() {
                                     <div className="flex justify-between items-start mb-6">
                                         <div className="flex gap-4 items-center">
                                             <div className="w-12 h-12 bg-bakery-primary text-white rounded-[16px] flex items-center justify-center text-xl font-black shrink-0 relative overflow-hidden">
-                                                {review.profiles?.full_name?.charAt(0) || "C"}
+                                                {(review.reviewer_name || review.profiles?.full_name || "V")?.charAt(0)}
                                                 <div className="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity" />
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-bakery-primary">{review.profiles?.full_name || "Customer"}</h4>
-                                                <p className="text-xs font-black uppercase tracking-widest text-bakery-primary/40 mt-1">
-                                                    {new Date(review.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                <h4 className="font-bold text-bakery-primary flex items-center gap-2">
+                                                    {review.reviewer_name || review.profiles?.full_name || "Verified Customer"}
+                                                    <span className="bg-green-100 text-green-700 text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-widest">
+                                                        Verified Purchase
+                                                    </span>
+                                                </h4>
+                                                <p className="text-xs font-bold text-bakery-primary/40 mt-1">
+                                                    {review.reviewer_location ? review.reviewer_location : ""}
+                                                    {review.reviewer_location ? " • " : ""}
+                                                    {(() => {
+                                                        const diff = new Date().getTime() - new Date(review.created_at).getTime();
+                                                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                                        if (days === 0) return "Today";
+                                                        if (days === 1) return "1 day ago";
+                                                        if (days < 30) return `${days} days ago`;
+                                                        if (days < 60) return `1 month ago`;
+                                                        return new Date(review.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+                                                    })()}
                                                 </p>
                                             </div>
                                         </div>
@@ -252,14 +307,14 @@ export default function ReviewsPage() {
                                     )}
 
                                     <p className="text-bakery-primary/70 leading-relaxed font-medium mb-8 grow">
-                                        &quot;{review.text}&quot;
+                                        &quot;{review.comment || review.text}&quot;
                                     </p>
 
                                     <div className="mt-auto pt-6 border-t border-bakery-primary/5 flex justify-between items-end">
                                         <div>
                                             <p className="text-[10px] font-black uppercase tracking-widest text-bakery-primary/40 mb-1">Purchased</p>
                                             <p className="text-sm font-bold text-bakery-primary truncate max-w-[150px]">
-                                                {review.products?.[0]?.name}
+                                                {review.products?.[0]?.name || "Assorted Pastries"}
                                             </p>
                                         </div>
 
