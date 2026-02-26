@@ -1,8 +1,13 @@
 -- Seed Reviews SQL
 -- Run this in Supabase SQL Editor (Dashboard -> SQL Editor -> New Query)
 
+-- Add missing columns to reviews table
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS is_pinned boolean default false;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS reviewer_name text;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS reviewer_location text;
+
 INSERT INTO public.reviews 
-(rating, review_text, status, is_featured, is_pinned, created_at)
+(rating, text, status, is_featured, is_pinned, created_at)
 VALUES
 (5, 'Absolutely stunning cake for my daughter''s birthday! The chocolate ganache was rich and the decoration was exactly what I asked for. The Nigerian community at the party couldn''t believe it was made in the UK. Will order again!', 'approved', true, true, NOW() - INTERVAL '5 days'),
 
@@ -20,12 +25,8 @@ VALUES
 
 (5, 'Posted a picture of my chin chin on Instagram and got so many questions! The packaging is beautiful and the product is even better. Ordered as gifts for Nigerian friends who can''t find authentic chin chin near them.', 'approved', true, false, NOW() - INTERVAL '18 days');
 
--- Add reviewer_name and reviewer_location columns
-ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reviewer_name text;
-ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reviewer_location text;
-
 -- Update the seeded reviews to add context
-UPDATE reviews SET 
+UPDATE public.reviews SET 
   reviewer_name = CASE 
     WHEN is_pinned = true AND is_featured = true THEN 'Amara O.'
     WHEN is_featured = true THEN 'Chidi N.'
