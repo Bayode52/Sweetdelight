@@ -87,7 +87,20 @@ export async function middleware(request: NextRequest) {
                 new URL('/auth/login?redirect=/admin', request.url)
             )
         }
-        const { data: profile } = await supabase
+
+        // Use service role key to bypass RLS for middleware check
+        const adminSupabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                cookies: {
+                    getAll() { return request.cookies.getAll() },
+                    setAll() { },
+                },
+            }
+        )
+
+        const { data: profile } = await adminSupabase
             .from('profiles')
             .select('role')
             .eq('id', user.id)

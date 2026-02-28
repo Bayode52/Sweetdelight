@@ -38,14 +38,21 @@ function AuthButton() {
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
-                supabase
-                    .from('profiles')
-                    .select('full_name, role')
-                    .eq('id', session.user.id)
-                    .single()
-                    .then(({ data }) => {
-                        setName(data?.full_name?.split(' ')[0] || 'Account')
+                // Use the service role via API route instead of 
+                // direct client query to bypass RLS issues
+                fetch('/api/auth/profile')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data?.full_name) {
+                            setName(data.full_name.split(' ')[0])
+                        } else {
+                            setName('Account')
+                        }
                         setIsAdmin(data?.role === 'admin')
+                        setLoaded(true)
+                    })
+                    .catch(() => {
+                        setName('Account')
                         setLoaded(true)
                     })
             } else {
@@ -56,12 +63,9 @@ function AuthButton() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (_event, session) => {
                 if (session?.user) {
-                    supabase
-                        .from('profiles')
-                        .select('full_name, role')
-                        .eq('id', session.user.id)
-                        .single()
-                        .then(({ data }) => {
+                    fetch('/api/auth/profile')
+                        .then(res => res.json())
+                        .then(data => {
                             setName(data?.full_name?.split(' ')[0] || 'Account')
                             setIsAdmin(data?.role === 'admin')
                         })
@@ -158,25 +162,27 @@ function AuthButton() {
                     {isAdmin && (
                         <>
                             <div className="border-t border-gray-100 my-1" />
-                            <Link
-                                href="/admin"
-                                onClick={() => setOpen(false)}
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#D4421A] hover:bg-orange-50 transition-colors"
-                            >
-                                ⚡ Admin Panel
+                            <p className="px-4 py-1 text-xs text-gray-400 uppercase tracking-wide">
+                                Admin
+                            </p>
+                            <Link href="/admin" onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#D4421A] hover:bg-orange-50 transition-colors">
+                                ⚡ Admin Dashboard
                             </Link>
-                            <Link
-                                href="/admin/products"
-                                onClick={() => setOpen(false)}
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors"
-                            >
-                                🛍️ Manage Products
+                            <Link href="/admin/products" onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors">
+                                🛍️ Products
                             </Link>
-                            <Link
-                                href="/admin/settings"
-                                onClick={() => setOpen(false)}
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors"
-                            >
+                            <Link href="/admin/orders" onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors">
+                                📦 Orders
+                            </Link>
+                            <Link href="/admin/content" onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors">
+                                ✏️ Edit Website
+                            </Link>
+                            <Link href="/admin/settings" onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors">
                                 ⚙️ Settings
                             </Link>
                         </>
