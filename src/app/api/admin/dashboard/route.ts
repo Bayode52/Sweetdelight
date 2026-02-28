@@ -25,7 +25,10 @@ async function verifyAdmin() {
     );
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
-    const { data: profile } = await adminClient.from("profiles").select("role").eq("id", user.id).single();
+
+    // Use regular supabase with session since RLS policy "Admins can read all" 
+    // allows admins to check their own role via is_admin() function.
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     if (profile?.role !== "admin") return null;
     return user;
 }

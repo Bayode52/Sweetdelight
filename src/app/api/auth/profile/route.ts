@@ -15,12 +15,30 @@ export async function GET() {
         }
 
         // Step 2: Use service role to read profile (bypasses RLS)
-        const serviceSupabase = await createServiceClient()
-        const { data: profile, error: profileError } = await serviceSupabase
-            .from('profiles')
-            .select('id, full_name, role, email, phone')
-            .eq('id', user.id)
-            .single()
+        let profile;
+        let profileError;
+
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            const serviceSupabase = await createServiceClient();
+            const result = await serviceSupabase
+                .from('profiles')
+                .select('id, full_name, role, email, phone')
+                .eq('id', user.id)
+                .single();
+            profile = result.data;
+            profileError = result.error;
+        }
+
+        // Fallback to regular client if service role failed or key missing
+        if (!profile) {
+            const { data: regularProfile, error: regularError } = await supabase
+                .from('profiles')
+                .select('id, full_name, role, email, phone')
+                .eq('id', user.id)
+                .single();
+            profile = regularProfile;
+            profileError = regularError;
+        }
 
         if (profileError || !profile) {
             // Return fallback with data from auth metadata

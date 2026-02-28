@@ -41,7 +41,7 @@ Execute these SQL commands to set up the automation:
 -- Process scheduled emails every minute
 SELECT cron.schedule('process-scheduled-emails', '* * * * *', $$
   SELECT net.http_post(
-    url := 'https://your-app-url.vercel.app/api/notifications/process',
+    url := 'https://pastry-web.vercel.app/api/notifications/process',
     headers := '{"Content-Type": "application/json", "x-internal-secret": "your_internal_secret"}'::jsonb
   );
 $$);

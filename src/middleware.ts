@@ -50,23 +50,36 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(url)
         }
 
-        // Use service role to bypass RLS when checking admin role
-        const serviceSupabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                cookies: {
-                    getAll() { return [] },
-                    setAll() { },
-                },
-            }
-        )
+        // Try service role first (fastest, bypasses RLS)
+        let profile;
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            const serviceSupabase = createServerClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                {
+                    cookies: {
+                        getAll() { return [] },
+                        setAll() { },
+                    },
+                }
+            )
+            const { data: serviceProfile } = await serviceSupabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+            profile = serviceProfile;
+        }
 
-        const { data: profile } = await serviceSupabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
+        // Fallback to regular client if service role failed or key missing
+        if (!profile) {
+            const { data: regularProfile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+            profile = regularProfile;
+        }
 
         if (profile?.role !== 'admin') {
             const url = request.nextUrl.clone()
