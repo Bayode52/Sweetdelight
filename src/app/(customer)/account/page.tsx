@@ -8,58 +8,40 @@ export default async function AccountPage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        redirect('/auth/login?redirect=/account')
+        redirect('/auth/login')
     }
 
-    // Parallel data fetching
+    // Fetch comprehensive data for the professional dashboard
     const [
         { data: profile },
         { data: orders },
         { data: referrals },
         { data: latestPost },
-        { data: activePromo }
+        { data: activePromos }
     ] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('orders')
-            .select('*, order_items(*)')
-            .eq('customer_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(3),
-        supabase.from('referrals').select('*').eq('referrer_id', user.id),
-        supabase.from('blog_posts')
-            .select('*')
-            .eq('is_published', true)
-            .order('published_at', { ascending: false })
-            .limit(1)
-            .single(),
-        supabase.from('promos')
-            .select('*')
-            .eq('is_active', true)
-            .gte('expires_at', new Date().toISOString())
-            .order('expires_at', { ascending: true })
-            .limit(1)
-            .single()
+        supabase.from('orders').select('*, order_items(*)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+        supabase.from('referrals').select('id, amount').eq('referrer_id', user.id),
+        supabase.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(1).single(),
+        supabase.from('promos').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1)
     ])
 
-    // Calculate lifetime spend and loyalty points (1 point per £1)
-    const allOrders = await supabase.from('orders').select('total').eq('customer_id', user.id)
-    const lifetimeSpent = allOrders.data?.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0) || 0
-    const loyaltyPoints = Math.floor(lifetimeSpent)
-
-    const referralStats = {
-        count: referrals?.length || 0,
-        totalEarned: referrals?.reduce((acc, curr) => acc + (Number(curr.commission_earned) || 0), 0) || 0
-    }
+    const totalSpent = orders?.reduce((sum, order) => sum + (Number(order.total) || 0), 0) || 0;
+    const referralCount = referrals?.length || 0;
+    const totalReferralEarned = referrals?.reduce((sum, ref) => sum + (Number(ref.amount) || 0), 0) || 0;
 
     return (
         <AccountDashboard
-            profile={profile || {}}
+            profile={profile}
             orders={orders || []}
-            referralStats={referralStats}
-            lifetimeSpent={lifetimeSpent}
-            loyaltyPoints={loyaltyPoints}
+            referralStats={{
+                count: referralCount,
+                totalEarned: totalReferralEarned
+            }}
+            lifetimeSpent={totalSpent}
+            loyaltyPoints={profile?.loyalty_points || 0}
             latestPost={latestPost}
-            activePromo={activePromo}
+            activePromo={activePromos?.[0]}
         />
     )
 }

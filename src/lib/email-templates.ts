@@ -29,13 +29,13 @@ function withBaseTemplate(content: string) {
 <body>
     <div class="container">
         <div class="header">
-            <a href="https://example.com" class="logo">Crave<span class="logo-cta">.</span>Bakery</a>
+            <a href="https://sweetdelight-eta.vercel.app" class="logo">Sweet Delight<span className="logo-cta">.</span></a>
         </div>
         <div class="box">
             ${content}
         </div>
         <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Crave Bakery. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Sweet Delight. All rights reserved.</p>
             <p>Made with ❤️ in the UK — with Nigerian Soul</p>
         </div>
     </div>
@@ -47,10 +47,10 @@ function withBaseTemplate(content: string) {
 export const emailTemplates = {
     welcome: (name: string) => withBaseTemplate(`
         <h1>Welcome to the Family, ${name}! 🥐</h1>
-        <p>We're absolutely thrilled to have you here at Crave Bakery. Prepare your tastebuds for a journey of rich flavors, premium ingredients, and a touch of Nigerian soul.</p>
+        <p>We're absolutely thrilled to have you here at Sweet Delight. Prepare your tastebuds for a journey of rich flavors, premium ingredients, and a touch of Nigerian soul.</p>
         <p>As a welcome gift, dive into our menu and explore our daily fresh batches. We promise you won't be disappointed.</p>
         <div style="text-align: center">
-            <a href="https://example.com/menu" class="btn">Explore the Menu</a>
+            <a href="https://sweetdelight-eta.vercel.app/menu" class="btn">Explore the Menu</a>
         </div>
     `),
 
@@ -77,7 +77,7 @@ export const emailTemplates = {
 
             <p>We'll notify you as soon as your order is on its way. You can always check the live status of your order.</p>
             <div style="text-align: center">
-                <a href="https://example.com/track-order" class="btn">Track Your Order</a>
+                <a href="https://sweetdelight-eta.vercel.app/track-order" class="btn">Track Your Order</a>
             </div>
         `);
     },
@@ -98,7 +98,7 @@ export const emailTemplates = {
             <p>Good news! Your order <strong>#PB-${orderId.substring(0, 8).toUpperCase()}</strong> ${msg}.</p>
             
             <div style="text-align: center">
-                <a href="https://example.com/track-order" class="btn">Track Order</a>
+                <a href="https://sweetdelight-eta.vercel.app/track-order" class="btn">Track Order</a>
             </div>
         `);
     },
@@ -109,7 +109,7 @@ export const emailTemplates = {
         <p>We hope you enjoyed your recent order! Your feedback means the world to us and helps other pastry lovers discover their new favorites.</p>
         <p>Could you take 60 seconds to leave a quick review on your items?</p>
         <div style="text-align: center">
-            <a href="https://example.com/account" class="btn">Leave a Review</a>
+            <a href="https://sweetdelight-eta.vercel.app/account" class="btn">Leave a Review</a>
         </div>
     `),
 
@@ -119,7 +119,7 @@ export const emailTemplates = {
         <p>Awesome! Someone just used your referral link to place their first order. We've added <strong>£${amount.toLocaleString()}</strong> in store credit to your account.</p>
         <p>This credit will be automatically applied to your next purchase.</p>
         <div style="text-align: center">
-            <a href="https://example.com/menu" class="btn">Claim Your Treats</a>
+            <a href="https://sweetdelight-eta.vercel.app/menu" class="btn">Claim Your Treats</a>
         </div>
     `),
 
@@ -128,7 +128,7 @@ export const emailTemplates = {
         <p>A new order (<strong>#PB-${orderId.substring(0, 8).toUpperCase()}</strong>) has just been placed for <strong>£${total.toLocaleString()}</strong>.</p>
         <p>Log in to the admin dashboard to review and process this order.</p>
         <div style="text-align: center">
-            <a href="https://example.com/admin/orders" class="btn">View Order</a>
+            <a href="https://sweetdelight-eta.vercel.app/admin/orders" class="btn">View Order</a>
         </div>
     `),
 
@@ -167,8 +167,8 @@ export const emailTemplates = {
             </div>
 
             <div style="text-align: center">
-                <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hi ${encodeURIComponent(customer.name.split(' ')[0])}, I'm reaching out from Crave Bakery regarding your custom order for a ${encodeURIComponent(customSpec.productType)}." class="btn" style="background-color: #25D366; margin-right: 10px;">Message on WhatsApp</a>
-                <a href="https://example.com/admin/orders" class="btn">View in Dashboard</a>
+                <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hi ${encodeURIComponent(customer.name.split(' ')[0])}, I'm reaching out from Sweet Delight regarding your custom order for a ${encodeURIComponent(customSpec.productType)}." class="btn" style="background-color: #25D366; margin-right: 10px;">Message on WhatsApp</a>
+                <a href="https://sweetdelight-eta.vercel.app/admin/orders" class="btn">View in Dashboard</a>
             </div>
         `);
     },
@@ -179,7 +179,7 @@ export const emailTemplates = {
         <p>We noticed you left some delicious treats in your basket. Don't worry, we've saved them for you!</p>
         <p>Complete your order now before they sell out.</p>
         <div style="text-align: center">
-            <a href="https://example.com/menu" class="btn">Return to Cart</a>
+            <a href="https://sweetdelight-eta.vercel.app/menu" class="btn">Return to Cart</a>
         </div>
     `)
 };

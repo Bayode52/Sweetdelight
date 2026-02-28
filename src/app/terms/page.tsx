@@ -78,7 +78,7 @@ export default function TermsPage() {
                         <section>
                             <h2 className="text-2xl font-playfair font-black text-[#4A3222] mb-4">7. Intellectual Property</h2>
                             <p>
-                                All content on this website, including images, designs, and text, is the property of Crave Bakery
+                                All content on this website, including images, designs, and text, is the property of Sweet Delight
                                 and may not be reproduced without our written permission.
                             </p>
                         </section>

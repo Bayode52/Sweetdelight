@@ -51,7 +51,7 @@ export function generateOrderMessage(
         ? `\n📝 Notes: ${customer.specialInstructions}`
         : "";
 
-    return `🎂 *New Order — Crave Bakery*
+    return `🎂 *New Order — Sweet Delight*
 ━━━━━━━━━━━━━━━━━━
 📋 Order Ref: ${order.ref}
 👤 Name: ${customer.fullName}
@@ -71,5 +71,5 @@ Please send payment to complete your order. Thank you! 🙏`;
 }
 
 export function generateReferralShareMessage(name: string, link: string): string {
-    return `Hey! 👋 I've been ordering from Crave Bakery for amazing Nigerian pastries in the UK 🎂🍢\n\nThey do custom cakes, small chops platters, chin chin and more — all handmade and delivered nationwide.\n\nUse my link to get money off your first order: ${link}\n\nTell them ${name} sent you! 😄`;
+    return `Hey! 👋 I've been ordering from Sweet Delight for amazing Nigerian pastries in the UK 🎂🍢\n\nThey do custom cakes, small chops platters, chin chin and more — all handmade and delivered nationwide.\n\nUse my link to get money off your first order: ${link}\n\nTell them ${name} sent you! 😄`;
 }

@@ -1,3 +1,4 @@
+import { createBrowserClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 
 // These fallbacks exist only to satisfy Next.js build-time analysis.
@@ -16,7 +17,10 @@ if (isPlaceholder && typeof window === 'undefined') {
 const supabaseServiceKey = isPlaceholder ? supabaseAnonKey : rawServiceKey;
 
 // Public client — for client-side and anon operations
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const isBrowser = typeof window !== 'undefined';
+export const supabase = isBrowser
+    ? createBrowserClient(supabaseUrl, supabaseAnonKey)
+    : createClient(supabaseUrl, supabaseAnonKey);
 
 // Admin client — for server-side privileged operations (bypasses RLS)
 // Never expose this to the client!

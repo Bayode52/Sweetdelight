@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Privacy Policy | Crave Bakery",
-    description: "Privacy Policy and GDPR information for Crave Bakery.",
+    title: "Privacy Policy | Sweet Delight",
+    description: "Privacy Policy and GDPR information for Sweet Delight.",
 };
 
 export default function PrivacyPage() {
@@ -93,8 +93,8 @@ export default function PrivacyPage() {
                             <h2 className="text-2xl font-playfair font-black text-[#4A3222] mb-4">7. Contact Us & ICO</h2>
                             <p>
                                 If you wish to exercise any of your data rights or have questions, please contact us:{" "}
-                                <a href="mailto:hello@cravebakery.co.uk" className="text-[#D97757] font-bold hover:underline">
-                                    hello@cravebakery.co.uk
+                                <a href="mailto:hello@sweetdelight.co.uk" className="text-[#D97757] font-bold hover:underline">
+                                    hello@sweetdelight.co.uk
                                 </a>
                             </p>
                             <p className="mt-4 text-sm bg-[#4A3222]/5 p-4 rounded-xl border border-[#4A3222]/10">

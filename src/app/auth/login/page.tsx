@@ -33,7 +33,7 @@ export default function LoginPage() {
             if (error) throw error;
             toast.success("Welcome back! 👋");
             const redirect = searchParams.get("redirect") ?? "/";
-            router.push(redirect);
+            window.location.href = redirect;
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : "Login failed");
         } finally {
@@ -59,7 +59,7 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div className="text-center space-y-3">
                     <Link href="/" className="inline-block text-3xl font-playfair font-black text-bakery-primary tracking-tighter">
-                        Crave<span className="text-bakery-cta">.</span>Bakery
+                        Sweet Delight<span className="text-bakery-cta">.</span>
                     </Link>
                     <h1 className="text-3xl font-playfair font-black text-bakery-primary">Welcome back</h1>
                     <p className="text-bakery-primary/50 font-medium">Sign in to your account</p>

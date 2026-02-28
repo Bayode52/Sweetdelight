@@ -10,20 +10,20 @@ import "./globals.css";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://cravebakery.co.uk"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://sweetdelight-eta.vercel.app"),
   title: {
-    template: "%s | Crave Bakery — Fresh Nigerian Pastries in the UK",
-    default: "Fresh Handcrafted Cakes & Pastries | Crave Bakery UK",
+    template: "%s | Sweet Delight — Fresh Nigerian Pastries in the UK",
+    default: "Fresh Handcrafted Cakes & Pastries | Sweet Delight UK",
   },
-  description: "Order fresh handmade cakes, chin chin, small chops and pastries online. Nationwide UK delivery. Crave Bakery — Nigerian soul, baked in the UK.",
+  description: "Order fresh handmade cakes, chin chin, small chops and pastries online. Nationwide UK delivery. Sweet Delight — Nigerian soul, baked in the UK.",
   keywords: ["Bakery", "Nigerian Pastries", "Cakes UK", "Chin Chin", "Small Chops", "Fresh Baked Daily", "London Bakery"],
-  authors: [{ name: "Crave Bakery" }],
-  creator: "Crave Bakery",
+  authors: [{ name: "Sweet Delight" }],
+  creator: "Sweet Delight",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Crave Bakery",
+    title: "Sweet Delight",
   },
   formatDetection: {
     telephone: false,
@@ -31,12 +31,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_GB",
-    siteName: "Crave Bakery",
+    siteName: "Sweet Delight",
     images: [{ url: "/og-image.jpg" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Crave Bakery",
+    title: "Sweet Delight",
     description: "Order fresh handmade cakes and Nigerian pastries online.",
   },
   icons: {
@@ -70,8 +70,8 @@ export default async function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Bakery",
-              "name": "Crave Bakery",
-              "image": "https://cravebakery.co.uk/og-image.jpg",
+              "name": "Sweet Delight",
+              "image": "https://sweetdelight-eta.vercel.app/og-image.jpg",
               "description": "Order fresh handmade cakes, chin chin, small chops and pastries online. Nationwide UK delivery.",
               "address": {
                 "@type": "PostalAddress",
@@ -79,7 +79,7 @@ export default async function RootLayout({
                 "addressCountry": "UK"
               },
               "priceRange": "££",
-              "url": "https://cravebakery.co.uk"
+              "url": "https://sweetdelight-eta.vercel.app"
             })
           }}
         />

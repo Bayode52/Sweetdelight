@@ -78,7 +78,7 @@ export function AboutPageClient({ content, settings }: { content: ContentMap, se
 
                         <div className="space-y-6 text-bakery-primary/70 leading-relaxed text-lg whitespace-pre-line">
                             <p>
-                                {content['story.para1'] || 'Crave Bakery was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
+                                {content['story.para1'] || 'Sweet Delight was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
                             </p>
                             <p>
                                 {content['story.para2'] || ''}
@@ -96,7 +96,7 @@ export function AboutPageClient({ content, settings }: { content: ContentMap, se
                 <div className="max-w-7xl mx-auto space-y-16">
                     <FadeIn className="text-center space-y-4">
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bakery-cta/10 text-bakery-cta text-xs font-black uppercase tracking-widest">
-                            {content['why_different.badge'] || 'Why Crave?'}
+                            {content['why_different.badge'] || 'Why Sweet Delight?'}
                         </span>
                         <h2 className="text-4xl md:text-5xl font-playfair font-black text-bakery-primary">{content['why_different.heading'] || 'Why We\'re Different'}</h2>
                     </FadeIn>

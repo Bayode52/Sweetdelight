@@ -6,7 +6,7 @@ export const BLOG_POSTS = [
         excerpt: "From puff puff to mini spring rolls — small chops are the centrepiece of every Nigerian celebration.",
         coverImage: "https://images.unsplash.com/photo-1606913084603-3e75fb777da1?auto=format&fit=crop&q=80&w=1400",
         date: "2024-02-10",
-        author: "Crave Bakery",
+        author: "Sweet Delight",
         readTime: "5 min read",
         tags: ["Small Chops", "Nigerian Food", "Party Food", "UK"],
         content: `
@@ -40,7 +40,7 @@ Over time, small chops became a symbol of celebration and abundance. To serve ge
 
 As the Nigerian diaspora grew in the UK, so did the demand for authentic small chops. Nigerian community events, naming ceremonies, birthday parties, and church gatherings all feature small chops as a centrepiece.
 
-Today, Crave Bakery brings these authentic flavours to homes across the UK. Made fresh to order, using traditional recipes — our small chops platters are the same quality you'd find at the best parties in Lagos.
+Today, Sweet Delight brings these authentic flavours to homes across the UK. Made fresh to order, using traditional recipes — our small chops platters are the same quality you'd find at the best parties in Lagos.
 
 ## Ordering Small Chops for Your Event
 
@@ -60,7 +60,7 @@ Ready to place your order? Browse our small chops platters or contact us for a c
         excerpt: "Hosting a naming ceremony, birthday or celebration in the UK? Here's how to get the food right.",
         coverImage: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1400",
         date: "2024-02-05",
-        author: "Crave Bakery",
+        author: "Sweet Delight",
         readTime: "6 min read",
         tags: ["Nigerian Party", "UK Events", "Food Planning", "Catering"],
         content: `
@@ -100,7 +100,7 @@ When selecting a venue in the UK, consider:
 
 ## Working With a Nigerian Bakery in the UK
 
-When ordering from a Nigerian bakery like Crave Bakery, communicate:
+When ordering from a Nigerian bakery like Sweet Delight, communicate:
 
 1. The occasion and any cultural significance
 2. Dietary requirements (halal, vegetarian, nut allergies)
@@ -117,7 +117,7 @@ With the right planning, your guests will be talking about the food for years to
         excerpt: "Crunchy, golden, slightly sweet — chin chin is the snack that every Nigerian grew up with.",
         coverImage: "https://images.unsplash.com/photo-1548840410-dd0ad53a5763?auto=format&fit=crop&q=80&w=1400",
         date: "2024-01-28",
-        author: "Crave Bakery",
+        author: "Sweet Delight",
         readTime: "4 min read",
         tags: ["Chin Chin", "Nigerian Snacks", "West African Food", "UK"],
         content: `
@@ -154,7 +154,7 @@ Chin chin is deeply embedded in Nigerian culture as both a snack and a gift:
 
 As the Nigerian diaspora spread across the world, chin chin followed. In the UK, chin chin has found a new audience — not just among Nigerians and West Africans, but among British food lovers who are discovering the joy of West African snacks.
 
-It's appearing in African food markets, Caribbean shops, and increasingly in premium food hampers. Crave Bakery's chin chin is made using the traditional recipe, with the right balance of sweetness and crunch.
+It's appearing in African food markets, Caribbean shops, and increasingly in premium food hampers. Sweet Delight's chin chin is made using the traditional recipe, with the right balance of sweetness and crunch.
 
 ## How to Enjoy Chin Chin
 
@@ -173,7 +173,7 @@ Order our chin chin bags for delivery anywhere in the UK.
         excerpt: "Planning a custom cake? From flavours to timelines to budget — here's what every customer should know.",
         coverImage: "https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&q=80&w=1400",
         date: "2024-01-20",
-        author: "Crave Bakery",
+        author: "Sweet Delight",
         readTime: "5 min read",
         tags: ["Custom Cake", "Birthday Cake", "How To", "UK"],
         content: `
@@ -197,7 +197,7 @@ For a birthday party of 30 guests, an 8" round is typically perfect.
 
 ## Step 2: Choose Your Flavour
 
-At Crave Bakery, we offer:
+At Sweet Delight, we offer:
 
 - **Sponge**: Classic vanilla, lemon, strawberry, or chocolate
 - **Filling**: Italian meringue buttercream, ganache, fresh cream, or jam
@@ -232,7 +232,7 @@ Our custom cake pricing starts from:
 
 Complex designs and decorations are priced individually. We provide a full quote before confirmation.
 
-## The Crave Bakery Custom Cake Process
+## The Sweet Delight Custom Cake Process
 
 1. Fill in our custom cake enquiry form (or WhatsApp us)
 2. We discuss your requirements and send a quote within 24 hours

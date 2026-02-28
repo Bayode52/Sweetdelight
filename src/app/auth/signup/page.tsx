@@ -127,7 +127,7 @@ export default function SignupPage() {
 
                 {/* Logo */}
                 <Link href="/" className="text-3xl font-playfair font-black text-white tracking-tighter">
-                    Crave<span className="text-bakery-cta">.</span>Bakery
+                    Sweet Delight<span className="text-bakery-cta">.</span>
                 </Link>
 
                 {/* Quote */}
@@ -139,7 +139,7 @@ export default function SignupPage() {
                 >
                     <p className="text-5xl font-playfair font-black text-white leading-tight">
                         Join the<br />
-                        <span className="text-bakery-cta italic">Crave Bakery</span><br />
+                        <span className="text-bakery-cta italic">Sweet Delight</span><br />
                         family.
                     </p>
                     <p className="text-white/50 text-lg font-medium max-w-sm">

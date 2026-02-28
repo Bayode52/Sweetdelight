@@ -208,7 +208,7 @@ function AuthButton() {
 }
 
 export function Navbar({ settings }: { settings?: Record<string, string> }) {
-    const businessName = settings?.business_name || "Crave Bakery";
+    const businessName = settings?.business_name || "Sweet Delight";
     const pathname = usePathname();
     const [isScrolled, setIsScrolled] = React.useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
