@@ -44,7 +44,7 @@ export default function AdminReviewsPage() {
                 .from("reviews")
                 .select(`
                     *,
-                    profiles:user_id(full_name, email),
+                    profiles:customer_id(full_name, email),
                     products:product_id(name)
                 `)
                 .order("created_at", { ascending: false });
@@ -94,7 +94,7 @@ export default function AdminReviewsPage() {
         r.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.products?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.text?.toLowerCase().includes(searchQuery.toLowerCase())
+        r.review_text?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const stats = {
@@ -191,7 +191,7 @@ export default function AdminReviewsPage() {
                                 if ((e.target as any).tagName === "INPUT") return;
                                 setSelectedReview(review);
                                 setIsEditing(false);
-                                setEditData({ title: review.title || "", text: review.text || "", rating: review.rating || 5 });
+                                setEditData({ title: review.title || "", text: review.review_text || "", rating: review.rating || 5 });
                             }}
                         >
                             <div className="shrink-0 pt-1">
@@ -226,7 +226,7 @@ export default function AdminReviewsPage() {
                                     {review.title || 'No Title'}
                                     {review.admin_edited && <span className="text-[9px] font-black uppercase bg-bakery-primary/5 text-bakery-primary/40 px-2 py-0.5 rounded ml-2">Edited</span>}
                                 </h4>
-                                <p className="text-sm text-bakery-primary/60 truncate mt-1">{review.text}</p>
+                                <p className="text-sm text-bakery-primary/60 truncate mt-1">{review.review_text}</p>
                             </div>
 
                             <div className="shrink-0 text-left md:text-right hidden sm:block">
@@ -331,7 +331,7 @@ export default function AdminReviewsPage() {
                                                                     title: editData.title,
                                                                     text: editData.text,
                                                                     rating: editData.rating,
-                                                                    original_text: selectedReview.original_text || selectedReview.text
+                                                                    original_text: selectedReview.original_text || selectedReview.review_text
                                                                 }
                                                             });
                                                         }}
@@ -344,7 +344,7 @@ export default function AdminReviewsPage() {
                                         ) : (
                                             <>
                                                 {selectedReview.title && <h4 className="font-bold text-bakery-primary text-lg flex items-center gap-2">{selectedReview.is_pinned && "📌"} {selectedReview.title}</h4>}
-                                                <p className="text-bakery-primary/70 leading-relaxed font-medium">"{selectedReview.text}"</p>
+                                                <p className="text-bakery-primary/70 leading-relaxed font-medium">"{selectedReview.review_text}"</p>
                                             </>
                                         )}
                                     </div>

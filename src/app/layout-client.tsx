@@ -17,7 +17,15 @@ const outfit = Outfit({
     variable: "--font-outfit",
 });
 
-export default function LayoutClient({ children, footerContent }: { children: React.ReactNode, footerContent?: ContentMap }) {
+export default function LayoutClient({
+    children,
+    footerContent,
+    settings
+}: {
+    children: React.ReactNode,
+    footerContent?: ContentMap,
+    settings?: Record<string, string>
+}) {
     const pathname = usePathname();
     const isAdminPage = pathname.startsWith("/admin");
 
@@ -30,9 +38,9 @@ export default function LayoutClient({ children, footerContent }: { children: Re
                 </div>
             ) : (
                 <div className="flex flex-col min-h-screen">
-                    <Navbar />
+                    <Navbar settings={settings} />
                     <main className="flex-1">{children}</main>
-                    <Footer content={footerContent} />
+                    <Footer content={footerContent} settings={settings} />
                     <ChatWidget />
                 </div>
             )}

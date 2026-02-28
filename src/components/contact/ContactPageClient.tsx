@@ -62,9 +62,19 @@ function FaqItem({ q, a }: { q: string; a: string }) {
     );
 }
 
-export function ContactPageClient({ content }: { content: ContentMap }) {
+export function ContactPageClient({ content, settings }: { content: ContentMap, settings?: Record<string, string> }) {
     const [sent, setSent] = React.useState(false);
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ContactForm>({ resolver: zodResolver(contactSchema) });
+
+    const whatsapp = settings?.whatsapp || "447000000000";
+    const instagram = (settings?.instagram || "sweetdelight").replace('@', '');
+    const email = settings?.email || "hello@sweetdelight.co.uk";
+    const monFri = settings?.mon_fri_hours || "9am – 7pm";
+    const satHours = settings?.sat_hours || "9am – 5pm";
+    const sunHours = settings?.sun_hours || "Custom orders only";
+    const cakeNotice = settings?.custom_cake_notice || "5 days";
+    const platterNotice = settings?.platter_notice || "48 hours";
+    const deliveryAreas = settings?.delivery_areas || "We deliver across the UK";
 
     const onSubmit = async (data: ContactForm) => {
         try {
@@ -103,13 +113,13 @@ export function ContactPageClient({ content }: { content: ContentMap }) {
                         <div className="space-y-4">
                             {[
                                 {
-                                    icon: "📱", title: content['info_sales.title'] || "WhatsApp", desc: content['info_sales.description'] || "Chat with us instantly", action: "Chat on WhatsApp", href: `https://wa.me/${content['info_sales.phone']?.replace(/\D/g, '') || '447000000000'}`, color: "bg-green-500 hover:bg-green-600",
+                                    icon: "📱", title: "WhatsApp", desc: "Chat with us instantly", action: "Chat on WhatsApp", href: `https://wa.me/${whatsapp}`, color: "bg-green-500 hover:bg-green-600",
                                 },
                                 {
-                                    icon: "📸", title: content['social.title'] || "Instagram", desc: content['social.instagram'] || "DM us on Instagram", action: "Visit Instagram", href: "https://instagram.com/cravebakery", color: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
+                                    icon: "📸", title: "Instagram", desc: `@${instagram}`, action: "Visit Instagram", href: `https://instagram.com/${instagram}`, color: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
                                 },
                                 {
-                                    icon: "📧", title: content['info_general.title'] || "Email", desc: content['info_general.email'] || "hello@cravebakery.co.uk", action: "Send Email", href: `mailto:${content['info_general.email'] || 'hello@cravebakery.co.uk'}`, color: "bg-bakery-primary hover:bg-bakery-primary/90",
+                                    icon: "📧", title: "Email", desc: email, action: "Send Email", href: `mailto:${email}`, color: "bg-bakery-primary hover:bg-bakery-primary/90",
                                 },
                             ].map((c) => (
                                 <Link key={c.title} href={c.href} target="_blank" rel="noopener noreferrer" className="block">
@@ -128,14 +138,16 @@ export function ContactPageClient({ content }: { content: ContentMap }) {
                         </div>
 
                         <div className="bg-white rounded-3xl p-8 border border-bakery-primary/5 space-y-4">
-                            <h3 className="font-playfair font-black text-lg text-bakery-primary">{content['business_hours.title'] || 'Business Hours'}</h3>
+                            <h3 className="font-playfair font-black text-lg text-bakery-primary">Business Hours</h3>
                             <div className="space-y-2 text-sm">
-                                <div className="flex justify-between"><span className="text-bakery-primary/60">Mon – Fri</span><span className="font-bold">{content['business_hours.mon_fri'] || '9am – 7pm'}</span></div>
-                                <div className="flex justify-between"><span className="text-bakery-primary/60">Saturday</span><span className="font-bold">{content['business_hours.sat'] || '9am – 5pm'}</span></div>
-                                <div className="flex justify-between"><span className="text-bakery-primary/60">Sunday</span><span className="font-bold text-bakery-cta">{content['business_hours.sun'] || 'Custom orders only'}</span></div>
+                                <div className="flex justify-between"><span className="text-bakery-primary/60">Mon – Fri</span><span className="font-bold">{monFri}</span></div>
+                                <div className="flex justify-between"><span className="text-bakery-primary/60">Saturday</span><span className="font-bold">{satHours}</span></div>
+                                <div className="flex justify-between"><span className="text-bakery-primary/60">Sunday</span><span className="font-bold text-bakery-cta">{sunHours}</span></div>
                             </div>
                             <div className="space-y-2 pt-2 border-t border-bakery-primary/5 text-xs text-bakery-primary/50 font-medium whitespace-pre-line">
-                                {content['kitchen.note'] || '⏱️ We typically reply within 2 hours on WhatsApp\n🎂 Custom cakes require minimum 5 days notice. Party platters require 48 hours.\n📍 We deliver across the UK. Collection also available.'}
+                                ⏱️ We typically reply within 2 hours on WhatsApp<br />
+                                🎂 Custom cakes require minimum {cakeNotice} notice. Party platters require {platterNotice}.<br />
+                                📍 {deliveryAreas}
                             </div>
                         </div>
                     </motion.div>

@@ -3,11 +3,14 @@ import Link from "next/link";
 import { NewsletterForm } from "@/components/ui/NewsletterForm";
 import { ContentMap } from "@/lib/content";
 
-export function Footer({ content }: { content?: ContentMap }) {
+export function Footer({ content, settings }: { content?: ContentMap, settings?: Record<string, string> }) {
+    const businessName = settings?.business_name || "Sweet Delight";
+    const tagline = settings?.tagline || content?.['footer.main.tagline'] || "Handcrafting moments of joy with premium ingredients and traditional Nigerian warmth.";
+
     const socialLinks = [
-        { icon: <Instagram size={20} />, href: "#" },
-        { icon: <Facebook size={20} />, href: "#" },
-        { icon: <Twitter size={20} />, href: "#" },
+        { icon: <Instagram size={20} />, href: settings?.instagram ? `https://instagram.com/${settings.instagram.replace('@', '')}` : "#" },
+        { icon: <Facebook size={20} />, href: settings?.facebook || "#" },
+        { icon: <Twitter size={20} />, href: settings?.tiktok ? `https://tiktok.com/@${settings.tiktok.replace('@', '')}` : "#" }, // Using Twitter icon for tiktok as fallback if no tiktok icon
     ];
 
     return (
@@ -16,10 +19,10 @@ export function Footer({ content }: { content?: ContentMap }) {
                 {/* Col 1: Brand */}
                 <div className="space-y-6">
                     <Link href="/" className="text-3xl font-playfair font-black text-bakery-primary tracking-tighter">
-                        {content?.['brand.name_part1'] || 'Crave'}<span className="text-bakery-cta">{content?.['brand.name_dot'] || '.'}</span>{content?.['brand.name_part2'] || 'Bakery'}
+                        {businessName}
                     </Link>
                     <p className="text-bakery-primary/60 text-sm leading-relaxed max-w-xs">
-                        {content?.['brand.description'] || 'Handcrafting moments of joy with premium ingredients and traditional Nigerian warmth. Freshness guaranteed in every bite.'}
+                        {tagline}
                     </p>
                     <div className="flex gap-4">
                         {socialLinks.map((social, i) => (
@@ -61,15 +64,15 @@ export function Footer({ content }: { content?: ContentMap }) {
                     <ul className="space-y-4">
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Phone size={18} className="text-bakery-cta" />
-                            <a href={`tel:${content?.['footer.contact.phone'] || '447000000000'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{content?.['footer.contact.phone'] || '+44 7000 000000'}</a>
+                            <a href={`https://wa.me/${settings?.whatsapp || '447000000000'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{settings?.whatsapp || '+44 7000 000000'}</a>
                         </li>
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Instagram size={18} className="text-bakery-cta" />
-                            <a href={`https://instagram.com/${content?.['footer.socials.instagram'] || 'cravebakery'}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-bakery-cta transition-colors">@{content?.['footer.socials.instagram'] || 'cravebakery'}</a>
+                            <a href={`https://instagram.com/${(settings?.instagram || 'sweetdelight').replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-bakery-cta transition-colors">{settings?.instagram || '@sweetdelight'}</a>
                         </li>
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Mail size={18} className="text-bakery-cta" />
-                            <a href={`mailto:${content?.['footer.contact.email'] || 'hello@cravebakery.co.uk'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{content?.['footer.contact.email'] || 'hello@cravebakery.co.uk'}</a>
+                            <a href={`mailto:${settings?.email || 'hello@sweetdelight.co.uk'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{settings?.email || 'hello@sweetdelight.co.uk'}</a>
                         </li>
                     </ul>
                 </div>
@@ -85,7 +88,7 @@ export function Footer({ content }: { content?: ContentMap }) {
             </div>
 
             <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-bakery-primary/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold uppercase tracking-widest text-bakery-primary/20 text-center md:text-left">
-                <p>&copy; 2026 {content?.['bottom.copyright'] || 'Crave Bakery. All rights reserved.'}</p>
+                <p>&copy; {new Date().getFullYear()} {businessName}. All rights reserved.</p>
                 <div className="flex items-center gap-2">
                     <span>{content?.['bottom.made_with'] || 'Made with'}</span>
                     <Heart size={12} className="fill-bakery-cta text-bakery-cta" />

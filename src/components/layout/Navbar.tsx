@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ShoppingCart, Menu, X } from "lucide-react";
@@ -23,10 +23,12 @@ const NAV_LINKS = [
 ];
 
 function AuthButton() {
+    const [open, setOpen] = useState(false)
     const [isAdmin, setIsAdmin] = useState(false)
     const [name, setName] = useState('')
     const [loaded, setLoaded] = useState(false)
     const router = useRouter()
+    const ref = useRef<HTMLDivElement>(null)
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -66,20 +68,35 @@ function AuthButton() {
                 } else {
                     setName('')
                     setIsAdmin(false)
+                    setOpen(false)
                 }
                 router.refresh()
             }
         )
-        return () => subscription.unsubscribe()
-    }, [supabase.auth, router])
 
-    if (!loaded) return <div className="w-20 h-9 bg-gray-100 rounded-full animate-pulse" />
+        // Close dropdown when clicking outside
+        const handleClickOutside = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+
+        return () => {
+            subscription.unsubscribe()
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [router, supabase])
+
+    if (!loaded) {
+        return <div className="w-24 h-9 bg-gray-100 rounded-full animate-pulse" />
+    }
 
     if (!name) {
         return (
             <Link
                 href="/auth/signup"
-                className="bg-[#2C1810] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-[#3d2418] transition-colors"
+                className="bg-[#2C1810] text-white px-6 py-2 rounded-full font-semibold text-sm hover:bg-[#3d2418] transition-colors"
             >
                 Sign Up
             </Link>
@@ -87,42 +104,105 @@ function AuthButton() {
     }
 
     return (
-        <div className="relative group">
-            <button className="bg-[#D4421A] text-white px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2">
+        <div ref={ref} className="relative">
+            {/* This button TOGGLES dropdown - does NOT navigate */}
+            <button
+                onClick={() => setOpen(!open)}
+                className="bg-[#D4421A] text-white px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2 hover:bg-[#b8381a] transition-colors"
+            >
                 <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold">
                     {name.charAt(0).toUpperCase()}
                 </span>
-                {name} ▾
+                {name}
+                <svg
+                    className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
             </button>
-            <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 py-2">
-                    <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50">👤 My Account</Link>
-                    <Link href="/account/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50">📦 My Orders</Link>
-                    <Link href="/track-order" className="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50">🚚 Track Order</Link>
+
+            {/* Dropdown - only shows when open=true */}
+            {open && (
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-[999]">
+
+                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                        <p className="font-semibold text-gray-800 text-sm">{name}</p>
+                        <p className="text-xs text-[#D4421A]">{isAdmin ? '⚡ Admin' : 'Customer'}</p>
+                    </div>
+
+                    <Link
+                        href="/account"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-[#D4421A] transition-colors"
+                    >
+                        👤 My Account
+                    </Link>
+
+                    <Link
+                        href="/account/orders"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-[#D4421A] transition-colors"
+                    >
+                        📦 My Orders
+                    </Link>
+
+                    <Link
+                        href="/track-order"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-[#D4421A] transition-colors"
+                    >
+                        🚚 Track Order
+                    </Link>
+
                     {isAdmin && (
                         <>
-                            <div className="border-t my-1" />
-                            <Link href="/admin" className="block px-4 py-2 text-sm font-bold text-[#D4421A] hover:bg-orange-50">⚡ Admin Panel</Link>
+                            <div className="border-t border-gray-100 my-1" />
+                            <Link
+                                href="/admin"
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#D4421A] hover:bg-orange-50 transition-colors"
+                            >
+                                ⚡ Admin Panel
+                            </Link>
+                            <Link
+                                href="/admin/products"
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors"
+                            >
+                                🛍️ Manage Products
+                            </Link>
+                            <Link
+                                href="/admin/settings"
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors"
+                            >
+                                ⚙️ Settings
+                            </Link>
                         </>
                     )}
-                    <div className="border-t my-1" />
+
+                    <div className="border-t border-gray-100 my-1" />
+
                     <button
                         onClick={async () => {
+                            setOpen(false)
                             await supabase.auth.signOut()
                             router.push('/')
                             router.refresh()
                         }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-red-50 hover:text-red-600"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors w-full text-left"
                     >
                         🚪 Sign Out
                     </button>
                 </div>
-            </div>
+            )}
         </div>
     )
 }
 
-export function Navbar() {
+export function Navbar({ settings }: { settings?: Record<string, string> }) {
+    const businessName = settings?.business_name || "Crave Bakery";
     const pathname = usePathname();
     const [isScrolled, setIsScrolled] = React.useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -146,7 +226,7 @@ export function Navbar() {
             <nav className="max-w-7xl mx-auto flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="text-2xl md:text-3xl font-playfair font-black text-bakery-primary tracking-tighter">
-                    Crave<span className="text-bakery-cta">.</span>Bakery
+                    {businessName}
                 </Link>
 
                 {/* Desktop Links */}

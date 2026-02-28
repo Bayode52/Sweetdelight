@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
 
 const adminClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,7 +13,11 @@ async function verifyAdmin() {
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { get: (n) => cookieStore.get(n)?.value, set: () => { }, remove: () => { } } }
+        {
+            cookies: {
+                get(name: string) { return cookieStore.get(name)?.value },
+            },
+        }
     );
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
@@ -30,60 +34,79 @@ export async function GET() {
         let score = 0;
 
         // 1. Inventory Check
-        const { count: productCount } = await adminClient.from("products").select("*", { count: 'exact', head: true });
+        const { data: products, count: productCount } = await adminClient
+            .from("products")
+            .select("images", { count: 'exact' });
+
         const hasProducts = (productCount || 0) > 0;
+        const missingImages = products?.some(p => !p.images || p.images.length === 0);
+
         checks.push({
             id: "inventory",
             label: "Product Inventory",
-            status: hasProducts ? "complete" : "missing",
-            message: hasProducts ? `${productCount} products active` : "You haven't added any products yet."
+            status: hasProducts ? (missingImages ? "warning" : "complete") : "missing",
+            message: hasProducts
+                ? (missingImages ? "Some products are missing images" : `${productCount} products ready`)
+                : "You haven't added any products yet.",
+            link: "/admin/products"
         });
         if (hasProducts) score += 25;
 
-        // 2. CMS Content Check
-        const { count: cmsCount } = await adminClient.from("site_content").select("*", { count: 'exact', head: true });
-        const hasCms = (cmsCount || 0) > 0;
+        // 2. CMS Content Check (site_content)
+        const { data: content } = await adminClient.from("site_content").select("page, section, field, value");
+        const contentMap = (content || []).reduce((acc: any, item: any) => {
+            acc[`${item.page}.${item.section}.${item.field}`] = item.value;
+            return acc;
+        }, {});
+
+        const hasHero = contentMap["home.hero.title"] && contentMap["home.hero.button_text"];
+        const hasStory = contentMap["about.story.title"] && contentMap["about.story.paragraph1"];
+        const hasBaker = contentMap["about.baker.image"];
+
+        const cmsComplete = hasHero && hasStory && hasBaker;
         checks.push({
             id: "cms",
             label: "Website Content",
-            status: hasCms ? "complete" : "warning",
-            message: hasCms ? "Core website content is populated" : "Some website sections are still using default placeholders."
+            status: cmsComplete ? "complete" : "warning",
+            message: cmsComplete ? "Core website content is populated" : "Some website sections (Hero, Story, or Baker Image) need setup.",
+            link: "/admin/content"
         });
-        if (hasCms) score += 25;
+        if (cmsComplete) score += 25;
 
-        // 3. Store Configuration Check
-        const { data: settings } = await adminClient.from("settings").select("*").single();
-        const hasContact = settings?.admin_whatsapp_number && settings?.contact_email;
-        const hasFees = settings?.delivery_fee !== null;
-        const configComplete = hasContact && hasFees;
+        // 3. Business Profile (site_settings)
+        const { data: siteSettings } = await adminClient.from("site_settings").select("key, value");
+        const settingsMap = (siteSettings || []).reduce((acc: any, item: any) => {
+            acc[item.key] = item.value;
+            return acc;
+        }, {});
+
+        const hasBusinessInfo = settingsMap["business_name"] && settingsMap["email"] && settingsMap["whatsapp"];
+        checks.push({
+            id: "business",
+            label: "Business Profile",
+            status: hasBusinessInfo ? "complete" : "missing",
+            message: hasBusinessInfo ? "Contact and business info set up" : "Missing business name, email, or WhatsApp.",
+            link: "/admin/settings"
+        });
+        if (hasBusinessInfo) score += 25;
+
+        // 4. Operational Settings (settings table)
+        const { data: opSettings } = await adminClient.from("settings").select("*").single();
+        const opComplete = opSettings?.delivery_fee !== null && opSettings?.min_order_amount !== null;
 
         checks.push({
-            id: "config",
-            label: "Store Configuration",
-            status: configComplete ? "complete" : "missing",
-            message: configComplete ? "Business profile and fees set up" : "Missing contact info or delivery fee settings."
+            id: "operations",
+            label: "Ordering Logic",
+            status: opComplete ? "complete" : "warning",
+            message: opComplete ? "Delivery fees and minimums set up" : "Verify your delivery fees and minimum order amounts.",
+            link: "/admin/settings" // Assuming they are here or similar
         });
-        if (configComplete) score += 25;
-
-        // 4. Security & Live Status
-        const { count: securityCount } = await adminClient.from("security_events").select("*", { count: 'exact', head: true });
-        const isProtected = (securityCount || 0) > 0;
-        const isLive = settings?.is_live;
-
-        // Security is now a "Good to have" or easier to pass
-        checks.push({
-            id: "security",
-            label: "Security & Status",
-            status: isProtected ? "complete" : "warning",
-            message: isProtected ? "Security monitoring is active" : "Security middleware is active (monitoring for threats)."
-        });
-        // Always give these points if the table exists or middleware is on
-        score += 25;
+        if (opComplete) score += 25;
 
         return NextResponse.json({
             score: Math.min(100, score),
             checks,
-            isLive: !!isLive
+            isLive: !!opSettings?.is_live
         });
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });

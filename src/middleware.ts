@@ -109,6 +109,9 @@ export const config = {
         '/contact/:path*',
         '/admin/:path*',
         '/account/:path*',
+        '/checkout/:path*',
+        '/api/reviews/:path*',
+        '/api/orders/:path*',
         '/ref/:path*',
     ]
 }

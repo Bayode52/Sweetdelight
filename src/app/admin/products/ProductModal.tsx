@@ -18,7 +18,7 @@ interface Product {
     description: string;
     price: number;
     image_url: string;
-    images?: ProductImage[];
+    images?: string[];
     category: string;
     is_available: boolean;
     is_featured: boolean;
@@ -42,7 +42,7 @@ export default function ProductModal({ product, onClose, onSuccess }: { product:
         on_sale: product?.on_sale ?? false,
         sale_price: product?.sale_price?.toString() || "",
         image_url: product?.image_url || "",
-        images: product?.images?.map(img => img.url) || [] as string[],
+        images: product?.images || [] as string[],
         meta_title: product?.meta_title || "",
         meta_description: product?.meta_description || ""
     });
@@ -186,11 +186,13 @@ export default function ProductModal({ product, onClose, onSuccess }: { product:
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-widest text-bakery-primary/40">Category</label>
                             <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full h-14 px-6 bg-bakery-primary/5 rounded-2xl border-none focus:ring-2 focus:ring-bakery-cta outline-none text-bakery-primary font-bold capitalize cursor-pointer">
-                                <option value="Cupcakes">Cupcakes</option>
-                                <option value="Brownies">Brownies</option>
-                                <option value="Cookies">Cookies</option>
-                                <option value="Cakes">Cakes</option>
-                                <option value="Pastries">Pastries</option>
+                                <option value="Celebration Cakes">Celebration Cakes</option>
+                                <option value="Small Chops Platters">Small Chops Platters</option>
+                                <option value="Chin Chin & Snacks">Chin Chin & Snacks</option>
+                                <option value="Puff Puff">Puff Puff</option>
+                                <option value="Pastries & Bakes">Pastries & Bakes</option>
+                                <option value="Party Boxes">Party Boxes</option>
+                                <option value="Drinks">Drinks</option>
                             </select>
                         </div>
                     </div>

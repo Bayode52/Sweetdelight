@@ -3,6 +3,7 @@ import { Providers } from "@/components/Providers";
 import { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
 import LayoutClient from "./layout-client";
+import { getSettings } from "@/lib/settings";
 import { getContent } from "@/lib/content";
 import "./globals.css";
 
@@ -58,6 +59,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSettings();
   const footerContent = await getContent("footer");
   return (
     <html lang="en">
@@ -84,7 +86,7 @@ export default async function RootLayout({
       </head>
       <body className="antialiased bg-bakery-background text-bakery-primary">
         <Providers>
-          <LayoutClient footerContent={footerContent}>{children}</LayoutClient>
+          <LayoutClient footerContent={footerContent} settings={settings}>{children}</LayoutClient>
           <CartDrawer />
           <Toaster position="bottom-right" />
         </Providers>

@@ -1,343 +1,290 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    Layout, Home, Info, Phone, Mail, Save,
-    Image as ImageIcon, Upload, Loader2, ArrowRight,
-    Type, AlignLeft, Sparkles, Globe
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-hot-toast";
+import { useEffect, useState, useRef } from 'react';
+import toast from 'react-hot-toast';
+import { Save, Loader2, Image as ImageIcon, Edit3, X, Check, UploadCloud } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface ContentField {
-    id?: string;
+type ContentField = {
+    id: string;
     page: string;
     section: string;
     field: string;
     value: string;
-    label: string;
-    type: 'text' | 'textarea' | 'image' | 'color';
-}
-
-const PAGE_DEFINITIONS = {
-    home: {
-        label: "Homepage",
-        icon: Home,
-        sections: [
-            {
-                id: 'hero', label: 'Hero Section', fields: [
-                    { id: 'badge', label: 'Small Badge Title', type: 'text' },
-                    { id: 'headline', label: 'Main Headline', type: 'text' },
-                    { id: 'subheadline', label: 'Supporting Sub-headline', type: 'textarea' },
-                    { id: 'cta_text', label: 'Call to Action Button', type: 'text' },
-                    { id: 'hero_image', label: 'Floating Hero Image', type: 'image' },
-                ]
-            },
-            {
-                id: 'delivery_banner', label: 'Scrolling Banner', fields: [
-                    { id: 'text', label: 'Banner Text Content', type: 'textarea' },
-                ]
-            },
-            {
-                id: 'categories', label: 'Categories Section', fields: [
-                    { id: 'badge', label: 'Section Badge', type: 'text' },
-                    { id: 'heading', label: 'Section Heading', type: 'text' },
-                    { id: 'button_text', label: 'Action Button Text', type: 'text' },
-                ]
-            }
-        ]
-    },
-    about: {
-        label: "About Us",
-        icon: Info,
-        sections: [
-            {
-                id: 'header', label: 'Header Section', fields: [
-                    { id: 'title', label: 'Page Title', type: 'text' },
-                    { id: 'subtitle', label: 'Subtitle Paragraph', type: 'textarea' },
-                    { id: 'hero_image', label: 'About Hero Image', type: 'image' },
-                ]
-            },
-            {
-                id: 'baker', label: 'The Baker Section', fields: [
-                    { id: 'name', label: 'Baker Name', type: 'text' },
-                    { id: 'bio', label: 'Baker Biography', type: 'textarea' },
-                    { id: 'image', label: 'Baker Image', type: 'image' },
-                ]
-            }
-        ]
-    },
-    contact: {
-        label: "Contact",
-        icon: Phone,
-        sections: [
-            {
-                id: 'header', label: 'Header', fields: [
-                    { id: 'title', label: 'Headline', type: 'text' },
-                    { id: 'subtitle', label: 'Sub-headline', type: 'text' },
-                ]
-            },
-            {
-                id: 'info', label: 'Contact Details', fields: [
-                    { id: 'address', label: 'Physical Address', type: 'textarea' },
-                    { id: 'whatsapp', label: 'WhatsApp Number', type: 'text' },
-                    { id: 'email', label: 'Contact Email', type: 'text' },
-                ]
-            }
-        ]
-    },
-    footer: {
-        label: "Global Footer",
-        icon: Globe,
-        sections: [
-            {
-                id: 'about', label: 'Footer Brand Box', fields: [
-                    { id: 'text', label: 'About Brand Text', type: 'textarea' },
-                ]
-            }
-        ]
-    }
 };
 
-export default function ContentManagerPage() {
-    const queryClient = useQueryClient();
-    const [activePage, setActivePage] = useState<keyof typeof PAGE_DEFINITIONS>("home");
-    const [localChanges, setLocalChanges] = useState<Record<string, string>>({});
-    const [uploadingField, setUploadingField] = useState<string | null>(null);
+export default function ContentEditorPage() {
+    const [content, setContent] = useState<ContentField[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('home');
 
-    const { data: dbContent, isLoading } = useQuery({
-        queryKey: ["site-content"],
-        queryFn: async () => {
-            const contentRes = await fetch("/api/admin/content?all=true");
-            if (!contentRes.ok) return [];
-            return await contentRes.json();
-        }
-    });
+    const tabs = [
+        { id: 'home', label: '🏠 Homepage' },
+        { id: 'about', label: '👩‍🍳 About Us' },
+        { id: 'footer', label: '🔗 Footer' },
+    ];
 
-    const saveMutation = useMutation({
-        mutationFn: async (fields: any[]) => {
-            const res = await fetch("/api/admin/content", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ fields })
-            });
-            if (!res.ok) throw new Error("Failed to save changes");
-            return res.json();
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["site-content"] });
-            setLocalChanges({});
-            toast.success("Website content updated successfully!", {
-                icon: '✨',
-                style: { borderRadius: '20px', background: '#2D1806', color: '#fff', fontClass: 'font-black uppercase tracking-widest text-[10px]' }
-            });
-        }
-    });
+    useEffect(() => {
+        fetchContent();
+    }, []);
 
-    const handleFieldChange = (section: string, field: string, value: string) => {
-        setLocalChanges(prev => ({
-            ...prev,
-            [`${activePage}.${section}.${field}`]: value
-        }));
-    };
-
-    const handleImageUpload = async (section: string, field: string, file: File) => {
-        const key = `${activePage}.${section}.${field}`;
-        setUploadingField(key);
+    async function fetchContent() {
         try {
-            const fileName = `site/${activePage}/${section}-${field}-${Date.now()}`;
-            const uploadRes = await fetch("/api/admin/upload", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ path: fileName, bucket: "site-images" })
-            });
-
-            if (!uploadRes.ok) throw new Error("Upload failed");
-            const { signedUrl, publicUrl } = await uploadRes.json();
-
-            const putRes = await fetch(signedUrl, {
-                method: "PUT",
-                body: file,
-                headers: { "Content-Type": file.type }
-            });
-
-            if (!putRes.ok) throw new Error("Storage failed");
-            handleFieldChange(section, field, publicUrl);
-        } catch (err) {
-            toast.error("Image upload failed");
+            const res = await fetch('/api/admin/content');
+            const data = await res.json();
+            setContent(data);
+        } catch (error) {
+            toast.error('Failed to load content');
         } finally {
-            setUploadingField(null);
+            setLoading(false);
         }
+    }
+
+    const updateLocalContent = (page: string, section: string, field: string, value: string) => {
+        setContent(prev => {
+            const exists = prev.find(c => c.page === page && c.section === section && c.field === field);
+            if (exists) {
+                return prev.map(c => (c.page === page && c.section === section && c.field === field) ? { ...c, value } : c);
+            }
+            return [...prev, { id: Math.random().toString(), page, section, field, value }];
+        });
     };
 
-    const getValue = (section: string, field: string) => {
-        const key = `${activePage}.${section}.${field}`;
-        if (localChanges[key] !== undefined) return localChanges[key];
-        const dbItem = dbContent?.find((item: any) => item.page === activePage && item.section === section && item.field === field);
-        return dbItem?.value || "";
-    };
-
-    if (isLoading) return (
-        <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-            <Loader2 size={40} className="text-bakery-cta animate-spin" />
-            <p className="font-playfair font-black text-bakery-primary/40 uppercase tracking-widest text-sm italic">Loading the Master Editor...</p>
-        </div>
-    );
-
-    const hasChanges = Object.keys(localChanges).length > 0;
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <Loader2 className="w-8 h-8 animate-spin text-[#D4421A]" />
+            </div>
+        );
+    }
 
     return (
-        <div className="p-6 md:p-8 space-y-8 max-w-6xl mx-auto">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-bakery-cta/10 rounded-2xl flex items-center justify-center text-bakery-cta">
-                            <Sparkles size={24} />
-                        </div>
-                        <h1 className="text-4xl font-playfair font-black text-bakery-primary italic tracking-tight">Website Editor</h1>
+        <div className="max-w-5xl space-y-8">
+            <div>
+                <h1 className="text-3xl font-playfair font-black text-bakery-primary">Edit Website Content</h1>
+                <p className="text-gray-500 mt-2">Click any field to edit it. Changes go live immediately.</p>
+            </div>
+
+            {/* TABS */}
+            <div className="flex gap-2 p-1 bg-orange-50/50 rounded-2xl w-fit">
+                {tabs.map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={cn(
+                            "px-6 py-2.5 rounded-xl font-bold text-sm transition-all",
+                            activeTab === tab.id
+                                ? "bg-white text-[#D4421A] luxury-shadow"
+                                : "text-gray-500 hover:text-gray-700"
+                        )}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* CONTENT FIELDS */}
+            <div className="space-y-6">
+                {activeTab === 'home' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <EditableField page="home" section="hero" field="badge" label="Top Badge text" content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="home" section="hero" field="line1" label="Headline line 1" content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="home" section="hero" field="line2" label="Headline line 2" content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="home" section="hero" field="line3" label="Headline line 3" content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="home" section="hero" field="subtext" label="Subheading text" textarea content={content} onUpdate={updateLocalContent} />
+                        <ImageField page="home" section="hero" field="image" label="Hero Image" content={content} onUpdate={updateLocalContent} />
                     </div>
-                    <p className="text-bakery-primary/40 font-medium uppercase tracking-[0.2em] text-[10px] ml-1">Live CMS for Absolute Brand Control</p>
+                )}
+
+                {activeTab === 'about' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <EditableField page="about" section="hero" field="heading" label="Page Heading" content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="about" section="hero" field="subheading" label="Page Subheading" content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="about" section="story" field="heading" label="Story Section Heading" content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="about" section="story" field="para1" label="Story Paragraph 1" textarea content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="about" section="story" field="para2" label="Story Paragraph 2" textarea content={content} onUpdate={updateLocalContent} />
+                        <EditableField page="about" section="story" field="para3" label="Story Paragraph 3" textarea content={content} onUpdate={updateLocalContent} />
+                        <ImageField
+                            page="about" section="story" field="baker_image" label="Your Photo"
+                            note="Upload a photo of yourself — your customers want to see the real you! 📸"
+                            content={content} onUpdate={updateLocalContent}
+                        />
+                    </div>
+                )}
+
+                {activeTab === 'footer' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <EditableField page="footer" section="main" field="tagline" label="Footer Tagline" textarea content={content} onUpdate={updateLocalContent} />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function EditableField({ page, section, field, label, textarea, content, onUpdate }: any) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [value, setValue] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [showSaved, setShowSaved] = useState(false);
+
+    useEffect(() => {
+        const item = content.find((c: any) => c.page === page && c.section === section && c.field === field);
+        setValue(item?.value || '');
+    }, [content, page, section, field]);
+
+    async function handleSave() {
+        setSaving(true);
+        try {
+            const res = await fetch('/api/admin/content', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page, section, field, value })
+            });
+            if (!res.ok) throw new Error('Failed');
+
+            onUpdate(page, section, field, value);
+            setIsEditing(false);
+            setShowSaved(true);
+            setTimeout(() => setShowSaved(false), 2000);
+        } catch (error) {
+            toast.error('Failed to save');
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 hover:border-[#D4421A]/20 transition-all flex flex-col gap-3 group">
+            <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase tracking-widest text-gray-400">{label}</label>
+                {showSaved && <span className="text-xs font-bold text-green-500 flex items-center gap-1"><Check size={12} /> Saved</span>}
+            </div>
+
+            {isEditing ? (
+                <div className="space-y-3">
+                    {textarea ? (
+                        <textarea
+                            value={value}
+                            onChange={e => setValue(e.target.value)}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D4421A] text-sm h-32 resize-none"
+                            autoFocus
+                        />
+                    ) : (
+                        <div className="relative">
+                            <input
+                                value={value}
+                                onChange={e => setValue(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D4421A] text-sm"
+                                autoFocus
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-300 font-bold">{value.length} codes</span>
+                        </div>
+                    )}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="flex-1 bg-[#D4421A] text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
+                        >
+                            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                            Save
+                        </button>
+                        <button
+                            onClick={() => setIsEditing(false)}
+                            className="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex items-start justify-between gap-4">
+                    <p className="text-sm font-medium text-gray-700 line-clamp-3 leading-relaxed">{value || <span className="text-gray-300 italic">Empty</span>}</p>
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="p-2 bg-gray-50 text-gray-400 rounded-lg hover:text-[#D4421A] hover:bg-orange-50 transition-all"
+                    >
+                        <Edit3 size={16} />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function ImageField({ page, section, field, label, note, content, onUpdate }: any) {
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const currentUrl = content.find((c: any) => c.page === page && c.section === section && c.field === field)?.value || '';
+
+    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) return toast.error('Max file size 10MB');
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            // 1. Upload to storage
+            const uploadRes = await fetch('/api/admin/content/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const { url } = await uploadRes.json();
+
+            // 2. Save URL to content table
+            const res = await fetch('/api/admin/content', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page, section, field, value: url })
+            });
+
+            if (!res.ok) throw new Error('Failed');
+
+            onUpdate(page, section, field, url);
+            toast.success('Photo updated!');
+        } catch (error) {
+            toast.error('Failed to upload image');
+        } finally {
+            setUploading(false);
+        }
+    }
+
+    return (
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col gap-4">
+            <label className="text-xs font-black uppercase tracking-widest text-gray-400">{label}</label>
+
+            <div className="flex items-center gap-6">
+                <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-gray-100 group">
+                    {currentUrl ? (
+                        <img src={currentUrl} className="w-full h-full object-cover" alt={label} />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                            <ImageIcon size={32} />
+                        </div>
+                    )}
+                    {uploading && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <Loader2 className="text-white animate-spin" size={24} />
+                        </div>
+                    )}
                 </div>
 
-                {hasChanges && (
-                    <motion.button
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        onClick={() => {
-                            const fields = Object.entries(localChanges).map(([key, value]) => {
-                                const [page, section, field] = key.split('.');
-                                return { page, section, field, value };
-                            });
-                            saveMutation.mutate(fields);
-                        }}
-                        disabled={saveMutation.isPending}
-                        className="bg-bakery-cta text-white px-8 py-4 rounded-[28px] font-black text-sm uppercase tracking-widest hover:brightness-110 shadow-xl shadow-bakery-cta/20 flex items-center gap-3 transition-all disabled:opacity-50"
+                <div className="flex-1 space-y-3">
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-2 bg-white border-2 border-dashed border-gray-200 text-gray-600 px-4 py-2.5 rounded-xl font-bold text-xs hover:border-[#D4421A] hover:text-[#D4421A] transition-all"
                     >
-                        {saveMutation.isPending ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
-                        Save All Changes
-                    </motion.button>
-                )}
-            </header>
-
-            <div className="flex flex-col lg:flex-row gap-8">
-                {/* Navigation Sidebar */}
-                <aside className="w-full lg:w-64 space-y-2">
-                    {Object.entries(PAGE_DEFINITIONS).map(([id, def]) => {
-                        const Icon = def.icon;
-                        const pageChanges = Object.keys(localChanges).filter(k => k.startsWith(id)).length;
-                        return (
-                            <button
-                                key={id}
-                                onClick={() => setActivePage(id as any)}
-                                className={`w-full flex items-center justify-between p-5 rounded-[28px] transition-all group ${activePage === id
-                                    ? "bg-bakery-primary text-white shadow-xl shadow-bakery-primary/10"
-                                    : "bg-white text-bakery-primary/50 hover:bg-bakery-primary/5 luxury-shadow border border-bakery-primary/5"
-                                    }`}
-                            >
-                                <div className="flex items-center gap-4">
-                                    <Icon size={20} className={activePage === id ? "text-bakery-cta" : "group-hover:text-bakery-primary transition-colors"} />
-                                    <span className="font-playfair font-black tracking-tight">{def.label}</span>
-                                </div>
-                                {pageChanges > 0 && (
-                                    <span className="w-5 h-5 bg-bakery-cta text-white text-[10px] font-black flex items-center justify-center rounded-full shadow-sm">
-                                        {pageChanges}
-                                    </span>
-                                )}
-                            </button>
-                        );
-                    })}
-                </aside>
-
-                {/* Editor Surface */}
-                <main className="flex-1 space-y-8">
-                    {PAGE_DEFINITIONS[activePage].sections.map((section) => (
-                        <div key={section.id} className="bg-white rounded-[40px] luxury-shadow border border-bakery-primary/5 overflow-hidden">
-                            <div className="px-10 py-6 bg-bakery-primary/[0.02] border-b border-bakery-primary/5 flex items-center justify-between">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-bakery-primary/60">{section.label}</h3>
-                                <div className="p-2 bg-white rounded-xl shadow-sm border border-bakery-primary/5">
-                                    <Layout size={14} className="text-bakery-primary/20" />
-                                </div>
-                            </div>
-
-                            <div className="p-10 space-y-8">
-                                {section.fields.map((field) => (
-                                    <div key={field.id} className="space-y-3">
-                                        <div className="flex justify-between items-center px-1">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-bakery-primary/40">{field.label}</label>
-                                            {field.type === 'image' && (
-                                                <span className="text-[9px] font-bold text-bakery-cta/60 italic">Dimensions: Auto-fit</span>
-                                            )}
-                                        </div>
-
-                                        {field.type === 'text' && (
-                                            <input
-                                                type="text"
-                                                value={getValue(section.id, field.id)}
-                                                onChange={(e) => handleFieldChange(section.id, field.id, e.target.value)}
-                                                className="w-full h-14 px-6 bg-bakery-primary/[0.02] rounded-2xl border border-bakery-primary/5 focus:bg-white focus:border-bakery-cta focus:ring-4 focus:ring-bakery-cta/5 transition-all text-bakery-primary font-bold outline-none"
-                                            />
-                                        )}
-
-                                        {field.type === 'textarea' && (
-                                            <textarea
-                                                rows={4}
-                                                value={getValue(section.id, field.id)}
-                                                onChange={(e) => handleFieldChange(section.id, field.id, e.target.value)}
-                                                className="w-full p-6 bg-bakery-primary/[0.02] rounded-3xl border border-bakery-primary/5 focus:bg-white focus:border-bakery-cta focus:ring-4 focus:ring-bakery-cta/5 transition-all text-bakery-primary font-medium outline-none resize-none leading-relaxed"
-                                            />
-                                        )}
-
-                                        {field.type === 'image' && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="h-40 bg-bakery-primary/[0.02] rounded-3xl border-2 border-dashed border-bakery-primary/10 overflow-hidden relative group">
-                                                    {getValue(section.id, field.id) ? (
-                                                        <>
-                                                            <img src={getValue(section.id, field.id)} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                                                <button onClick={() => handleFieldChange(section.id, field.id, "")} className="p-3 bg-red-500 text-white rounded-2xl shadow-lg">
-                                                                    <ArrowRight className="rotate-45" size={20} />
-                                                                </button>
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-bakery-primary/20">
-                                                            <ImageIcon size={32} />
-                                                            <p className="text-[10px] font-black uppercase tracking-widest text-center px-4">No image selected</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <label className="h-40 rounded-3xl border-2 border-dashed border-bakery-cta/20 bg-bakery-cta/[0.02] hover:bg-bakery-cta/[0.05] hover:border-bakery-cta/40 transition-all flex flex-col items-center justify-center gap-3 cursor-pointer group">
-                                                    <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-bakery-cta group-hover:scale-110 transition-transform">
-                                                        {uploadingField === `${activePage}.${section.id}.${field.id}` ? (
-                                                            <Loader2 size={24} className="animate-spin" />
-                                                        ) : (
-                                                            <Upload size={24} />
-                                                        )}
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <p className="text-xs font-black text-bakery-primary uppercase tracking-widest">Upload Image</p>
-                                                        <p className="text-[10px] font-bold text-bakery-primary/40 mt-1 uppercase tracking-widest">JPG, PNG OR WEBP</p>
-                                                    </div>
-                                                    <input
-                                                        type="file"
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                        onChange={(e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (file) handleImageUpload(section.id, field.id, file);
-                                                        }}
-                                                    />
-                                                </label>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </main>
+                        <UploadCloud size={16} />
+                        📸 Change Photo
+                    </button>
+                    {note && <p className="text-[10px] text-gray-400 leading-tight">{note}</p>}
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                </div>
             </div>
         </div>
     );

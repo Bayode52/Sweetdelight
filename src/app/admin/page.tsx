@@ -83,38 +83,16 @@ export default function AdminDashboard() {
 
     if (isLoading) return <div className="p-8"><div className="w-8 h-8 border-4 border-bakery-cta border-t-transparent rounded-full animate-spin" /></div>;
 
-    // Setup Checker Logic
-    const { data: dbContent } = useQuery({
-        queryKey: ["site-content-summary"],
+    // Readiness / Setup Checker
+    const { data: readiness, isLoading: isReadinessLoading } = useQuery({
+        queryKey: ["admin-readiness"],
         queryFn: async () => {
-            const res = await fetch("/api/admin/content?all=true");
+            const res = await fetch("/api/admin/readiness");
             return res.json();
         }
     });
 
-    const getSetupIssues = () => {
-        const issues = [];
-        const contentMap = (dbContent || []).reduce((acc: any, item: any) => {
-            acc[`${item.page}.${item.section}.${item.field}`] = item.value;
-            return acc;
-        }, {});
-
-        if (!contentMap["contact.info.whatsapp"]) {
-            issues.push({ id: 'whatsapp', label: 'WhatsApp Number Missing', description: 'Customers cannot contact you directly via WhatsApp.', link: '/admin/content?page=contact' });
-        }
-        if (!contentMap["about.baker.image"]) {
-            issues.push({ id: 'baker', label: 'Baker Photo Missing', description: 'Your brand story needs a face! Upload a photo in About Us.', link: '/admin/content?page=about' });
-        }
-        if (!contentMap["about.baker.bio"]) {
-            issues.push({ id: 'bio', label: 'Baker Bio Missing', description: 'Introduce yourself to your customers! Add a bio in About Us.', link: '/admin/content?page=about' });
-        }
-        if (products && (products as any).products?.some((p: any) => !p.images || p.images.length === 0)) {
-            issues.push({ id: 'products', label: 'Missing Product Images', description: 'Some products have no photos. Customers eat with their eyes first!', link: '/admin/products' });
-        }
-        return issues;
-    };
-
-    const setupIssues = getSetupIssues();
+    const setupIssues = readiness?.checks?.filter((c: any) => c.status !== "complete") || [];
 
     return (
         <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
@@ -155,11 +133,11 @@ export default function AdminDashboard() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
-                            {setupIssues.map((issue) => (
+                            {setupIssues.map((issue: any) => (
                                 <Link key={issue.id} href={issue.link}>
                                     <div className="bg-white p-5 rounded-3xl border border-orange-200/50 hover:border-orange-400 transition-all group overflow-hidden relative">
                                         <h4 className="font-black text-bakery-primary text-sm mb-1">{issue.label}</h4>
-                                        <p className="text-xs text-bakery-primary/50 font-medium leading-relaxed">{issue.description}</p>
+                                        <p className="text-xs text-bakery-primary/50 font-medium leading-relaxed">{issue.message}</p>
                                         <ArrowRight size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-orange-200 group-hover:text-orange-600 transition-colors" />
                                     </div>
                                 </Link>

@@ -58,7 +58,7 @@ const BADGE_COLORS: Record<string, string> = {
   "MUST TRY": "bg-red-600 text-white",
 };
 
-export function HomePageClient({ content }: { content: ContentMap }) {
+export function HomePageClient({ content, settings }: { content: ContentMap, settings?: Record<string, string> }) {
   const addItem = useCartStore((s) => s.addItem);
   const carouselRef = React.useRef<HTMLDivElement>(null);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
@@ -88,11 +88,13 @@ export function HomePageClient({ content }: { content: ContentMap }) {
             </div>
 
             <h1 className="text-6xl md:text-8xl font-playfair font-black text-bakery-primary leading-[0.9] tracking-tighter">
-              {content['hero.headline'] || 'Baking Joy, One Bite At A Time.'}
+              {content['hero.line1'] || 'Baking Joy,'}<br />
+              <span className="text-bakery-cta italic">{content['hero.line2'] || 'One Bite'}</span><br />
+              {content['hero.line3'] || 'At A Time.'}
             </h1>
 
             <p className="text-lg md:text-xl text-bakery-primary/60 max-w-lg leading-relaxed font-medium">
-              {content['hero.subheadline'] || 'Experience the perfect blend of London sophistication and Nigerian soul. Handcrafted pastries delivered warm to your doorstep.'}
+              {content['hero.subtext'] || 'Experience the perfect blend of London sophistication and Nigerian soul. Handcrafted pastries delivered warm to your doorstep.'}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -135,7 +137,7 @@ export function HomePageClient({ content }: { content: ContentMap }) {
             {/* Floating cake image */}
             <div className="relative hero-cake-float" style={{ borderRadius: "24px", overflow: "hidden", width: "100%", maxWidth: "480px", aspectRatio: "1/1" }}>
               <Image
-                src={content['hero.hero_image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=900"}
+                src={content['hero.image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=900"}
                 alt="Elegant Celebration Cake"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -169,7 +171,7 @@ export function HomePageClient({ content }: { content: ContentMap }) {
       {/* ────────── DELIVERY BANNER ────────── */}
       <div className="bg-bakery-cta/5 border-y border-bakery-cta/10 py-4 px-6 overflow-hidden">
         <motion.p animate={{ x: [0, -800, 0] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }} className="text-sm font-bold text-bakery-primary/60 whitespace-nowrap">
-          {content['delivery_banner.text'] || '🚚 Free delivery on orders over £50 · Minimum order £20 · 🕐 Allow 48h notice for custom cakes · 📍 Delivering across the UK'} &nbsp;·&nbsp; {content['delivery_banner.text'] || '🚚 Free delivery on orders over £50 · Minimum order £20 · 🕐 Allow 48h notice for custom cakes · 📍 Delivering across the UK'}
+          {`🚚 Free delivery on orders over £${settings?.free_delivery_over || '50'} · Minimum order £${settings?.min_order || '20'} · 🕐 Allow ${settings?.custom_cake_notice || '48h'} notice for custom cakes · 📍 ${settings?.delivery_areas || 'Delivering across the UK'}`} &nbsp;·&nbsp; {`🚚 Free delivery on orders over £${settings?.free_delivery_over || '50'} · Minimum order £${settings?.min_order || '20'} · 🕐 Allow ${settings?.custom_cake_notice || '48h'} notice for custom cakes · 📍 ${settings?.delivery_areas || 'Delivering across the UK'}`}
         </motion.p>
       </div>
 

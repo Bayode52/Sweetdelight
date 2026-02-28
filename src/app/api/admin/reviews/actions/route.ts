@@ -52,7 +52,7 @@ export async function POST(req: Request) {
                     .from("reviews")
                     .update({
                         title: payload.title,
-                        text: payload.text,
+                        review_text: payload.text,
                         rating: payload.rating,
                         admin_edited: true,
                         original_text: payload.original_text

@@ -76,9 +76,10 @@ export async function POST(req: Request) {
                 category: body.category,
                 description: body.description,
                 price: body.price,
+                on_sale: body.on_sale ?? false,
                 sale_price: body.on_sale ? body.sale_price : null,
-                images: body.images || [], // Array of {id, url, alt}
-                image_url: body.images?.[0]?.url || body.image_url || "",
+                images: body.images || [], // Array of text URLs
+                image_url: body.images?.[0] || body.image_url || "",
                 is_available: body.is_available ?? true,
                 is_featured: body.is_featured ?? false,
                 meta_title: body.meta_title,

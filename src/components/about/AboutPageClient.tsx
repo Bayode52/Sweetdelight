@@ -16,7 +16,9 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
     );
 }
 
-export function AboutPageClient({ content }: { content: ContentMap }) {
+export function AboutPageClient({ content, settings }: { content: ContentMap, settings?: Record<string, string> }) {
+    const businessName = settings?.business_name || "Sweet Delight";
+    const bakerImage = content['story.baker_image'] || "/baker-placeholder.jpg";
     const STATS = [
         { value: content['hero.stats_years'] || "Fresh To Order", label: content['hero.stats_years_label'] || "Every single time" },
         { value: content['hero.stats_recipes'] || "No Preservatives", label: content['hero.stats_recipes_label'] || "Real ingredients only" },
@@ -53,7 +55,7 @@ export function AboutPageClient({ content }: { content: ContentMap }) {
                     <FadeIn>
                         <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden luxury-shadow">
                             <Image
-                                src={content['story.image'] || "https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&q=80&w=800"}
+                                src={bakerImage}
                                 alt="Our story"
                                 fill
                                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -74,9 +76,15 @@ export function AboutPageClient({ content }: { content: ContentMap }) {
                             </h2>
                         </div>
 
-                        <div className="space-y-6 text-bakery-primary/70 leading-relaxed text-lg">
+                        <div className="space-y-6 text-bakery-primary/70 leading-relaxed text-lg whitespace-pre-line">
                             <p>
-                                {content['story.content'] || 'Crave Bakery was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
+                                {content['story.para1'] || 'Crave Bakery was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
+                            </p>
+                            <p>
+                                {content['story.para2'] || ''}
+                            </p>
+                            <p>
+                                {content['story.para3'] || ''}
                             </p>
                         </div>
                     </FadeIn>
