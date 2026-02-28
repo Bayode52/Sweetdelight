@@ -1,94 +1,62 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Simple in-memory rate limiting for the middleware instance
-const rateLimitMap = new Map<string, { count: number, reset: number }>();
-const RATE_LIMIT_THRESHOLD = 100; // requests per minute
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-
 export async function middleware(request: NextRequest) {
-    let response = NextResponse.next({ request })
+    let supabaseResponse = NextResponse.next({
+        request,
+    })
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                getAll() { return request.cookies.getAll() },
+                getAll() {
+                    return request.cookies.getAll()
+                },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value }) =>
-                        request.cookies.set(name, value))
-                    response = NextResponse.next({ request })
+                        request.cookies.set(name, value)
+                    )
+                    supabaseResponse = NextResponse.next({
+                        request,
+                    })
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        response.cookies.set(name, value, options))
+                        supabaseResponse.cookies.set(name, value, options)
+                    )
                 },
             },
         }
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
-    const path = request.nextUrl.pathname
-    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    // IMPORTANT: Do not add logic between createServerClient 
+    // and supabase.auth.getUser(). A simple mistake could make 
+    // it hard to debug issues with users being randomly logged out.
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
 
-    // ─── Ban Enforcement ─────────────────────────────────────────────
-    if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('banned, is_bot')
-            .eq('id', user.id)
-            .single();
-
-        if (profile?.banned) {
-            return NextResponse.redirect(new URL('/banned', request.url));
-        }
+    // Protect /account routes
+    if (
+        !user &&
+        request.nextUrl.pathname.startsWith('/account')
+    ) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/login'
+        url.searchParams.set('redirect', request.nextUrl.pathname)
+        return NextResponse.redirect(url)
     }
 
-    // ─── Rate Limiting ───────────────────────────────────────────────
-    const now = Date.now();
-    const rateData = rateLimitMap.get(ip) || { count: 0, reset: now + RATE_LIMIT_WINDOW };
-
-    if (now > rateData.reset) {
-        rateData.count = 1;
-        rateData.reset = now + RATE_LIMIT_WINDOW;
-    } else {
-        rateData.count++;
-    }
-    rateLimitMap.set(ip, rateData);
-
-    if (rateData.count > RATE_LIMIT_THRESHOLD) {
-        return new NextResponse('Too Many Requests', { status: 429 });
-    }
-
-    // ─── Referral handling ───────────────────────────────────────────
-    if (path.startsWith('/ref/')) {
-        const parts = path.split('/');
-        const code = parts[2];
-        if (code) {
-            const nextRes = NextResponse.next({ request });
-            nextRes.cookies.set('referral_code', code, {
-                maxAge: 60 * 60 * 24 * 30, // 30 days
-                path: '/',
-                sameSite: 'lax',
-            });
-            return nextRes;
-        }
-    }
-
-    // Protect /account routes — must be logged in
-    if (path.startsWith('/account') && !user) {
-        const loginUrl = new URL('/auth/login', request.url)
-        loginUrl.searchParams.set('redirect', path)
-        return NextResponse.redirect(loginUrl)
-    }
-
-    if (path.startsWith('/admin')) {
+    // Protect /admin routes
+    if (request.nextUrl.pathname.startsWith('/admin')) {
         if (!user) {
-            return NextResponse.redirect(
-                new URL('/auth/login?redirect=/admin', request.url)
-            )
+            const url = request.nextUrl.clone()
+            url.pathname = '/auth/login'
+            url.searchParams.set('redirect', '/admin')
+            return NextResponse.redirect(url)
         }
 
-        // Use service role key to bypass RLS for middleware check
+        // Check admin role using service role to bypass RLS
         const adminSupabase = createServerClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -107,25 +75,19 @@ export async function middleware(request: NextRequest) {
             .single()
 
         if (profile?.role !== 'admin') {
-            return NextResponse.redirect(new URL('/', request.url))
+            const url = request.nextUrl.clone()
+            url.pathname = '/'
+            return NextResponse.redirect(url)
         }
     }
 
-    return response
+    // IMPORTANT: Return supabaseResponse, not NextResponse.next()
+    // This ensures cookies are properly passed through
+    return supabaseResponse
 }
 
 export const config = {
     matcher: [
-        '/',
-        '/menu/:path*',
-        '/about/:path*',
-        '/contact/:path*',
-        '/admin/:path*',
-        '/account/:path*',
-        '/checkout/:path*',
-        '/api/reviews/:path*',
-        '/api/orders/:path*',
-        '/ref/:path*',
-    ]
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
 }
-
