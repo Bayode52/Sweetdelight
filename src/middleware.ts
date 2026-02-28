@@ -29,25 +29,19 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // IMPORTANT: Do not add logic between createServerClient 
-    // and supabase.auth.getUser(). A simple mistake could make 
-    // it hard to debug issues with users being randomly logged out.
     const {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Protect /account routes
-    if (
-        !user &&
-        request.nextUrl.pathname.startsWith('/account')
-    ) {
+    // Protect /account
+    if (!user && request.nextUrl.pathname.startsWith('/account')) {
         const url = request.nextUrl.clone()
         url.pathname = '/auth/login'
         url.searchParams.set('redirect', request.nextUrl.pathname)
         return NextResponse.redirect(url)
     }
 
-    // Protect /admin routes
+    // Protect /admin
     if (request.nextUrl.pathname.startsWith('/admin')) {
         if (!user) {
             const url = request.nextUrl.clone()
@@ -56,19 +50,19 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(url)
         }
 
-        // Check admin role using service role to bypass RLS
-        const adminSupabase = createServerClient(
+        // Use service role to bypass RLS when checking admin role
+        const serviceSupabase = createServerClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!,
             {
                 cookies: {
-                    getAll() { return request.cookies.getAll() },
+                    getAll() { return [] },
                     setAll() { },
                 },
             }
         )
 
-        const { data: profile } = await adminSupabase
+        const { data: profile } = await serviceSupabase
             .from('profiles')
             .select('role')
             .eq('id', user.id)
@@ -81,8 +75,6 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // IMPORTANT: Return supabaseResponse, not NextResponse.next()
-    // This ensures cookies are properly passed through
     return supabaseResponse
 }
 
