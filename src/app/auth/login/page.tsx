@@ -58,8 +58,8 @@ export default function LoginPage() {
             >
                 {/* Logo */}
                 <div className="text-center space-y-3">
-                    <Link href="/" className="inline-block text-3xl font-playfair font-black text-bakery-primary tracking-tighter">
-                        Sweet Delight<span className="text-bakery-cta">.</span>
+                    <Link href="/" className="inline-block text-3xl font-playfair font-black tracking-tighter uppercase">
+                        <span className="text-bakery-cta">Sweet</span> <span className="text-bakery-primary">Delight</span><span className="text-bakery-cta">.</span>
                     </Link>
                     <h1 className="text-3xl font-playfair font-black text-bakery-primary">Welcome back</h1>
                     <p className="text-bakery-primary/50 font-medium">Sign in to your account</p>

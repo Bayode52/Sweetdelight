@@ -231,8 +231,8 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
         >
             <nav className="max-w-7xl mx-auto flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="text-2xl md:text-3xl font-playfair font-black text-bakery-primary tracking-tighter">
-                    {businessName}
+                <Link href="/" className="text-2xl md:text-3xl font-playfair font-black tracking-tighter uppercase">
+                    <span className="text-bakery-cta">Sweet</span> <span className="text-bakery-primary">Delight</span>
                 </Link>
 
                 {/* Desktop Links */}

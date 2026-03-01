@@ -168,8 +168,8 @@ export default function SignupPage() {
                 >
                     {/* Header — mobile only */}
                     <div className="lg:hidden text-center mb-8">
-                        <Link href="/" className="text-3xl font-playfair font-black text-bakery-primary tracking-tighter">
-                            Crave<span className="text-bakery-cta">.</span>Bakery
+                        <Link href="/" className="text-3xl font-playfair font-black tracking-tighter uppercase">
+                            <span className="text-bakery-cta">Sweet</span> <span className="text-bakery-primary">Delight</span><span className="text-bakery-cta">.</span>
                         </Link>
                     </div>
 

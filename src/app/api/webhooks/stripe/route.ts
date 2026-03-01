@@ -82,7 +82,7 @@ export async function POST(req: Request) {
                 const resend = getResend();
                 if (resend) {
                     await resend.emails.send({
-                        from: "Crave Bakery <onboarding@resend.dev>",
+                        from: "Sweet Delight <onboarding@resend.dev>",
                         to: order.customer_email,
                         subject: `✅ Order Confirmed — PB-${order.order_ref.substring(0, 8).toUpperCase()}`,
                         html: emailTemplates.orderConfirmed(order.customer_name, order.id, items, order.total_amount),
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
                 const resend = getResend();
                 if (resend) {
                     await resend.emails.send({
-                        from: "Crave Bakery Orders <onboarding@resend.dev>",
+                        from: "Sweet Delight Orders <onboarding@resend.dev>",
                         to: process.env.ADMIN_EMAIL || "admin@example.com",
                         subject: `🆕 New Order — PB-${order.order_ref.substring(0, 8).toUpperCase()} (£${order.total_amount?.toFixed(2)})`,
                         html: emailTemplates.adminNewOrder(order.id, order.total_amount),
@@ -127,9 +127,9 @@ export async function POST(req: Request) {
                     const resend = getResend();
                     if (resend) {
                         await resend.emails.send({
-                            from: "Crave Bakery <orders@cravebakery.co.uk>",
+                            from: "Sweet Delight <orders@sweetdelight.co.uk>",
                             to: order.customer_email,
-                            subject: "Payment Failed — Crave Bakery",
+                            subject: "Payment Failed — Sweet Delight",
                             html: `<p>Hi ${order.customer_name}, unfortunately your payment for order ${order.order_ref} did not go through. Please try again or contact us.</p>`,
                         });
                     } else {
@@ -182,7 +182,7 @@ async function triggerReferralCommission(customerId: string, subtotal: number, o
             const resend = getResend();
             if (resend) {
                 await resend.emails.send({
-                    from: "Crave Bakery <onboarding@resend.dev>",
+                    from: "Sweet Delight <onboarding@resend.dev>",
                     to: profile.email,
                     subject: "You've Got Store Credit! 💸",
                     html: emailTemplates.referralCredited(profile.full_name || "Friend", commission),

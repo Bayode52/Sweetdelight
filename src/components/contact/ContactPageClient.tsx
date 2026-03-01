@@ -25,10 +25,10 @@ const CONTACT_CARDS = [
         icon: "📱", title: "WhatsApp", desc: "Chat with us instantly", action: "Chat on WhatsApp", href: "https://wa.me/447000000000", color: "bg-green-500 hover:bg-green-600",
     },
     {
-        icon: "📸", title: "Instagram", desc: "DM us on Instagram", action: "Visit Instagram", href: "https://instagram.com/cravebakery", color: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
+        icon: "📸", title: "Instagram", desc: "DM us on Instagram", action: "Visit Instagram", href: "https://instagram.com/sweetdelightuk", color: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
     },
     {
-        icon: "📧", title: "Email", desc: "hello@cravebakery.co.uk", action: "Send Email", href: "mailto:hello@cravebakery.co.uk", color: "bg-bakery-primary hover:bg-bakery-primary/90",
+        icon: "📧", title: "Email", desc: "hello@sweetdelight.co.uk", action: "Send Email", href: "mailto:hello@sweetdelight.co.uk", color: "bg-bakery-primary hover:bg-bakery-primary/90",
     },
 ];
 

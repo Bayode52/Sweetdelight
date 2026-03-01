@@ -297,7 +297,7 @@ export default function AdminChatDashboard() {
                                     return (
                                         <div key={msg.id} className={`flex flex-col max-w-[80%] ${isCustomer ? "self-end items-end" : "self-start items-start"}`}>
                                             <span className="text-[10px] font-bold text-bakery-primary/40 mb-1 ml-1 mr-1 uppercase tracking-wider">
-                                                {isCustomer ? activeSession.customer_name || 'Customer' : isBot ? 'Crave AI' : 'Team / You'} • {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {isCustomer ? activeSession.customer_name || 'Customer' : isBot ? 'Sweet Delight AI' : 'Team / You'} • {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
 
                                             <div className={`px-4 py-3 text-sm whitespace-pre-wrap rounded-2xl ${isCustomer

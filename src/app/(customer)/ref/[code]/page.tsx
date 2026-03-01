@@ -66,7 +66,7 @@ export default function ReferralLandingPage() {
                     You were invited by <span className="text-bakery-cta">{firstName}!</span>
                 </h1>
                 <p className="text-white/60 text-lg max-w-lg mx-auto">
-                    Join Crave Bakery and get <strong className="text-white">10% off your first order</strong> with code{" "}
+                    Join Sweet Delight and get <strong className="text-white">10% off your first order</strong> with code{" "}
                     <span className="bg-white/20 px-3 py-1 rounded-full font-black tracking-widest">WELCOME10</span>
                 </p>
                 <Link href={`/auth/signup?ref=${code}`}>
@@ -78,7 +78,7 @@ export default function ReferralLandingPage() {
             {/* Why section */}
             <div className="max-w-4xl mx-auto px-4 py-16 space-y-10">
                 <h2 className="text-3xl font-playfair font-black text-bakery-primary text-center">
-                    Why <span className="text-bakery-cta italic">Crave Bakery?</span>
+                    Why <span className="text-bakery-cta italic">Sweet Delight?</span>
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[

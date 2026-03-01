@@ -43,6 +43,14 @@ export default function AdminDashboard() {
         refetchInterval: 300000,
     });
 
+    const { data: readiness, isLoading: isReadinessLoading } = useQuery({
+        queryKey: ["admin-readiness"],
+        queryFn: async () => {
+            const res = await fetch("/api/admin/readiness");
+            return res.json();
+        }
+    });
+
     const { data: products } = useQuery({
         queryKey: ["admin-products-summary"],
         queryFn: async () => {
@@ -84,13 +92,6 @@ export default function AdminDashboard() {
     if (isLoading) return <div className="p-8"><div className="w-8 h-8 border-4 border-bakery-cta border-t-transparent rounded-full animate-spin" /></div>;
 
     // Readiness / Setup Checker
-    const { data: readiness, isLoading: isReadinessLoading } = useQuery({
-        queryKey: ["admin-readiness"],
-        queryFn: async () => {
-            const res = await fetch("/api/admin/readiness");
-            return res.json();
-        }
-    });
 
     const setupIssues = readiness?.checks?.filter((c: any) => c.status !== "complete") || [];
 

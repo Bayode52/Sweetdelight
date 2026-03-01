@@ -63,7 +63,7 @@ export function PWAInstallPrompt() {
                 >
                     <div className="bg-bakery-primary text-white p-4 rounded-2xl shadow-xl flex items-center justify-between gap-4">
                         <div className="flex-1">
-                            <h4 className="font-playfair font-black text-lg">Install Crave Bakery</h4>
+                            <h4 className="font-playfair font-black text-lg">Install Sweet Delight</h4>
                             <p className="text-xs text-white/70">Add us to your home screen for quick access to fresh pastries.</p>
                         </div>
                         <div className="flex items-center gap-2">

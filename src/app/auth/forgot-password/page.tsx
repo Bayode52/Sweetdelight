@@ -37,8 +37,8 @@ export default function ForgotPasswordPage() {
                 className="w-full max-w-md space-y-6"
             >
                 <div className="text-center space-y-3">
-                    <Link href="/" className="inline-block text-3xl font-playfair font-black text-bakery-primary tracking-tighter">
-                        Crave<span className="text-bakery-cta">.</span>Bakery
+                    <Link href="/" className="inline-block text-3xl font-playfair font-black tracking-tighter uppercase">
+                        <span className="text-bakery-cta">Sweet</span> <span className="text-bakery-primary">Delight</span><span className="text-bakery-cta">.</span>
                     </Link>
                     <h1 className="text-3xl font-playfair font-black text-bakery-primary">Reset your password</h1>
                     <p className="text-bakery-primary/50 font-medium">Enter your email and we&apos;ll send a reset link</p>

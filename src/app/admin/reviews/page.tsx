@@ -90,7 +90,7 @@ export default function AdminReviewsPage() {
         }
     });
 
-    const filteredReviews = reviews?.filter(r =>
+    const filteredReviews = (reviews || []).filter(r =>
         r.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.products?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||

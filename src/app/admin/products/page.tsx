@@ -31,7 +31,8 @@ export default function AdminProducts() {
         queryFn: async () => {
             const res = await fetch("/api/admin/products");
             if (!res.ok) throw new Error("Failed to fetch products");
-            return res.json();
+            const data = await res.json();
+            return Array.isArray(data) ? data : (data.products || []);
         }
     });
 
@@ -61,9 +62,9 @@ export default function AdminProducts() {
         }
     });
 
-    const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))];
+    const categories = ["all", ...Array.from(new Set((Array.isArray(products) ? products : []).map(p => p.category)))];
 
-    const filteredProducts = products.filter(p => {
+    const filteredProducts = (Array.isArray(products) ? products : []).filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
         const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
         return matchesSearch && matchesCategory;

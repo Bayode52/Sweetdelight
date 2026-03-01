@@ -117,7 +117,7 @@ export default function CustomersPage() {
     if (isLoading) return (
         <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
             <Loader2 size={40} className="text-bakery-cta animate-spin" />
-            <p className="font-playfair font-black text-bakery-primary/40 uppercase tracking-widest text-sm">Gathering the Crave community...</p>
+            <p className="font-playfair font-black text-bakery-primary/40 uppercase tracking-widest text-sm">Gathering the Sweet Delight community...</p>
         </div>
     );
 
@@ -132,7 +132,7 @@ export default function CustomersPage() {
                         </div>
                         <h1 className="text-4xl font-playfair font-black text-bakery-primary italic tracking-tight">Customer Records</h1>
                     </div>
-                    <p className="text-bakery-primary/40 font-medium uppercase tracking-[0.2em] text-[10px] ml-1">Absolute control over the Crave database</p>
+                    <p className="text-bakery-primary/40 font-medium uppercase tracking-[0.2em] text-[10px] ml-1">Absolute control over Your Business</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">

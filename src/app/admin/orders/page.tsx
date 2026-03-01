@@ -100,7 +100,7 @@ export default function AdminOrdersPage() {
 
     const getWhatsAppLink = (order: Order) => {
         if (!order.customer_phone) return null;
-        const msg = `Hi ${order.customer_name}! 👋 This is Crave Bakery with an update on your order ${order.order_ref}:\n\nStatus: *${order.status.toUpperCase()}*${estimatedTime ? `\nEstimated: ${estimatedTime}` : ""}\n\nThank you for ordering with us! 🎂`;
+        const msg = `Hi ${order.customer_name}! 👋 This is Sweet Delight with an update on your order ${order.order_ref}:\n\nStatus: *${order.status.toUpperCase()}*${estimatedTime ? `\nEstimated: ${estimatedTime}` : ""}\n\nThank you for ordering with us! 🎂`;
         return `https://wa.me/${order.customer_phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(msg)}`;
     };
 

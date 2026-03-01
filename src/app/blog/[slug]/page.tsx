@@ -72,7 +72,7 @@ export default function BlogPostPage({ params }: Props) {
                         author: [{
                             "@type": "Organization",
                             "name": post.author,
-                            "url": "https://cravebakery.co.uk"
+                            "url": "https://sweetdelight.co.uk"
                         }]
                     })
                 }}

@@ -113,7 +113,7 @@ export async function POST(req: Request) {
         })) : [];
 
         // 6. Build the System Prompt
-        const systemPrompt = `You are Crave, the friendly AI assistant for Crave Bakery 
+        const systemPrompt = `You are Sweet Delight AI, the friendly assistant for Sweet Delight Bakery 
 — a premium Nigerian and African pastry business based in 
 the UK. You speak in a warm, helpful, professional tone.
 
@@ -125,7 +125,7 @@ KEY FACTS YOU KNOW:
 - Lead times: Custom cakes = 5 days. Platters = 48 hours
 - Payment: Card (Stripe) or WhatsApp/Instagram DM
 - WhatsApp: +44 7000 000000
-- Instagram: @cravebakery  
+- Instagram: @sweetdelightuk  
 - Hours: Mon-Fri 9am-7pm, Sat 9am-5pm, Sun custom only
 - All meat products are halal certified
 - Full allergen info on every product page
@@ -177,7 +177,7 @@ Escalation response: '${ESCALATION_PHRASE}'`;
             }
         } else {
             // Mock response mode if no API key is provided
-            botMessage = `Hi! 👋 I'm Crave, your bakery assistant! I'm having a little technical moment. Please WhatsApp us directly at +44 7000 000000 for instant help, or try again shortly!`;
+            botMessage = `Hi! 👋 I'm the Sweet Delight assistant! I'm having a little technical moment. Please WhatsApp us directly at +44 7000 000000 for instant help, or try again shortly!`;
             if (message.toLowerCase().includes('human') || message.toLowerCase().includes('agent')) {
                 botMessage += `\n\n${ESCALATION_PHRASE}`;
                 isEscalated = true;

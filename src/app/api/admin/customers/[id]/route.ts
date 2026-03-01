@@ -104,7 +104,7 @@ export async function DELETE(
             .from("profiles")
             .update({
                 full_name: "Deleted User",
-                email: `deleted_${customerId}@cravebakery.uk`,
+                email: `deleted_${customerId}@sweetdelight.co.uk`,
                 phone: null,
                 banned: true,
                 ban_reason: "Account deleted/anonymized by admin."

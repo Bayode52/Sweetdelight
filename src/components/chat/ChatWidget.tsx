@@ -129,7 +129,7 @@ export default function ChatWidget() {
                         <div className="flex justify-between items-start relative z-10">
                             <div className="space-y-1">
                                 <h3 className="font-playfair font-black text-2xl flex items-center gap-2 drop-shadow-sm">
-                                    Crave Bakery <span className="text-2xl animate-in zoom-in spin-in-12 duration-500 delay-150">🧁</span>
+                                    Sweet Delight <span className="text-2xl animate-in zoom-in spin-in-12 duration-500 delay-150">🧁</span>
                                 </h3>
                                 <p className="text-xs text-white/80 font-medium tracking-wide flex items-center gap-1.5">
                                     <span className={`w-2 h-2 rounded-full ${status === 'human' ? 'bg-green-400' : 'bg-bakery-cta'} animate-pulse`} />
@@ -169,7 +169,7 @@ export default function ChatWidget() {
                                         CB
                                     </div>
                                     <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm border border-black/5 text-sm text-[#2C1810] max-w-[85%] whitespace-pre-wrap leading-relaxed">
-                                        Hi there! 👋 Welcome to Crave Bakery!
+                                        Hi there! 👋 Welcome to Sweet Delight!
                                         {"\n\n"}
                                         I'm your AI assistant. I can help you with orders, products, delivery and more. What can I help you with today?
                                     </div>
@@ -197,7 +197,7 @@ export default function ChatWidget() {
                             return (
                                 <div key={msg.id || index} className={`flex flex-col ${isCustomer ? "items-end" : "items-start"} relative z-10 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
                                     {isHumanAgent && (
-                                        <span className="text-[10px] font-bold text-bakery-cta mb-1 ml-[40px] tracking-wide uppercase">Crave Bakery Team</span>
+                                        <span className="text-[10px] font-bold text-bakery-cta mb-1 ml-[40px] tracking-wide uppercase">Sweet Delight Team</span>
                                     )}
                                     <div className={`flex items-end gap-2 max-w-[85%]`}>
 

@@ -274,7 +274,7 @@ export default function CustomOrderPage() {
                             Design Your Perfect Bake
                         </h1>
                         <p className="text-lg text-bakery-primary/70 max-w-2xl mx-auto leading-relaxed">
-                            Tell us exactly what you're craving. Our AI baker will visualise your dream product, provide an instant price estimate, and prepare it for our kitchen.
+                            Tell us exactly what you're craving. Our Sweet Delight AI will visualise your dream product, provide an instant price estimate, and prepare it for our kitchen.
                         </p>
                     </div>
 
@@ -543,7 +543,7 @@ export default function CustomOrderPage() {
                                 </div>
                                 <h2 className="text-3xl font-black font-playfair mb-4">Request Received!</h2>
                                 <p className="text-lg text-bakery-primary/70 mb-8">
-                                    Thank you for choosing Crave Bakery. Our team is reviewing your custom order details. We will be in touch shortly to confirm everything and arrange payment.
+                                    Thank you for choosing Sweet Delight. Our team is reviewing your custom order details. We will be in touch shortly to confirm everything and arrange payment.
                                 </p>
 
                                 {customerDetails.paymentMethod === 'dm_whatsapp' ? (

@@ -43,7 +43,7 @@ export async function POST(req: Request) {
                 const resend = getResend();
                 if (resend) {
                     await resend.emails.send({
-                        from: "Crave Bakery <onboarding@resend.dev>",
+                        from: "Sweet Delight <onboarding@resend.dev>",
                         to: order.customer_email,
                         subject: `Order Update — PB-${order.order_ref.substring(0, 8).toUpperCase()}`,
                         html: emailTemplates.statusUpdate(order.customer_name, order.order_ref, status),
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
                     const resend = getResend();
                     if (resend) {
                         await resend.emails.send({
-                            from: "Crave Bakery <onboarding@resend.dev>",
+                            from: "Sweet Delight <onboarding@resend.dev>",
                             to: order.customer_email,
                             subject: "How did we do? ⭐️",
                             html: emailTemplates.reviewRequest(order.customer_name, order.id),

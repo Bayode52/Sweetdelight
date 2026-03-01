@@ -23,13 +23,21 @@ export async function GET(request: NextRequest) {
                             cookiesToSet.forEach(({ name, value, options }) =>
                                 cookieStore.set(name, value, options)
                             )
-                        } catch { }
+                        } catch (error) {
+                            // The `set` method was called from a Server Component.
+                            // This can be ignored if you have middleware refreshing
+                            // user sessions.
+                        }
                     },
                 },
             }
         )
-        await supabase.auth.exchangeCodeForSession(code)
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (!error) {
+            return NextResponse.redirect(new URL(redirectTo, request.url))
+        }
     }
 
-    return NextResponse.redirect(requestUrl.origin + redirectTo)
+    // Return the user to an error page with some instructions
+    return NextResponse.redirect(new URL('/auth/auth-code-error', request.url))
 }

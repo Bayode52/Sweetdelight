@@ -19,14 +19,14 @@ export default function BannedPage() {
                 <div className="space-y-4">
                     <h1 className="text-4xl font-playfair font-black text-bakery-primary italic">Account Restricted</h1>
                     <p className="text-bakery-primary/60 font-medium leading-relaxed">
-                        Your account has been restricted from accessing certain features of Crave Bakery.
+                        Your account has been restricted from accessing certain features of Sweet Delight.
                         If you believe this is a mistake, please contact our support team.
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 pt-4">
                     <a
-                        href="mailto:support@cravebakery.co.uk"
+                        href="mailto:support@sweetdelight.co.uk"
                         className="flex items-center justify-center gap-3 w-full py-4 bg-bakery-primary text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-bakery-primary/20 hover:bg-bakery-primary/90 transition-all"
                     >
                         <Mail size={16} /> Contact Support

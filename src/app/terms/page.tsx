@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Terms & Conditions | Crave Bakery",
-    description: "Terms and Conditions for Crave Bakery custom orders and deliveries.",
+    title: "Terms & Conditions | Sweet Delight",
+    description: "Terms and Conditions for Sweet Delight custom orders and deliveries.",
 };
 
 export default function TermsPage() {
@@ -25,7 +25,7 @@ export default function TermsPage() {
                         <section>
                             <h2 className="text-2xl font-playfair font-black text-[#4A3222] mb-4">1. Business Information</h2>
                             <p>
-                                Crave Bakery operates in the United Kingdom.
+                                Sweet Delight operates in the United Kingdom.
                                 By placing an order with us, you agree to these Terms and Conditions.
                             </p>
                         </section>
@@ -94,8 +94,8 @@ export default function TermsPage() {
                             <h2 className="text-2xl font-playfair font-black text-[#4A3222] mb-4">9. Contact Us</h2>
                             <p>
                                 For any disputes or questions regarding these terms, please contact us at:{" "}
-                                <a href="mailto:hello@cravebakery.co.uk" className="text-[#D97757] font-bold hover:underline">
-                                    hello@cravebakery.co.uk
+                                <a href="mailto:hello@sweetdelight.co.uk" className="text-[#D97757] font-bold hover:underline">
+                                    hello@sweetdelight.co.uk
                                 </a>
                             </p>
                         </section>
