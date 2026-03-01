@@ -76,92 +76,91 @@ export function HomePageClient({ content, settings }: { content: ContentMap, set
 
   return (
     <div className="w-full">
-      {/* ────────── HERO ────────── */}
-      <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden px-6 md:px-12">
-        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-bakery-accent/30 rounded-full blur-[120px] -z-10 animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-bakery-cta/10 rounded-full blur-[100px] -z-10" />
+      {/* ────────── HERO SECTION — LUXURY REDESIGN ────────── */}
+      <section className="relative min-h-[92vh] flex items-center pt-20 overflow-hidden px-8 md:px-16" style={{ background: 'var(--cream)' }}>
+        {/* Decorative elements */}
+        <div className="absolute top-[-10%] right-[-5%] w-[65%] h-[65%] rounded-full blur-[120px] opacity-40 -z-10" style={{ background: 'var(--gold-light)' }} />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[100px] opacity-20 -z-10" style={{ background: 'var(--orange-brand)' }} />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }} className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bakery-cta/5 border border-bakery-cta/10 text-bakery-cta text-sm font-bold uppercase tracking-widest">
-              {content['hero.badge'] || '🇬🇧 Proudly Serving the UK'}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
+          <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: "easeOut" }} className="space-y-10">
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-bakery-cta/10 text-bakery-cta text-[11px] font-black uppercase tracking-[0.2em] shadow-sm">
+              <span className="flex h-2 w-2 rounded-full bg-bakery-cta animate-ping" />
+              {content['hero.badge'] || '🇬🇧 Proudly Serving London & Beyond'}
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-playfair font-black text-bakery-primary leading-[0.9] tracking-tighter">
-              {content['hero.line1'] || 'Baking Joy,'}<br />
-              <span className="text-bakery-cta italic">{content['hero.line2'] || 'One Bite'}</span><br />
-              {content['hero.line3'] || 'At A Time.'}
+            <h1 className="text-7xl md:text-[6.5rem] font-playfair font-black text-bakery-primary leading-[0.88] tracking-[-0.04em]">
+              {content['hero.line1'] || 'Artisan'}<br />
+              <span className="text-bakery-cta italic pr-4">{content['hero.line2'] || 'Baking'}</span>
+              <span className="font-light text-bakery-primary/40">{content['hero.line3'] || 'Reimagined.'}</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-bakery-primary/60 max-w-lg leading-relaxed font-medium">
-              {content['hero.subtext'] || 'Experience the perfect blend of London sophistication and Nigerian soul. Handcrafted pastries delivered warm to your doorstep.'}
+            <p className="text-xl text-[#5C4D42] max-w-lg leading-relaxed font-medium opacity-90">
+              {content['hero.subtext'] || 'Discover the perfect fusion of classic French technique and bold West African flavours. Delivered fresh to your door.'}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link href={'/menu'}>
-                <Button size="xl" className="shadow-2xl shadow-bakery-cta/20 group">
-                  {content['hero.cta_text'] || 'Order Fresh Now'}
-                  <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
+            <div className="flex flex-col sm:flex-row gap-5 pt-4">
+              <Link href="/menu">
+                <button className="px-10 py-5 rounded-2xl bg-[#1C0A00] text-white font-bold text-sm uppercase tracking-widest hover:bg-[#D4421A] transition-all duration-300 shadow-2xl shadow-black/20 flex items-center group">
+                  {content['hero.cta_text'] || 'Explore the Menu'}
+                  <ArrowRight size={18} className="ml-3 group-hover:translate-x-1 transition-transform" />
+                </button>
               </Link>
-              <Link href={'/menu'}>
-                <Button variant="outline" size="xl">View Our Menu</Button>
+              <Link href="/custom-order">
+                <button className="px-10 py-5 rounded-2xl border-2 border-[#1C0A00]/10 text-[#1C0A00] font-bold text-sm uppercase tracking-widest hover:bg-white hover:border-white transition-all duration-300 shadow-sm">
+                  Custom Orders
+                </button>
               </Link>
             </div>
 
-            <div className="flex items-center gap-8 pt-8 border-t border-bakery-primary/5">
-              <div>
-                <p className="text-3xl font-black font-playfair">{content['hero.stats_customers'] || '500+'}</p>
-                <p className="text-xs uppercase tracking-widest font-bold text-bakery-primary/40">Happy Customers</p>
-              </div>
-              <div className="w-px h-10 bg-bakery-primary/10" />
-              <div>
-                <p className="text-3xl font-black font-playfair">{content['hero.stats_rating'] || '4.9/5'}</p>
-                <div className="flex text-bakery-cta">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+            <div className="flex items-center gap-10 pt-10 border-t border-[#1C0A00]/5">
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-12 h-12 rounded-full border-4 border-white overflow-hidden bg-gray-200">
+                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+                <div className="w-12 h-12 rounded-full border-4 border-white bg-[#D4421A] flex items-center justify-center text-white text-[10px] font-black tracking-tighter">
+                  4.9/5
                 </div>
               </div>
+              <p className="text-sm font-bold text-[#7C6B5E] max-w-[140px] leading-tight">
+                Trusted by <span className="text-[#1C0A00]">12,000+</span> pastry lovers across the UK
+              </p>
             </div>
           </motion.div>
 
-          {/* ── FLOATING CAKE IMAGE ── */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="relative flex justify-center"
-          >
-            {/* Warm cream glow behind cake */}
-            <div className="absolute inset-0 m-auto w-[85%] h-[85%] bg-bakery-accent/50 rounded-full blur-[60px]" />
-
-            {/* Floating cake image */}
-            <div className="relative hero-cake-float" style={{ borderRadius: "24px", overflow: "hidden", width: "100%", maxWidth: "480px", aspectRatio: "1/1" }}>
+          {/* Right side — Image Showcase */}
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }} className="relative">
+            <div className="relative aspect-square rounded-[60px] overflow-hidden luxury-shadow border-[12px] border-white/50 rotate-3 hover:rotate-0 transition-all duration-700 group">
               <Image
-                src={content['hero.image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=900"}
-                alt="Elegant Celebration Cake"
+                src={content['hero.image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1200"}
+                alt="Luxury Pastry"
                 fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
+                className="object-cover group-hover:scale-110 transition-transform duration-1000"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-bakery-primary/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#1C0A00]/40 to-transparent" />
+
+              {/* Floating Price Tag */}
+              <div className="absolute top-10 right-10 bg-white/90 backdrop-blur-md px-6 py-4 rounded-3xl shadow-2xl border border-white/20">
+                <p className="text-[10px] font-black text-bakery-cta uppercase tracking-[0.2em] mb-1">Starting from</p>
+                <p className="text-3xl font-black text-bakery-primary">£45.00</p>
+              </div>
             </div>
 
-            {/* Fast Delivery badge */}
-            <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -top-6 -right-6 bg-white p-4 rounded-3xl shadow-xl border border-bakery-primary/5 flex items-center gap-3 z-10">
-              <div className="w-12 h-12 bg-bakery-cta/10 rounded-2xl flex items-center justify-center text-bakery-cta"><Clock size={24} /></div>
-              <div>
-                <p className="text-xs font-bold text-bakery-primary/40 uppercase tracking-widest">{content['hero.badge_fast_delivery_title'] || 'Fast Delivery'}</p>
-                <p className="text-sm font-black">{content['hero.badge_fast_delivery_text'] || 'Under 45 Mins'}</p>
-              </div>
+            {/* Floating Badges */}
+            <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -top-6 -left-6 bg-[#C9A84C] text-white p-5 rounded-[32px] shadow-2xl z-10">
+              <ShieldCheck size={32} />
             </motion.div>
 
-            {/* Quality Assurance badge */}
-            <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 0.5 }} className="absolute -bottom-10 -left-10 bg-bakery-primary text-white p-6 rounded-[32px] shadow-2xl flex items-center gap-4 border border-white/10 z-10">
-              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-bakery-cta"><ShieldCheck size={32} /></div>
+            <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 1 }} className="absolute -bottom-10 -right-6 bg-white p-6 rounded-[40px] shadow-2xl z-10 border border-bakery-primary/5 flex items-center gap-4">
+              <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-bakery-cta">
+                <Clock size={28} />
+              </div>
               <div>
-                <p className="text-xs font-bold text-white/40 uppercase tracking-widest">{content['hero.badge_quality_title'] || 'Quality Assurance'}</p>
-                <p className="text-base font-black">{content['hero.badge_quality_text'] || '100% Fresh'}</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rapid Delivery</p>
+                <p className="text-lg font-black text-bakery-primary">Today 18:00</p>
               </div>
             </motion.div>
           </motion.div>

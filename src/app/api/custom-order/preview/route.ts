@@ -4,14 +4,34 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// Helper to determine base price rough estimates
-const getBasePrice = (type: string) => {
-    switch (type) {
-        case "Celebration Cake": return "£60";
-        case "Small Chops Platter": return "£45";
-        case "Puff Puff": return "£15";
-        default: return "£30";
+// Helper to determine base price rough estimates with more granularity
+const getBasePrice = (type: string, answers: any) => {
+    let base = 25;
+    if (type === "Celebration Cake") {
+        base = 45;
+        const serves = answers.serves || "";
+        if (serves.includes("25-30")) base += 20;
+        if (serves.includes("40-50")) base += 40;
+        if (serves.includes("50+")) base += 60;
+
+        const tiers = answers.tiers || "";
+        if (tiers.includes("2 tiers")) base += 25;
+        if (tiers.includes("3 tiers")) base += 50;
+    } else if (type === "Small Chops Platter") {
+        base = 35;
+        const serves = answers.serves || "";
+        if (serves.includes("20-30")) base += 20;
+        if (serves.includes("40-50")) base += 45;
+        if (serves.includes("50-100")) base += 85;
+    } else if (type === "Puff Puff") {
+        base = 6;
+        const pieces = answers.pieces || "";
+        if (pieces === "24") base = 12;
+        if (pieces === "36") base = 18;
+        if (pieces === "48") base = 24;
+        if (pieces === "72") base = 35;
     }
+    return `£${base}`;
 };
 
 export async function POST(req: Request) {
@@ -23,34 +43,32 @@ export async function POST(req: Request) {
         }
 
         if (!apiKey) {
-            // Fallback for when the API key is missing (so the user can still test the flow)
-            console.warn("GOOGLE_GENERATIVE_AI_API_KEY is missing. Using mock response.");
+            // Fallback for when the API key is missing
+            console.warn("GOOGLE_GENERATIVE_AI_API_KEY is missing. Using local logic.");
             return NextResponse.json({
-                visualDescription: `A stunning and bespoke ${productType}, handcrafted exactly to your preferences. Our expert bakers will bring this vision to life using the finest ingredients.`,
+                visualDescription: `A stunning and bespoke ${productType}, handcrafted exactly to your preferences. Our expert bakers will bring this vision to life using the finest ingredients and traditional Nigerian techniques.`,
                 specifications: Object.entries(answers)
                     .filter(([k]) => !k.endsWith('_custom'))
-                    .map(([k, v]) => ({ label: k, value: typeof v === 'object' && v !== null ? (Array.isArray(v) ? v.join(", ") : Object.values(v).join(' - ')) : String(v || '') })),
-                priceEstimate: `${getBasePrice(productType)} - Estimated`,
-                imageQuery: productType.split(" ")[0].toLowerCase() + ", food"
+                    .map(([k, v]) => ({ label: k.replace(/_/g, ' '), value: String(v || '') })),
+                priceEstimate: `${getBasePrice(productType, answers)} - Estimated`,
+                imageQuery: productType.toLowerCase() + " professional food photography"
             });
         }
 
         const prompt = `
-        You are an expert, highly creative master baker at "Sweet Delight" in the UK. 
-        A customer wants to place a custom order for a "${productType}".
-        
-        Here are their specific requirements:
-        ${JSON.stringify(answers, null, 2)}
+        You are a Master Artisan Baker at "Sweet Delight". 
+        A customer wants a custom order for a "${productType}".
+        Requirements: ${JSON.stringify(answers)}
 
-        Based on these requirements, generate a compelling, appetizing preview of what their order will look and feel like.
+        Create an exquisite, luxury preview of their request.
         
-        You MUST respond strictly in valid JSON format with the following keys exactly:
-        - "visualDescription": A 2-3 sentence, beautifully written, warm and mouth-watering description of the final product. Make them excited to eat it.
-        - "specifications": An array of objects, each with a "label" (string) and "value" (string), summarizing the key technical specs of their order (e.g., Serves, Flavour, Tiers, Theme).
-        - "priceEstimate": A string representing a rough price estimate in GBP (£). Be realistic but give a range if needed (e.g., "£65 - £80"). Basecakes start around £60, platters around £45.
-        - "imageQuery": A highly optimized, max 3-word search query to fetch a beautiful reference image from Unsplash (e.g. "chocolate tier cake", "nigerian puff puff").
-
-        CRITICAL: Output ONLY the JSON object. Do not include markdown formatting like \`\`\`json. Just the raw JSON.
+        Respond ONLY in JSON:
+        {
+          "visualDescription": "A 3-sentence mouth-watering, luxury description of the final product.",
+          "specifications": [{"label": "string", "value": "string"}],
+          "priceEstimate": "A realistic GBP price range (e.g. £75 - £90). Note: Cakes start at £45, Platters £35. Add premium for size/tiers/gold leaf.",
+          "imageQuery": "A 4-5 word highly descriptive prompt for a food image (e.g. 'luxury 3 tier gold white wedding cake') - DO NOT include 'cake' if it's not a cake."
+        }
         `;
 
         let responseText = "";
@@ -79,7 +97,7 @@ export async function POST(req: Request) {
                             : (typeof v === 'string' && v.startsWith('Custom') && customVal ? `Custom: ${customVal}` : String(v || ''));
                         return { label: k, value: displayVal };
                     }),
-                priceEstimate: `${getBasePrice(productType)} - Estimated`,
+                priceEstimate: `${getBasePrice(productType, answers)} - Estimated`,
                 imageQuery: productType.split(" ")[0].toLowerCase() + ", food"
             });
         }

@@ -5,16 +5,16 @@ export interface Product {
     id: string;
     name: string;
     price: number;
-    originalPrice?: number;
-    rating: number;
-    reviewCount: number;
+    sale_price?: number | null;
+    on_sale?: boolean;
+    rating?: number;
+    reviewCount?: number;
     category: string;
     description: string;
-    image: string;
+    image_url: string;
     images?: string[];
-    isAvailable: boolean;
-    isFeatured: boolean;
-    onSale?: boolean;
+    is_available: boolean;
+    is_featured: boolean;
 }
 
 export interface CartItem extends Product {

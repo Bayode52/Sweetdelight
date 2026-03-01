@@ -181,7 +181,10 @@ export default function AdminProducts() {
                                                     <Edit2 size={16} />
                                                 </button>
                                                 <button
-                                                    onClick={() => { if (window.confirm("Are you sure you want to delete this product?")) deleteProduct.mutate(p.id); }}
+                                                    onClick={() => {
+                                                        const ok = window.confirm(`Are you sure you want to delete "${p.name}"? This action cannot be undone.`);
+                                                        if (ok) deleteProduct.mutate(p.id);
+                                                    }}
                                                     className="p-2 text-bakery-primary/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                 >
                                                     <Trash2 size={16} />

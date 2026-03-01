@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Navbar, Footer, AdminSidebar } from "@/components/layout";
 import { PWAInstallPrompt } from "@/components/ui/PWAInstallPrompt";
 import ChatWidget from "@/components/chat/ChatWidget";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { Playfair_Display, Outfit } from "next/font/google";
 import { ContentMap } from "@/lib/content";
 
@@ -42,6 +43,7 @@ export default function LayoutClient({
                     <main className="flex-1 pt-[72px]">{children}</main>
                     <Footer content={footerContent} settings={settings} />
                     <ChatWidget />
+                    <WhatsAppButton />
                 </div>
             )}
             <PWAInstallPrompt />

@@ -44,7 +44,7 @@ export function ProductCard({ product, onViewDetail }: ProductCardProps) {
         >
             <div className="relative aspect-square rounded-[32px] overflow-hidden bg-bakery-accent/20">
                 <Image
-                    src={product.image}
+                    src={product.image_url}
                     alt={product.name}
                     fill
                     sizes="(max-width: 768px) 100vw, 400px"
@@ -53,8 +53,8 @@ export function ProductCard({ product, onViewDetail }: ProductCardProps) {
 
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
-                    {product.onSale && <Badge variant="sale">Sale</Badge>}
-                    {product.isFeatured && <Badge variant="highlight">Must Try</Badge>}
+                    {product.on_sale && <Badge variant="sale">Sale</Badge>}
+                    {product.is_featured && <Badge variant="highlight">Must Try</Badge>}
                 </div>
 
                 {/* Action Overlay */}
@@ -87,11 +87,11 @@ export function ProductCard({ product, onViewDetail }: ProductCardProps) {
                 <div className="flex items-center justify-between">
                     <div className="flex items-baseline gap-2">
                         <span className="text-xl font-black text-bakery-primary font-playfair">
-                            £{product.price.toFixed(2)}
+                            £{(product.on_sale && product.sale_price ? product.sale_price : product.price).toFixed(2)}
                         </span>
-                        {product.originalPrice && (
+                        {product.on_sale && product.sale_price && (
                             <span className="text-sm line-through text-bakery-primary/30 font-bold">
-                                £{product.originalPrice.toFixed(2)}
+                                £{product.price.toFixed(2)}
                             </span>
                         )}
                     </div>

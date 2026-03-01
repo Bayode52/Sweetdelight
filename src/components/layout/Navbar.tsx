@@ -155,62 +155,56 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
     ];
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-            <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
+        <header
+            className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+            style={{
+                background: '#FFFDF9',
+                boxShadow: '0 2px 20px rgba(28,10,0,0.08)',
+                borderBottom: '1px solid rgba(201,168,76,0.3)'
+            }}
+        >
+            <div className="max-w-7xl mx-auto px-8 h-[72px] flex items-center">
 
-                {/* LEFT — Logo */}
-                <Link href="/" className="flex items-center gap-1 shrink-0 mr-12 hover:opacity-90 transition-opacity">
+                {/* Logo */}
+                <Link href="/" className="flex items-baseline gap-1 shrink-0 mr-16 group">
                     <span style={{
                         fontFamily: "'Playfair Display', Georgia, serif",
-                        fontSize: '1.5rem',
-                        fontWeight: '700',
-                        fontStyle: 'italic',
-                        background: 'linear-gradient(135deg, #1a0805 0%, #D4421A 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        letterSpacing: '0.01em'
-                    }}>
-                        Sweet
-                    </span>
+                        fontSize: '1.55rem', fontWeight: 700, fontStyle: 'italic',
+                        background: 'linear-gradient(135deg, #1C0A00 30%, #D4421A 100%)',
+                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text', letterSpacing: '-0.01em'
+                    }}>Sweet</span>
                     <span style={{
                         fontFamily: "'Playfair Display', Georgia, serif",
-                        fontSize: '1.5rem',
-                        fontWeight: '700',
-                        fontStyle: 'italic',
-                        color: '#D4421A',
-                        marginLeft: '5px',
-                        letterSpacing: '0.01em'
+                        fontSize: '1.55rem', fontWeight: 700, fontStyle: 'italic',
+                        color: '#D4421A', letterSpacing: '-0.01em', position: 'relative'
                     }}>
                         Delight
+                        <span style={{
+                            position: 'absolute', bottom: '-1px', left: 0, right: 0,
+                            height: '1.5px',
+                            background: 'linear-gradient(90deg, #D4421A, #C9A84C)',
+                            borderRadius: '2px'
+                        }} />
                     </span>
-                    <span style={{
-                        color: '#D4421A',
-                        fontSize: '10px',
-                        marginLeft: '3px',
-                        marginBottom: '8px',
-                        alignSelf: 'flex-end'
-                    }}>
-                        ✦
-                    </span>
+                    <span style={{ color: '#C9A84C', fontSize: '11px', marginLeft: '2px' }}>✦</span>
                 </Link>
 
-                {/* CENTER — Nav links (desktop only) */}
-                <nav className="hidden lg:flex items-center gap-7 flex-1 justify-center">
+                {/* Nav links — desktop */}
+                <nav className="hidden lg:flex items-center gap-9 flex-1">
                     {navLinks.map(link => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className="text-sm font-medium text-gray-700 hover:text-[#D4421A] transition-colors whitespace-nowrap tracking-wide"
-                            style={{ fontFamily: "'Inter', sans-serif" }}
-                        >
+                        <Link key={link.href} href={link.href}
+                            className="text-[12px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200"
+                            style={{ color: '#7C6B5E' }}
+                            onMouseEnter={e => (e.target as HTMLElement).style.color = '#D4421A'}
+                            onMouseLeave={e => (e.target as HTMLElement).style.color = '#7C6B5E'}>
                             {link.label}
                         </Link>
                     ))}
                 </nav>
 
-                {/* RIGHT — Cart + Auth */}
-                <div className="flex items-center gap-3 shrink-0 ml-6">
+                {/* Right: cart + auth */}
+                <div className="flex items-center gap-3 ml-auto">
                     {/* Cart icon */}
                     <button
                         onClick={openCart}

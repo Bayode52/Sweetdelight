@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronLeft, ChevronRight, ShoppingCart, Plus, Minus, Star, X } from "lucide-react";
 import { Badge } from "@/components/ui";
@@ -35,29 +36,6 @@ const SORT_OPTIONS = [
 ];
 
 // ─── Mock products (replace with Supabase fetch in production) ───────────────
-const MOCK_PRODUCTS: (Product & { badge?: "BEST SELLER" | "PREMIUM" | "SIGNATURE" | "NEW" | "MUST TRY" })[] = [
-    { id: "c1", name: "Gold Tier Celebration Cake", price: 65.00, rating: 4.9, reviewCount: 84, category: "Celebration Cakes", description: "Luxurious 3-tier vanilla sponge with Italian meringue buttercream and edible gold leaf.", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: true, badge: "BEST SELLER" },
-    { id: "c2", name: "Chocolate Fudge Layer Cake", price: 55.00, rating: 4.8, reviewCount: 62, category: "Celebration Cakes", description: "Rich dark chocolate sponge with velvety fudge filling and ganache drip.", image: "https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-    { id: "c3", name: "Custom Birthday Cake (6\")", price: 45.00, rating: 5.0, reviewCount: 31, category: "Celebration Cakes", description: "Fully personalised — your flavours, your design, your message.", image: "https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false, badge: "PREMIUM" },
-
-    { id: "s1", name: "Small Chops Platter (30 pcs)", price: 35.00, rating: 5.0, reviewCount: 214, category: "Small Chops Platters", description: "Puff puff, samosas, mini spring rolls — the ultimate party starter.", image: "https://images.unsplash.com/photo-1606913084603-3e75fb777da1?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: true, badge: "BEST SELLER" },
-    { id: "s2", name: "Golden Meat Pie (6 pcs)", price: 12.00, rating: 4.8, reviewCount: 450, category: "Small Chops Platters", description: "Authentic flaky crust filled with seasoned beef, potatoes and carrots.", image: "https://images.unsplash.com/photo-1623334044303-242022f5a470?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false, badge: "SIGNATURE" },
-    { id: "s3", name: "Sausage Roll Bites (12 pcs)", price: 9.00, rating: 4.7, reviewCount: 320, category: "Small Chops Platters", description: "Buttery puff pastry with herbed pork sausage — crowd pleasers every time.", image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-    { id: "s4", name: "Fish Roll (8 pcs)", price: 10.00, rating: 4.6, reviewCount: 178, category: "Small Chops Platters", description: "Crispy pastry rolls filled with spiced tuna and peppered sauce.", image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-
-    { id: "ch1", name: "Classic Chin Chin 500g", price: 8.50, rating: 4.9, reviewCount: 196, category: "Chin Chin & Snacks", description: "Crunchy, golden, slightly sweet — just like grandma's recipe.", image: "https://images.unsplash.com/photo-1548840410-dd0ad53a5763?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: true, badge: "NEW" },
-    { id: "ch2", name: "Coconut Chin Chin 400g", price: 9.00, rating: 4.8, reviewCount: 112, category: "Chin Chin & Snacks", description: "Coconut-infused crunch — a tropical West African classic.", image: "https://images.unsplash.com/photo-1533930027501-46bc3785256e?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-
-    { id: "pp1", name: "Puff Puff Dozen", price: 6.00, rating: 4.9, reviewCount: 388, category: "Puff Puff", description: "Soft, fluffy, deep-fried West African doughnuts — sweet and addictive.", image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: true, badge: "MUST TRY" },
-    { id: "pp2", name: "Spiced Puff Puff (18 pcs)", price: 9.00, rating: 4.7, reviewCount: 142, category: "Puff Puff", description: "The classic with a chilli kick — bold, soft and completely moreish.", image: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-
-    { id: "pa1", name: "Nigerian Beef Pie", price: 3.50, rating: 4.8, reviewCount: 210, category: "Pastries & Bakes", description: "A staple in every Nigerian home — flaky shortcrust with peppered beef.", image: "https://images.unsplash.com/photo-1623334044303-242022f5a470?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-    { id: "pa2", name: "Spring Roll (6 pcs)", price: 7.50, rating: 4.6, reviewCount: 94, category: "Pastries & Bakes", description: "Crispy golden rolls filled with vegetables and seasoned minced meat.", image: "https://images.unsplash.com/photo-1606913084603-3e75fb777da1?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-
-    { id: "pb1", name: "Premium Party Box (Feeds 15)", price: 85.00, originalPrice: 100.00, rating: 4.9, reviewCount: 47, category: "Party Boxes", description: "Small chops, chin chin, puff puff and celebration cake slices — feeds 15 guests.", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: true, badge: "PREMIUM", onSale: true },
-    { id: "pb2", name: "Starter Party Box (Feeds 8)", price: 45.00, rating: 4.8, reviewCount: 28, category: "Party Boxes", description: "Perfect for smaller gatherings. Mixed selection of our bestselling snacks.", image: "https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&q=80&w=600", isAvailable: true, isFeatured: false },
-];
-
 const BADGE_COLORS: Record<string, string> = {
     "BEST SELLER": "bg-[#D4421A] text-white",
     "SIGNATURE": "bg-purple-600 text-white",
@@ -67,7 +45,7 @@ const BADGE_COLORS: Record<string, string> = {
 };
 
 // ─── Product Card ────────────────────────────────────────────────────────────
-function MenuProductCard({ product, onViewDetail }: { product: typeof MOCK_PRODUCTS[0]; onViewDetail: (p: Product) => void }) {
+function MenuProductCard({ product, onViewDetail }: { product: Product; onViewDetail: (p: Product) => void }) {
     const { addItem, items, updateQuantity, removeItem } = useCartStore();
     const cartItem = items.find((i) => i.id === product.id);
 
@@ -87,13 +65,13 @@ function MenuProductCard({ product, onViewDetail }: { product: typeof MOCK_PRODU
             onClick={() => onViewDetail(product)}
         >
             <div className="relative aspect-square overflow-hidden bg-bakery-accent/20">
-                <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 50vw, 300px" className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                {product.badge && (
-                    <span className={cn("absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest", BADGE_COLORS[product.badge])}>
-                        {product.badge}
+                <Image src={product.image_url} alt={product.name} fill sizes="(max-width: 768px) 50vw, 300px" className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                {product.is_featured && (
+                    <span className={cn("absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest", BADGE_COLORS["BEST SELLER"])}>
+                        BEST SELLER
                     </span>
                 )}
-                {"onSale" in product && product.onSale && product.originalPrice && (
+                {product.on_sale && product.sale_price && (
                     <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black">SALE</span>
                 )}
             </div>
@@ -108,13 +86,14 @@ function MenuProductCard({ product, onViewDetail }: { product: typeof MOCK_PRODU
                     className="flex items-center gap-1 hover:opacity-70 transition-opacity"
                 >
                     <Star size={10} className="text-bakery-cta fill-bakery-cta" />
-                    <span className="text-[10px] font-bold text-bakery-primary/50">{product.rating} ({product.reviewCount})</span>
+                    <span className="text-[10px] font-bold text-bakery-primary/50">4.9 (24)</span>
                 </Link>
 
                 <div className="flex items-center justify-between pt-1">
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-base font-black text-bakery-primary font-playfair">£{product.price.toFixed(2)}</span>
-                        {product.originalPrice && <span className="text-xs line-through text-bakery-primary/30 font-bold">£{product.originalPrice.toFixed(2)}</span>}
+                        {product.on_sale && product.sale_price && <span className="text-xs line-through text-bakery-primary/30 font-bold">£{product.price.toFixed(2)}</span>}
+                        {product.on_sale && product.sale_price && <span className="text-base font-black text-bakery-primary font-playfair">£{product.sale_price.toFixed(2)}</span>}
                     </div>
 
                     {cartItem ? (
@@ -138,31 +117,43 @@ function MenuProductCard({ product, onViewDetail }: { product: typeof MOCK_PRODU
     );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────────────────
-export function MenuPageClient({ content }: { content: ContentMap }) {
+// ─── Component Props ────────────────────────────────────────────────────────
+interface MenuPageClientProps {
+    content: ContentMap;
+}
+
+export function MenuPageClient({ content }: MenuPageClientProps) {
+    const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
+        queryKey: ["all-products"],
+        queryFn: async () => {
+            const res = await fetch("/api/admin/products");
+            if (!res.ok) throw new Error("Failed to fetch products");
+            const data = await res.json();
+            return (Array.isArray(data) ? data : data.products || []).filter((p: any) => p.is_available);
+        }
+    });
+
     const [selectedCategory, setSelectedCategory] = React.useState("All");
     const [searchQuery, setSearchQuery] = React.useState("");
     const [sortBy, setSortBy] = React.useState("rec");
     const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
     const [isDetailOpen, setIsDetailOpen] = React.useState(false);
-    const [loading] = React.useState(false);
     const categoryScrollRef = React.useRef<HTMLDivElement>(null);
 
     const scrollCats = (dir: "left" | "right") => {
         categoryScrollRef.current?.scrollBy({ left: dir === "right" ? 200 : -200, behavior: "smooth" });
     };
 
-    const filteredProducts = MOCK_PRODUCTS.filter((p) => {
-        // Normalise "Small Chops Platters" vs "Small Chops" for URL param compatibility
+    const filteredProducts = products.filter((p) => {
         const catMatch = selectedCategory === "All"
             || p.category === selectedCategory
             || (selectedCategory === "Small Chops" && p.category === "Small Chops Platters");
-        const search = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const search = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || (p.description || "").toLowerCase().includes(searchQuery.toLowerCase());
         return catMatch && search;
     }).sort((a, b) => {
         if (sortBy === "price-asc") return a.price - b.price;
         if (sortBy === "price-desc") return b.price - a.price;
-        if (sortBy === "rating") return b.rating - a.rating;
+        if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
         return 0;
     });
 
@@ -234,18 +225,18 @@ export function MenuPageClient({ content }: { content: ContentMap }) {
                 </div>
 
                 {/* Skeleton loading */}
-                {loading && (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)}
+                {productsLoading && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[...Array(6)].map((_, i) => <ProductCardSkeleton key={i} />)}
                     </div>
                 )}
 
                 {/* GROUPED VIEW — when All is selected + no search */}
-                {!loading && isAllSelected && (
+                {!productsLoading && isAllSelected && (
                     <div className="space-y-16">
                         {grouped.map((group) => {
                             const shown = group.products.slice(0, 3);
-                            const needPlaceholders = 3 - shown.length; // 0, 1, or 2
+                            const needPlaceholders = Math.max(0, 3 - shown.length);
                             return (
                                 <div key={group.name} className="space-y-6">
                                     <div>
@@ -289,10 +280,10 @@ export function MenuPageClient({ content }: { content: ContentMap }) {
                 )}
 
                 {/* FLAT VIEW — when specific category or search active */}
-                {!loading && !isAllSelected && (
+                {!productsLoading && !isAllSelected && (
                     <>
                         <AnimatePresence mode="popLayout">
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                 {filteredProducts.map((p) => (
                                     <MenuProductCard key={p.id} product={p} onViewDetail={openDetail} />
                                 ))}
