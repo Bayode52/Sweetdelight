@@ -25,6 +25,14 @@ export default function CustomOrderPage() {
     const [answers, setAnswers] = useState<Record<string, any>>({});
     const [isGenerating, setIsGenerating] = useState(false);
     const [aiPreview, setAiPreview] = useState<any>(null);
+    const [imgLoaded, setImgLoaded] = useState(false);
+    const [seed, setSeed] = useState(0);
+
+    // Dynamic AI Image URL builder
+    const buildAIImageUrl = (query: string) => {
+        const prompt = encodeURIComponent(`${query}, artisan bakery, professional food photography, luxury, 4k, hyperrealistic`);
+        return `https://image.pollinations.ai/prompt/${prompt}?width=800&height=1000&seed=${seed}&nologo=true`;
+    };
 
     // Step 4 Checkout State
     const [customerDetails, setCustomerDetails] = useState({ name: "", email: "", phone: "", deliveryType: "collection", address: "", paymentMethod: "dm_whatsapp", notes: "" });
@@ -92,6 +100,8 @@ export default function CustomOrderPage() {
                 body: JSON.stringify({ productType, answers })
             });
             const data = await res.json();
+            setSeed(Math.floor(Math.random() * 1000000));
+            setImgLoaded(false);
             setAiPreview(data);
         } catch (error) {
             console.error("Failed to generate preview", error);
@@ -387,14 +397,22 @@ export default function CustomOrderPage() {
                                                         <Cake size={64} className="text-bakery-primary/20" />
                                                     </div>
                                                 )}
-                                                {/* We use Pollinations AI, which generates an image on the fly! This is faster and much more powerful than simple stock search. */}
+                                                {/* We use Pollinations AI for instant visualisations */}
                                                 {aiPreview.imageQuery && (
-                                                    <img
-                                                        src={`https://image.pollinations.ai/prompt/${encodeURIComponent(aiPreview.imageQuery + ", delicious bakery food, high quality photo, 4k")}?width=800&height=1000&nologo=true`}
-                                                        alt="AI Reference"
-                                                        className="object-cover w-full h-full absolute inset-0 z-10"
-                                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                                    />
+                                                    <div className="relative w-full h-full">
+                                                        {!imgLoaded && (
+                                                            <div className="absolute inset-0 z-20 flex items-center justify-center bg-bakery-primary/10 backdrop-blur-sm animate-pulse">
+                                                                <div className="w-12 h-12 border-4 border-bakery-cta border-t-transparent rounded-full animate-spin"></div>
+                                                            </div>
+                                                        )}
+                                                        <img
+                                                            src={buildAIImageUrl(aiPreview.imageQuery)}
+                                                            alt="AI Reference"
+                                                            className={`object-cover w-full h-full absolute inset-0 z-10 transition-opacity duration-1000 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                                                            onLoad={() => setImgLoaded(true)}
+                                                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                        />
+                                                    </div>
                                                 )}
 
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-20 flex items-end p-8">

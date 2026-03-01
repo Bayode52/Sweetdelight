@@ -1,6 +1,9 @@
-'use client'
+"use client";
+
 import { useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import { CropUpload } from '@/components/admin/CropUpload'
+import toast from 'react-hot-toast'
 
 // ─── Supabase client ───────────────────────────────
 function getSupabase() {
@@ -92,56 +95,40 @@ function Field({ label, defaultValue, page, section, field, multiline = false, h
     )
 }
 
-// ─── Image upload field ───────────────────────────
-function ImageField({ label, defaultValue, page, section, field, hint, bucket = 'site-images' }: {
+// ─── Image upload field (Powered by CropUpload) ───
+function ImageField({ label, defaultValue, page, section, field, hint, bucket = 'site-images', aspectRatio = 'square' }: {
     label: string; defaultValue?: string; page: string
-    section: string; field: string; hint?: string; bucket?: string
+    section: string; field: string; hint?: string; bucket?: string;
+    aspectRatio?: 'square' | 'video' | 'portrait'
 }) {
-    const [preview, setPreview] = useState(defaultValue || '')
-    const [uploading, setUploading] = useState(false)
-    const [ok, setOk] = useState(false)
+    const [value, setValue] = useState(defaultValue || '');
 
-    const handle = async (file: File) => {
-        setUploading(true)
-        const reader = new FileReader()
-        reader.onload = e => setPreview(e.target?.result as string)
-        reader.readAsDataURL(file)
-        const url = await uploadImage(file, bucket)
-        if (url) {
-            await saveField(page, section, field, url)
-            setPreview(url)
-            setOk(true)
-            setTimeout(() => setOk(false), 3000)
+    const handleUpload = async (url: string) => {
+        const success = await saveField(page, section, field, url);
+        if (success) {
+            setValue(url);
+            toast.success(`${label} updated`);
+        } else {
+            toast.error("Failed to save image");
         }
-        setUploading(false)
-    }
+    };
 
     return (
-        <div className="py-3 border-b border-gray-100 last:border-0">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-            {hint && <p className="text-xs text-orange-500 mb-2">{hint}</p>}
-            <div className="flex items-center gap-4">
-                {preview && (
-                    <img src={preview} className="w-20 h-20 object-cover rounded-xl border-2 border-gray-200 shrink-0"
-                        onError={e => (e.currentTarget.style.display = 'none')} />
-                )}
-                <label className="cursor-pointer">
-                    <div className={`flex items-center gap-2 border-2 border-dashed rounded-xl px-4 py-3 transition-colors ${uploading ? 'border-orange-300 bg-orange-50' : 'border-gray-200 hover:border-orange-400 hover:bg-orange-50'
-                        }`}>
-                        <span className="text-xl">{uploading ? '⏳' : '📸'}</span>
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">
-                                {uploading ? 'Uploading...' : ok ? '✅ Uploaded!' : 'Upload Photo'}
-                            </p>
-                            <p className="text-xs text-gray-400">JPG, PNG, WebP • Max 10MB</p>
-                        </div>
-                    </div>
-                    <input type="file" accept="image/*" className="hidden"
-                        onChange={e => { const f = e.target.files?.[0]; if (f) handle(f) }} />
-                </label>
+        <div className="py-6 border-b border-gray-100 last:border-0">
+            <div className="flex flex-col gap-2 mb-4">
+                <p className="text-xs font-black uppercase tracking-widest text-[#D4421A]">{label}</p>
+                {hint && <p className="text-xs text-gray-400 font-medium">{hint}</p>}
+            </div>
+            <div className="max-w-md">
+                <CropUpload
+                    value={value}
+                    onChange={handleUpload}
+                    bucket={bucket}
+                    aspectRatio={aspectRatio as any}
+                />
             </div>
         </div>
-    )
+    );
 }
 
 // ─── Section card ─────────────────────────────────
@@ -225,7 +212,7 @@ export default function ContentEditor() {
                         <Field label="Subheading" defaultValue="Experience the perfect blend of London sophistication and Nigerian soul." page="home" section="hero" field="subtext" multiline />
                         <Field label="Button 1 Text" defaultValue="Order Fresh Now" page="home" section="hero" field="btn1" />
                         <Field label="Button 2 Text" defaultValue="View Our Menu" page="home" section="hero" field="btn2" />
-                        <ImageField label="Hero Image" page="home" section="hero" field="image" hint="Best size: 900×700px. Shows on right side of homepage." />
+                        <ImageField label="Hero Image" page="home" section="hero" field="image" aspectRatio="video" hint="Best size: 1200×800px. Shows on right side of homepage." />
                     </Section>
                     <Section title="Stats Bar">
                         <Field label="Stat 1 Number" defaultValue="500+" page="home" section="stats" field="s1_num" />
@@ -240,10 +227,10 @@ export default function ContentEditor() {
                     </Section>
                     <Section title="Category Section">
                         <Field label="Section Heading" defaultValue="Explore Categories" page="home" section="categories" field="heading" />
-                        <ImageField label="Celebration Cakes Photo" page="home" section="categories" field="cat1_img" hint="Upload your own cake photo" />
-                        <ImageField label="Small Chops Photo" page="home" section="categories" field="cat2_img" />
-                        <ImageField label="Chin Chin & Snacks Photo" page="home" section="categories" field="cat3_img" />
-                        <ImageField label="Party Boxes Photo" page="home" section="categories" field="cat4_img" />
+                        <ImageField label="Celebration Cakes Photo" page="home" section="categories" field="cat1_img" aspectRatio="portrait" hint="Upload your own cake photo" />
+                        <ImageField label="Small Chops Photo" page="home" section="categories" field="cat2_img" aspectRatio="portrait" />
+                        <ImageField label="Chin Chin & Snacks Photo" page="home" section="categories" field="cat3_img" aspectRatio="portrait" />
+                        <ImageField label="Party Boxes Photo" page="home" section="categories" field="cat4_img" aspectRatio="portrait" />
                     </Section>
                     <Section title="Newsletter Section">
                         <Field label="Heading" defaultValue="Get 10% Off Your First Order" page="home" section="newsletter" field="heading" />
@@ -270,11 +257,11 @@ export default function ContentEditor() {
                     <Section title="Category Cover Images">
                         <Field label="Note" defaultValue="" page="menu" section="note" field="info"
                             hint="Upload cover photos for each category below. These show on the homepage and menu page." />
-                        <ImageField label="Celebration Cakes Cover" page="menu" section="covers" field="celebration_cakes" bucket="site-images" hint="Your best cake photo" />
-                        <ImageField label="Small Chops Cover" page="menu" section="covers" field="small_chops" hint="Your platter or small chops photo" />
-                        <ImageField label="Chin Chin & Snacks Cover" page="menu" section="covers" field="chin_chin" hint="Chin chin bag or snacks photo" />
-                        <ImageField label="Party Boxes Cover" page="menu" section="covers" field="party_boxes" />
-                        <ImageField label="Puff Puff Cover" page="menu" section="covers" field="puff_puff" />
+                        <ImageField label="Celebration Cakes Cover" page="menu" section="covers" field="celebration_cakes" bucket="site-images" aspectRatio="portrait" hint="Your best cake photo" />
+                        <ImageField label="Small Chops Cover" page="menu" section="covers" field="small_chops" aspectRatio="portrait" hint="Your platter or small chops photo" />
+                        <ImageField label="Chin Chin & Snacks Cover" page="menu" section="covers" field="chin_chin" aspectRatio="portrait" hint="Chin chin bag or snacks photo" />
+                        <ImageField label="Party Boxes Cover" page="menu" section="covers" field="party_boxes" aspectRatio="portrait" />
+                        <ImageField label="Puff Puff Cover" page="menu" section="covers" field="puff_puff" aspectRatio="portrait" />
                     </Section>
                     <Section title="Featured Products Section">
                         <Field label="Section Heading" defaultValue="Customer Favourites" page="menu" section="featured" field="heading" />

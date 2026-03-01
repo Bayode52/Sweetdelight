@@ -166,7 +166,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
             <div className="max-w-7xl mx-auto px-8 h-[72px] flex items-center">
 
                 {/* Logo */}
-                <Link href="/" className="flex items-baseline gap-1 shrink-0 mr-16 group">
+                <Link href="/" className="flex items-baseline gap-1 shrink-0 mr-12 group">
                     <span style={{
                         fontFamily: "'Playfair Display', Georgia, serif",
                         fontSize: '1.55rem', fontWeight: 700, fontStyle: 'italic',
@@ -191,7 +191,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                 </Link>
 
                 {/* Nav links — desktop */}
-                <nav className="hidden lg:flex items-center gap-9 flex-1">
+                <nav className="hidden lg:flex items-center gap-7 flex-1">
                     {navLinks.map(link => (
                         <Link key={link.href} href={link.href}
                             className="text-[12px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200"

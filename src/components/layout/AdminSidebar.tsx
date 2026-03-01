@@ -27,6 +27,7 @@ const ADMIN_LINKS = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Orders", href: "/admin/orders", icon: ShoppingBag },
     { name: "Products", href: "/admin/products", icon: Package },
+    { name: "Blog Posts", href: "/admin/blog", icon: BookOpen },
     { name: "Customers", href: "/admin/customers", icon: Users },
     { name: "Reviews", href: "/admin/reviews", icon: Star },
     { name: "Messages", href: "/admin/messages", icon: MessageSquare },

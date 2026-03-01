@@ -94,8 +94,14 @@ export default function ChatWidget() {
 
             const data = await res.json();
             if (res.ok) {
-                // Refetch to get the actual DB messages to stay in sync
-                await fetchMessages(sessionToken);
+                // IMPORTANT: Append the bot's response to the history
+                const botMessage: Message = {
+                    id: Date.now().toString() + "-bot",
+                    role: "bot",
+                    content: data.message,
+                    created_at: new Date().toISOString()
+                };
+                setMessages(prev => [...prev, botMessage]);
             } else {
                 console.error("Failed to send message", data.error);
             }
@@ -253,6 +259,12 @@ export default function ChatWidget() {
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        sendMessage(input);
+                                    }
+                                }}
                                 placeholder="Type a message..."
                                 className="flex-1 bg-black/5 text-sm p-3 pl-4 rounded-xl border border-transparent outline-none focus:border-bakery-cta/30 focus:bg-white focus:shadow-[0_0_0_4px_rgba(235,94,40,0.1)] transition-all placeholder:text-black/30 text-[#2C1810]"
                             />
