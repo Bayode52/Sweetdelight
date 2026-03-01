@@ -7,10 +7,15 @@ export function Footer({ content, settings }: { content?: ContentMap, settings?:
     const businessName = settings?.business_name || "Sweet Delight";
     const tagline = settings?.tagline || content?.['footer.main.tagline'] || "Handcrafting moments of joy with premium ingredients and traditional Nigerian warmth.";
 
+    const phone = process.env.NEXT_PUBLIC_PHONE || '447000000000';
+    const instagram = process.env.NEXT_PUBLIC_INSTAGRAM || 'sweetdelight';
+    const email = process.env.NEXT_PUBLIC_EMAIL || 'hello@sweetdelight.co.uk';
+    const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '447000000000';
+
     const socialLinks = [
-        { icon: <Instagram size={20} />, href: settings?.instagram ? `https://instagram.com/${settings.instagram.replace('@', '')}` : "#" },
-        { icon: <Facebook size={20} />, href: settings?.facebook || "#" },
-        { icon: <Twitter size={20} />, href: settings?.tiktok ? `https://tiktok.com/@${settings.tiktok.replace('@', '')}` : "#" }, // Using Twitter icon for tiktok as fallback if no tiktok icon
+        { icon: <Instagram size={20} />, href: `https://instagram.com/${instagram.replace('@', '')}` },
+        { icon: <Facebook size={20} />, href: "#" },
+        { icon: <Twitter size={20} />, href: "#" },
     ];
 
     return (
@@ -64,15 +69,15 @@ export function Footer({ content, settings }: { content?: ContentMap, settings?:
                     <ul className="space-y-4">
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Phone size={18} className="text-bakery-cta" />
-                            <a href={`https://wa.me/${settings?.whatsapp || '447000000000'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{settings?.whatsapp || '+44 7000 000000'}</a>
+                            <a href={`https://wa.me/${whatsapp}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">+{whatsapp}</a>
                         </li>
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Instagram size={18} className="text-bakery-cta" />
-                            <a href={`https://instagram.com/${(settings?.instagram || 'sweetdelight').replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-bakery-cta transition-colors">{settings?.instagram || '@sweetdelight'}</a>
+                            <a href={`https://instagram.com/${instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold hover:text-bakery-cta transition-colors">@{instagram.replace('@', '')}</a>
                         </li>
                         <li className="flex gap-3 text-bakery-primary/60">
                             <Mail size={18} className="text-bakery-cta" />
-                            <a href={`mailto:${settings?.email || 'hello@sweetdelight.co.uk'}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{settings?.email || 'hello@sweetdelight.co.uk'}</a>
+                            <a href={`mailto:${email}`} className="text-sm font-bold hover:text-bakery-cta transition-colors">{email}</a>
                         </li>
                     </ul>
                 </div>

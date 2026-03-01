@@ -24,7 +24,7 @@ export async function GET(req: Request) {
             console.warn("⚠️ Chat API in Demo Mode (Database or Keys missing)");
             return NextResponse.json({
                 messages: [
-                    { role: 'bot', content: "👋 Welcome to Crave Bakery! (Demo Mode: Database not connected)", created_at: new Number(Date.now()).toLocaleString() }
+                    { role: 'bot', content: "👋 Welcome to Sweet Delight! (Demo Mode: Database not connected)", created_at: new Number(Date.now()).toLocaleString() }
                 ],
                 status: 'bot',
                 demo: true

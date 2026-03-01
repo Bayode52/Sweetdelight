@@ -82,7 +82,7 @@ export default function ReviewsPage() {
     });
 
     return (
-        <div className="min-h-screen bg-bakery-background pt-32 pb-24 px-6 md:px-12">
+        <div className="min-h-screen bg-bakery-background pt-40 pb-24 px-6 md:px-12">
             <div className="max-w-7xl mx-auto">
                 {/* Hero section */}
                 <div className="text-center max-w-2xl mx-auto mb-16">

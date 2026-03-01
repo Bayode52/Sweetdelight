@@ -66,9 +66,9 @@ export function ContactPageClient({ content, settings }: { content: ContentMap, 
     const [sent, setSent] = React.useState(false);
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ContactForm>({ resolver: zodResolver(contactSchema) });
 
-    const whatsapp = settings?.whatsapp || "447000000000";
-    const instagram = (settings?.instagram || "sweetdelight").replace('@', '');
-    const email = settings?.email || "hello@sweetdelight.co.uk";
+    const whatsapp = settings?.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP || "447000000000";
+    const instagram = ((settings?.instagram || process.env.NEXT_PUBLIC_INSTAGRAM || "sweetdelight")).replace('@', '');
+    const email = settings?.email || process.env.NEXT_PUBLIC_EMAIL || "hello@sweetdelight.co.uk";
     const monFri = settings?.mon_fri_hours || "9am – 7pm";
     const satHours = settings?.sat_hours || "9am – 5pm";
     const sunHours = settings?.sun_hours || "Custom orders only";
@@ -92,7 +92,7 @@ export function ContactPageClient({ content, settings }: { content: ContentMap, 
     const errClass = "text-xs text-red-500 font-bold mt-1";
 
     return (
-        <div className="min-h-screen bg-[#FDF6F0] pt-32 pb-24">
+        <div className="min-h-screen bg-[#FDF6F0] pt-40 pb-24">
             {/* ── HERO ── */}
             <div className="bg-bakery-primary py-20 px-6 md:px-12 text-center mb-24">
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-2xl mx-auto space-y-4">

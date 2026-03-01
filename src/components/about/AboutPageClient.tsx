@@ -34,7 +34,7 @@ export function AboutPageClient({ content, settings }: { content: ContentMap, se
     return (
         <div className="min-h-screen bg-[#FDF6F0]">
             {/* ── HERO ── */}
-            <section className="bg-bakery-primary text-white py-32 px-6 md:px-12 text-center">
+            <section className="bg-bakery-primary text-white pt-44 pb-32 px-6 md:px-12 text-center">
                 <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-4xl mx-auto space-y-6">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm font-bold uppercase tracking-widest mb-4">
                         {content['hero.badge'] || '🇬🇧 Our Story'}

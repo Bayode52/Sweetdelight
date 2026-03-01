@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
         switch (type) {
             case 'welcome':
-                subject = 'Welcome to Crave Bakery 🥐';
+                subject = 'Welcome to Sweet Delight 🥐';
                 html = emailTemplates.welcome(data.name);
                 break;
             case 'order_confirmed':

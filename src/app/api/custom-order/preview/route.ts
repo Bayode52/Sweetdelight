@@ -36,7 +36,7 @@ export async function POST(req: Request) {
         }
 
         const prompt = `
-        You are an expert, highly creative master baker at "Crave Bakery" in the UK. 
+        You are an expert, highly creative master baker at "Sweet Delight" in the UK. 
         A customer wants to place a custom order for a "${productType}".
         
         Here are their specific requirements:

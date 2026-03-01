@@ -24,10 +24,10 @@ export default function ChatWidget() {
 
     // Initialize session token and fetch initial messages
     useEffect(() => {
-        let token = localStorage.getItem("crave_chat_session");
+        let token = localStorage.getItem("sweetdelight_chat_session");
         if (!token) {
-            token = crypto.randomUUID();
-            localStorage.setItem("crave_chat_session", token);
+            token = Math.random().toString(36).substring(7);
+            localStorage.setItem("sweetdelight_chat_session", token);
         }
         setSessionToken(token);
         fetchMessages(token);

@@ -29,8 +29,8 @@ const ADMIN_LINKS = [
     { name: "Products", href: "/admin/products", icon: Package },
     { name: "Customers", href: "/admin/customers", icon: Users },
     { name: "Reviews", href: "/admin/reviews", icon: Star },
+    { name: "Messages", href: "/admin/messages", icon: MessageSquare },
     { name: "Edit Website", href: "/admin/content", icon: FileEdit },
-    { name: "Messages", href: "/admin/chat", icon: MessageSquare },
     { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

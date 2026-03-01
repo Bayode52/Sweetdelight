@@ -48,7 +48,7 @@ const BLOG_POSTS = [
         excerpt: "Planning a custom cake? From flavours to timelines to budget — here's what every customer should know before placing their order.",
         coverImage: "https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&q=80&w=800",
         date: "2024-01-20",
-        author: "Crave Bakery",
+        author: "Sweet Delight",
         readTime: "5 min read",
         featured: false,
     },
@@ -93,7 +93,7 @@ export default function BlogPage() {
     const rest = BLOG_POSTS.filter((p) => !p.featured);
 
     return (
-        <div className="min-h-screen bg-[#FDF6F0] pt-32 pb-24 px-6 md:px-12">
+        <div className="min-h-screen bg-[#FDF6F0] pt-40 pb-24 px-6 md:px-12">
             <div className="max-w-7xl mx-auto space-y-16">
                 {/* Header */}
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="text-center space-y-4">
