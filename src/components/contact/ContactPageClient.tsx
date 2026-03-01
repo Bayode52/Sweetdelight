@@ -92,7 +92,7 @@ export function ContactPageClient({ content, settings }: { content: ContentMap, 
     const errClass = "text-xs text-red-500 font-bold mt-1";
 
     return (
-        <div className="min-h-screen bg-[#FDF6F0] pt-40 pb-24">
+        <div className="min-h-screen bg-[#FDF6F0] pt-20 pb-24">
             {/* ── HERO ── */}
             <div className="bg-bakery-primary py-20 px-6 md:px-12 text-center mb-24">
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-2xl mx-auto space-y-4">

@@ -62,7 +62,7 @@ export default async function RootLayout({
   const settings = await getSettings();
   const footerContent = await getContent("footer");
   return (
-    <html lang="en">
+    <html lang="en" style={{ scrollBehavior: 'smooth' }}>
       <head>
         <script
           type="application/ld+json"

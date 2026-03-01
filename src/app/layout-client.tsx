@@ -39,7 +39,7 @@ export default function LayoutClient({
             ) : (
                 <div className="flex flex-col min-h-screen">
                     <Navbar settings={settings} />
-                    <main className="flex-1 pt-20 md:pt-24">{children}</main>
+                    <main className="flex-1 pt-[72px]">{children}</main>
                     <Footer content={footerContent} settings={settings} />
                     <ChatWidget />
                 </div>

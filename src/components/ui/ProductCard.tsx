@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Heart, Star, Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Badge } from "@/components/ui";
 import { Product, useCartStore } from "@/store/useCartStore";
@@ -14,10 +16,14 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onViewDetail }: ProductCardProps) {
     const addItem = useCartStore((state) => state.addItem);
+    const [isAdded, setIsAdded] = useState(false);
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.stopPropagation();
         addItem(product);
+        setIsAdded(true);
+        setTimeout(() => setIsAdded(false), 2000);
+
         toast.success(`${product.name} added to cart!`, {
             icon: "🧁",
             style: {
@@ -34,7 +40,7 @@ export function ProductCard({ product, onViewDetail }: ProductCardProps) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group bg-white rounded-[40px] p-4 luxury-shadow border border-bakery-primary/5 hover:border-bakery-cta/20 transition-all duration-500"
+            className="group bg-white rounded-[40px] p-4 luxury-shadow border border-bakery-primary/5 hover:border-bakery-cta/20 transition-all duration-500 hover:shadow-lg hover:-translate-y-1"
         >
             <div className="relative aspect-square rounded-[32px] overflow-hidden bg-bakery-accent/20">
                 <Image
@@ -92,9 +98,20 @@ export function ProductCard({ product, onViewDetail }: ProductCardProps) {
 
                     <button
                         onClick={handleAddToCart}
-                        className="w-10 h-10 rounded-xl bg-bakery-cta text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg shadow-bakery-cta/20"
+                        className={cn(
+                            "min-w-10 h-10 px-3 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95",
+                            isAdded
+                                ? "bg-green-500 text-white shadow-green-500/20"
+                                : "bg-bakery-cta text-white shadow-bakery-cta/20 hover:scale-110"
+                        )}
                     >
-                        <ShoppingCart size={18} />
+                        {isAdded ? (
+                            <span className="text-xs font-black uppercase tracking-wider flex items-center gap-1">
+                                Added! <span className="text-sm">✓</span>
+                            </span>
+                        ) : (
+                            <ShoppingCart size={18} />
+                        )}
                     </button>
                 </div>
             </div>

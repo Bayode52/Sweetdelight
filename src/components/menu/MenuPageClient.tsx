@@ -177,7 +177,7 @@ export function MenuPageClient({ content }: { content: ContentMap }) {
     const isAllSelected = selectedCategory === "All" && searchQuery === "";
 
     return (
-        <div className="min-h-screen pt-40 pb-24 px-6 md:px-12 bg-[#FDF6F0]">
+        <div className="min-h-screen pt-20 pb-24 px-6 md:px-12 bg-[#FDF6F0]">
             <div className="max-w-7xl mx-auto space-y-10">
 
                 {/* Header */}
