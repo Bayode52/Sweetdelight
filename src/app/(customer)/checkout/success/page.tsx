@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Package, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 
 type OrderItem = { product_name: string; quantity: number; price: number; line_total: number };
 type Order = {

@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = 'force-dynamic';
 
 // Use standard client for operations
 
 export async function POST(req: Request) {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { get: (n) => cookieStore.get(n)?.value, set: () => { }, remove: () => { } } }
-    );
+    const supabase = await createClient();
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
@@ -86,10 +79,7 @@ export async function GET(req: Request) {
         const rating = searchParams.get("rating");
         const sort = searchParams.get("sort") || "newest";
 
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        const supabase = await createClient();
 
         let query = supabase
             .from("reviews")

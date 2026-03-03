@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, ChevronLeft, ChevronRight, ShoppingCart, Info, Star } from "lucide-react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Search, ChevronLeft, ChevronRight, ShoppingCart, Info, Star, X, MessageCircle } from "lucide-react";
+import { createBrowserClient } from "@supabase/ssr";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function MenuPageClient() {
-    const supabase = createClientComponentClient();
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const [activeCategory, setActiveCategory] = useState("All");
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -71,8 +74,8 @@ export function MenuPageClient() {
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
                                 className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeCategory === category
-                                        ? "bg-[#D4421A] text-white shadow-lg shadow-[#D4421A]/30"
-                                        : "bg-white text-[#1C0A00] hover:bg-gray-50"
+                                    ? "bg-[#D4421A] text-white shadow-lg shadow-[#D4421A]/30"
+                                    : "bg-white text-[#1C0A00] hover:bg-gray-50"
                                     }`}
                             >
                                 {category}

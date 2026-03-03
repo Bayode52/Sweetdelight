@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { Search, Package, CheckCircle, ChefHat, Gift, Truck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import toast from "react-hot-toast";
 import Image from "next/image";
 

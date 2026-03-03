@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { Search, Filter, Eye, CheckCircle, Clock, Truck, XCircle, MessageCircle, CreditCard, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";

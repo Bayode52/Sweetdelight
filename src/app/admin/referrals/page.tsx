@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { Users, TrendingUp, DollarSign, Award } from "lucide-react";
 
 type Referral = {

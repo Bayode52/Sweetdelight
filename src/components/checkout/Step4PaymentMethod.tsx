@@ -7,7 +7,7 @@ import { Button } from "@/components/ui";
 import { generateOrderMessage } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import type { CartItem } from "@/store/useCartStore";
 import type { CustomerDetailsForm } from "./Step2CustomerDetails";
 

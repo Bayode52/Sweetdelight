@@ -5,7 +5,7 @@ import { Tag, Wallet, CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-re
 import { useCartStore } from "@/store/useCartStore";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 
 const DELIVERY_FEE = Number(process.env.NEXT_PUBLIC_DELIVERY_FEE ?? 5);
 const FREE_DELIVERY_THRESHOLD = Number(process.env.NEXT_PUBLIC_FREE_DELIVERY_THRESHOLD ?? 50);
