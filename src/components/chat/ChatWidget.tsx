@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import { MessageCircle, X, Send, User, ChevronDown } from "lucide-react";
 
 type Message = {
@@ -41,6 +41,25 @@ export default function ChatWidget() {
         }
     }, [messages, isOpen, loading]);
 
+    // Simple markdown renderer for chat messages
+    function renderMessage(text: string): ReactNode[] {
+        return text
+            .split('\n')
+            .map((line, i) => {
+                // Bold text
+                const parts = line.split(/\*\*(.*?)\*\*/g)
+                return (
+                    <p key={i} className={line === '' ? 'h-2' : 'leading-relaxed mb-1 last:mb-0'}>
+                        {parts.map((part, j) =>
+                            j % 2 === 1
+                                ? <strong key={j} className="font-bold text-[#1C0A00]">{part}</strong>
+                                : <span key={j}>{part}</span>
+                        )}
+                    </p>
+                )
+            })
+    }
+
     const smart = (m: string) => {
         const t = m.toLowerCase()
         if (/hi|hello|hey/.test(t)) return "Hello! Welcome to Sweet Delight 🍰 How can I help?"
@@ -65,7 +84,6 @@ export default function ChatWidget() {
 
         try {
             // 2. Get current messages for history
-            // We reconstruct history from the current state (using the previous messages)
             const currentHistory = messages.map(m => ({
                 role: m.role === 'customer' ? 'user' : 'assistant',
                 content: m.content
@@ -160,12 +178,12 @@ export default function ChatWidget() {
                                             </div>
                                         )}
                                         <div
-                                            className={`px-4 py-3 text-sm whitespace-pre-wrap shadow-sm leading-relaxed ${isCustomer
+                                            className={`px-4 py-3 text-sm shadow-sm leading-relaxed ${isCustomer
                                                 ? "bg-gradient-to-br from-[#2C1810] to-[#4a281a] text-white rounded-2xl rounded-br-sm"
                                                 : "bg-white text-[#2C1810] border border-black/5 rounded-2xl rounded-bl-sm"
                                                 }`}
                                         >
-                                            {msg.content}
+                                            {renderMessage(msg.content)}
                                         </div>
                                     </div>
                                 </div>
@@ -174,13 +192,13 @@ export default function ChatWidget() {
 
                         {loading && (
                             <div className="flex items-start gap-2 mb-3">
-                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-sm flex-shrink-0">🍰</div>
-                                <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
+                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-sm flex-shrink-0 shadow-sm border border-orange-200">🍰</div>
+                                <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 border border-black/5 shadow-sm">
                                     <div className="flex gap-1 items-center">
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                        <span className="text-xs text-gray-400 ml-1">Chloe is typing...</span>
+                                        <div className="w-2 h-2 bg-[#D4421A] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                        <div className="w-2 h-2 bg-[#D4421A] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                        <div className="w-2 h-2 bg-[#D4421A] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Chloe is typing...</span>
                                     </div>
                                 </div>
                             </div>
