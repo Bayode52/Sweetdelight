@@ -1,81 +1,81 @@
-import { NextResponse } from 'next/server';
+export const runtime = 'edge'
 
-export const runtime = 'edge';
+// Smart fallback replies when AI unavailable
+const smart = (m: string): string => {
+    const t = m.toLowerCase()
+    if (/hi|hello|hey|morning|afternoon/.test(t))
+        return "Hello! Welcome to Sweet Delight 🍰 I'm Chloe, your bakery assistant. What can I help you with today?"
+    if (/price|cost|how much|charge/.test(t))
+        return "Our prices: Celebration cakes from £45 🎂, Small chops from £35, Puff puff £6/dozen, Chin chin £8.50, Party boxes from £85. Free delivery over £50!"
+    if (/order|buy|want|purchase/.test(t))
+        return "Great! Browse our Menu page to order, or WhatsApp us for custom and bulk orders. What would you like? 🍰"
+    if (/deliver|shipping|uk|location/.test(t))
+        return "We deliver across the whole UK! 🚚 Free delivery on orders over £50. Minimum order £20."
+    if (/custom|wedding|birthday|cake/.test(t))
+        return "We love custom cakes! 🎂 We need 5 days notice. Try our Custom Order builder, then confirm via WhatsApp!"
+    if (/puff/.test(t))
+        return "Our puff puff is legendary! 😍 Soft, golden, perfectly spiced. A dozen for just £6!"
+    if (/chin/.test(t))
+        return "Classic Nigerian chin chin — crunchy and irresistible! 500g for £8.50. 😋"
+    if (/small chop|platter/.test(t))
+        return "Small chops platters from £35 for 30 pieces — puff puff, spring rolls, samosa & more! 🎉"
+    if (/hour|open|time/.test(t))
+        return "We're open Mon–Fri 9am–7pm, Saturday 9am–5pm. Need help outside hours? WhatsApp us! 🕐"
+    if (/allerg|gluten|nut|vegan|halal/.test(t))
+        return "For allergen info please WhatsApp us directly — your safety is our priority! 🙏"
+    if (/thank/.test(t))
+        return "You're welcome! 🥰 Anything else I can help with?"
+    return "Thanks for your message! 🍰 For fastest help, WhatsApp us Mon–Fri 9am–7pm or Saturday 9am–5pm."
+}
 
 export async function POST(req: Request) {
     try {
-        const { message, history = [] } = await req.json();
+        const body = await req.json().catch(() => ({ message: '' }))
+        const message = String(body?.message || '').trim()
+        const history = Array.isArray(body?.history) ? body.history : []
 
-        if (!message?.trim()) {
-            return NextResponse.json({ error: "Message required" }, { status: 400 });
+        if (!message) {
+            return Response.json({ message: "Hello! I'm Chloe from Sweet Delight 🍰 How can I help you today?" })
         }
 
-        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-
-        // EMERGENCY FALLBACK if no API key
+        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
         if (!apiKey) {
-            return NextResponse.json({
-                message: "Hi! I'm Chloe from Sweet Delight 🧁 I'm currently whisking up some new features, so I might be a bit quiet. Please message us on WhatsApp for instant help with your order!"
-            });
+            return Response.json({ message: smart(message) })
         }
 
-        const systemPrompt = `You are Chloe, the lead baker and friendly assistant at Sweet Delight, a premium Nigerian artisan bakery in the UK.
+        const geminiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: {
+                        parts: [{ text: `You are Chloe, Sweet Delight bakery assistant (UK Nigerian pastry shop). Be warm, friendly, max 2-3 short sentences. Products: cakes from £45, small chops £35+, puff puff £6/dozen, chin chin £8.50, party boxes £85+. Free delivery over £50. Min £20. Custom cakes 5 days notice. Mon-Fri 9am-7pm, Sat 9am-5pm. WhatsApp for orders. Never make up info.` }]
+                    },
+                    contents: [
+                        ...history.slice(-6).map((h: { role: string; content: string }) => ({
+                            role: h.role === 'assistant' ? 'model' : 'user',
+                            parts: [{ text: String(h.content) }]
+                        })),
+                        { role: 'user', parts: [{ text: message }] }
+                    ],
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 150 }
+                })
+            }
+        )
 
-OUR STORY:
-- Founded on a passion for authentic Nigerian flavors with a modern, luxury twist.
-- We serve the entire UK with signature treats (Chin Chin, Puff Puff) and bespoke cakes.
-
-BRAND VOICE:
-- Warm, professional, and deeply proud of Nigerian culture.
-- Use friendly expressions: "Welcome, dear!", "Excellent choice!", "Oya, let's get you something sweet!"
-- Keep answers concise (max 3 sentences).
-- Guide users to: /menu (browse), /custom-order (AI designer), /track-order (tracking).
-
-RULES:
-- Minimum order: £20. Free delivery over £50.
-- Custom Cakes: 5 days notice. Platters: 48 hours.
-- Allergies: Always say "Please message us on WhatsApp to discuss allergies directly for your safety."
-- Prices: Celebration Cakes from £45, Platters from £35, Chin Chin £8.50.
-
-If unsure, always apologize warmly and suggest WhatsApp for the human touch.`;
-
-        const contents = history.slice(-6).map((msg: any) => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
-        }));
-
-        contents.push({
-            role: 'user',
-            parts: [{ text: message }]
-        });
-
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-        const response = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                system_instruction: { parts: [{ text: systemPrompt }] },
-                contents,
-                generationConfig: { temperature: 0.7, maxOutputTokens: 150 }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Gemini API failed');
+        if (!geminiRes.ok) {
+            return Response.json({ message: smart(message) })
         }
 
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const data = await geminiRes.json()
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+        return Response.json({ message: text || smart(message) })
 
-        if (!text) throw new Error('No text returned');
-
-        return NextResponse.json({ message: text });
-
-    } catch (error) {
-        console.error("Chat API Error:", error);
-        return NextResponse.json({
-            message: "I'm so sorry, I'm having a little moment in the kitchen! 😅 Please message us on WhatsApp for immediate help. 🍰"
-        });
+    } catch (err) {
+        console.error('Chat error:', err)
+        return Response.json({
+            message: "Quick hiccup! 😊 Please WhatsApp us for immediate help. 🍰"
+        })
     }
 }

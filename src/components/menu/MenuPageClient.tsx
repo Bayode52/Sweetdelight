@@ -1,308 +1,258 @@
 "use client";
 
-import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { Search, ChevronLeft, ChevronRight, ShoppingCart, Info, Star } from "lucide-react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, ShoppingCart, Plus, Minus, Star, X } from "lucide-react";
-import { Badge } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import { ProductDetailModal } from "@/components/ui/ProductDetailModal";
-import { ProductCardSkeleton } from "@/components/ui/Skeleton";
-import { Product, useCartStore } from "@/store/useCartStore";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
-import toast from "react-hot-toast";
-import { ContentMap } from "@/lib/content";
 
-// ─── Category definitions ────────────────────────────────────────────────────
-const CATEGORY_DEFS = [
-    { name: "Celebration Cakes", emoji: "🎂", description: "Custom & signature cakes for every occasion" },
-    { name: "Small Chops Platters", emoji: "🍢", description: "Perfect party platters — samosas, puff puff, spring rolls and more" },
-    { name: "Chin Chin & Snacks", emoji: "🟡", description: "Crunchy West African snacks made the traditional way" },
-    { name: "Puff Puff", emoji: "🫓", description: "Soft, golden, deep-fried Nigerian doughnuts" },
-    { name: "Pastries & Bakes", emoji: "🥐", description: "Flaky, buttery everyday bakes — meat pies, sausage rolls and more" },
-    { name: "Party Boxes", emoji: "📦", description: "Curated boxes that feed the whole crowd" },
-    { name: "Drinks", emoji: "🥤", description: "Nigerian favourites — zobo, chapman, tiger nut milk" },
-];
+export function MenuPageClient() {
+    const supabase = createClientComponentClient();
+    const [activeCategory, setActiveCategory] = useState("All");
+    const [products, setProducts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
-const ALL_CATEGORIES = ["All", ...CATEGORY_DEFS.map((c) => c.name)];
+    useEffect(() => {
+        async function fetchProducts() {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from("products")
+                .select("*")
+                .eq("is_available", true)
+                .order("category");
 
-const SORT_OPTIONS = [
-    { label: "Recommended", value: "rec" },
-    { label: "Price: Low to High", value: "price-asc" },
-    { label: "Price: High to Low", value: "price-desc" },
-    { label: "Top Rated", value: "rating" },
-];
-
-// ─── Mock products (replace with Supabase fetch in production) ───────────────
-const BADGE_COLORS: Record<string, string> = {
-    "BEST SELLER": "bg-[#D4421A] text-white",
-    "SIGNATURE": "bg-purple-600 text-white",
-    "NEW": "bg-green-600 text-white",
-    "PREMIUM": "bg-[#D4AF37] text-[#3D1A0F]",
-    "MUST TRY": "bg-red-600 text-white",
-};
-
-// ─── Product Card ────────────────────────────────────────────────────────────
-function MenuProductCard({ product, onViewDetail }: { product: Product; onViewDetail: (p: Product) => void }) {
-    const { addItem, items, updateQuantity, removeItem } = useCartStore();
-    const cartItem = items.find((i) => i.id === product.id);
-
-    const handleAdd = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        addItem(product);
-        toast.success(`${product.name} added!`, { icon: "🧁", style: { borderRadius: "20px", background: "#3D1A0F", color: "#fff", fontWeight: "bold" } });
-    };
-
-    return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="group bg-white rounded-[32px] overflow-hidden border border-bakery-primary/5 hover:border-bakery-cta/20 transition-all duration-300 hover:shadow-xl cursor-pointer"
-            onClick={() => onViewDetail(product)}
-        >
-            <div className="relative aspect-square overflow-hidden bg-bakery-accent/20">
-                <Image src={product.image_url} alt={product.name} fill sizes="(max-width: 768px) 50vw, 300px" className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                {product.is_featured && (
-                    <span className={cn("absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest", BADGE_COLORS["BEST SELLER"])}>
-                        BEST SELLER
-                    </span>
-                )}
-                {product.on_sale && product.sale_price && (
-                    <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black">SALE</span>
-                )}
-            </div>
-
-            <div className="p-4 space-y-2">
-                <span className="text-[9px] uppercase tracking-[0.2em] font-black text-bakery-primary/30">{product.category}</span>
-                <h3 className="text-sm font-bold text-bakery-primary leading-tight line-clamp-2">{product.name}</h3>
-
-                <Link
-                    href={`/reviews?product=${product.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1 hover:opacity-70 transition-opacity"
-                >
-                    <Star size={10} className="text-bakery-cta fill-bakery-cta" />
-                    <span className="text-[10px] font-bold text-bakery-primary/50">4.9 (24)</span>
-                </Link>
-
-                <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-baseline gap-1.5">
-                        <span className="text-base font-black text-bakery-primary font-playfair">£{product.price.toFixed(2)}</span>
-                        {product.on_sale && product.sale_price && <span className="text-xs line-through text-bakery-primary/30 font-bold">£{product.price.toFixed(2)}</span>}
-                        {product.on_sale && product.sale_price && <span className="text-base font-black text-bakery-primary font-playfair">£{product.sale_price.toFixed(2)}</span>}
-                    </div>
-
-                    {cartItem ? (
-                        <div className="flex items-center gap-1 border border-bakery-primary/10 rounded-xl px-2 py-1" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => cartItem.quantity === 1 ? removeItem(product.id) : updateQuantity(product.id, -1)} className="w-5 h-5 flex items-center justify-center text-bakery-primary/50 hover:text-bakery-primary">
-                                {cartItem.quantity === 1 ? <X size={10} /> : <Minus size={10} />}
-                            </button>
-                            <span className="text-xs font-black min-w-[16px] text-center">{cartItem.quantity}</span>
-                            <button onClick={(e) => { e.stopPropagation(); addItem(product); }} className="w-5 h-5 flex items-center justify-center text-bakery-primary/50 hover:text-bakery-primary">
-                                <Plus size={10} />
-                            </button>
-                        </div>
-                    ) : (
-                        <button onClick={handleAdd} className="w-9 h-9 rounded-xl bg-bakery-cta text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-md shadow-bakery-cta/20">
-                            <ShoppingCart size={15} />
-                        </button>
-                    )}
-                </div>
-            </div>
-        </motion.div>
-    );
-}
-
-// ─── Component Props ────────────────────────────────────────────────────────
-interface MenuPageClientProps {
-    content: ContentMap;
-}
-
-export function MenuPageClient({ content }: MenuPageClientProps) {
-    const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
-        queryKey: ["all-products"],
-        queryFn: async () => {
-            const res = await fetch("/api/admin/products");
-            if (!res.ok) throw new Error("Failed to fetch products");
-            const data = await res.json();
-            return (Array.isArray(data) ? data : data.products || []).filter((p: any) => p.is_available);
+            if (!error) {
+                setProducts(data || []);
+            }
+            setLoading(false);
         }
+        fetchProducts();
+    }, []);
+
+    const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
+
+    const filtered = products.filter((p) => {
+        const matchesCategory = activeCategory === "All" || p.category === activeCategory;
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (p.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
     });
-
-    const [selectedCategory, setSelectedCategory] = React.useState("All");
-    const [searchQuery, setSearchQuery] = React.useState("");
-    const [sortBy, setSortBy] = React.useState("rec");
-    const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
-    const [isDetailOpen, setIsDetailOpen] = React.useState(false);
-    const categoryScrollRef = React.useRef<HTMLDivElement>(null);
-
-    const scrollCats = (dir: "left" | "right") => {
-        categoryScrollRef.current?.scrollBy({ left: dir === "right" ? 200 : -200, behavior: "smooth" });
-    };
-
-    const filteredProducts = products.filter((p) => {
-        const catMatch = selectedCategory === "All"
-            || p.category === selectedCategory
-            || (selectedCategory === "Small Chops" && p.category === "Small Chops Platters");
-        const search = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || (p.description || "").toLowerCase().includes(searchQuery.toLowerCase());
-        return catMatch && search;
-    }).sort((a, b) => {
-        if (sortBy === "price-asc") return a.price - b.price;
-        if (sortBy === "price-desc") return b.price - a.price;
-        if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
-        return 0;
-    });
-
-    const openDetail = (p: Product) => { setSelectedProduct(p); setIsDetailOpen(true); };
-
-    // Grouped view
-    const grouped = CATEGORY_DEFS.map((cat) => ({
-        ...cat,
-        products: filteredProducts.filter((p) => p.category === cat.name || (cat.name === "Small Chops Platters" && p.category === "Small Chops Platters")),
-    })).filter((g) => g.products.length > 0);
-
-    const isAllSelected = selectedCategory === "All" && searchQuery === "";
 
     return (
-        <div className="min-h-screen pt-20 pb-24 px-6 md:px-12 bg-[#FDF6F0]">
-            <div className="max-w-7xl mx-auto space-y-10">
-
+        <div className="min-h-screen bg-[#FAF7F2] pt-28 pb-20 px-4 md:px-8">
+            <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="space-y-4 text-center">
-                    <h1 className="text-5xl md:text-7xl font-playfair font-black text-bakery-primary tracking-tighter">
-                        {content['hero.heading'] || 'Explore Our'} <span className="text-bakery-cta italic">{content['hero.heading_italic'] || 'Bakes'}</span>
+                <div className="text-center mb-12">
+                    <h1 className="text-5xl md:text-6xl font-playfair font-black text-[#1C0A00] mb-4 italic">
+                        Our <span className="text-[#D4421A]">Menu</span>
                     </h1>
-                    <p className="text-bakery-primary/60 max-w-xl mx-auto font-medium">
-                        {content['hero.subheading'] || 'From flaky golden snacks to decadent celebratory cakes, find your perfect treat here.'}
+                    <p className="text-[#7C6B5E] max-w-2xl mx-auto font-medium">
+                        Handcrafted Nigerian pastries and artisanal bakes, made fresh daily with love and the finest ingredients.
                     </p>
                 </div>
 
-                {/* Delivery banner */}
-                <div className="bg-bakery-cta/5 border border-bakery-cta/10 rounded-2xl py-3 px-6 flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-bakery-primary/60">
-                    <span>{content['banner.text1'] || '🚚 Free delivery on orders over £50'}</span>
-                    <span className="hidden md:block text-bakery-primary/20">·</span>
-                    <span>{content['banner.text2'] || '📦 Min order £20'}</span>
-                    <span className="hidden md:block text-bakery-primary/20">·</span>
-                    <span>{content['banner.text3'] || '🕐 48h notice for custom cakes'}</span>
-                    <span className="hidden md:block text-bakery-primary/20">·</span>
-                    <span>{content['banner.text4'] || '📍 Delivering across the UK'}</span>
-                </div>
-
-                {/* Search + Sort */}
-                <div className="flex flex-col lg:flex-row gap-4 items-center justify-between sticky top-24 z-30 bg-[#FDF6F0]/90 backdrop-blur-xl p-4 rounded-[32px] border border-bakery-primary/5 luxury-shadow">
-                    <div className="flex items-center gap-3 w-full lg:max-w-md bg-bakery-primary/5 rounded-[24px] px-5 py-1 border border-transparent focus-within:border-bakery-cta/20 focus-within:bg-white transition-all group">
-                        <Search className="text-bakery-primary/20 group-focus-within:text-bakery-cta transition-colors shrink-0" size={20} />
-                        <input type="text" placeholder="Search for chin chin, cakes..." className="w-full bg-transparent py-3.5 text-sm font-bold text-bakery-primary focus:outline-none placeholder:text-bakery-primary/20" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                {/* Search and Categories */}
+                <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-12">
+                    <div className="relative w-full md:max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search our delicious bakes..."
+                            className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-none bg-white shadow-sm focus:ring-2 focus:ring-[#D4421A]/20 transition-all text-[#1C0A00]"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
-                    <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar">
-                        {SORT_OPTIONS.map((opt) => (
-                            <button key={opt.value} onClick={() => setSortBy(opt.value)} className={cn("px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap", sortBy === opt.value ? "bg-bakery-primary text-white" : "bg-bakery-primary/5 text-bakery-primary/40 hover:bg-bakery-primary/10")}>
-                                {opt.label}
+
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 w-full md:w-auto">
+                        {categories.map((category) => (
+                            <button
+                                key={category}
+                                onClick={() => setActiveCategory(category)}
+                                className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeCategory === category
+                                        ? "bg-[#D4421A] text-white shadow-lg shadow-[#D4421A]/30"
+                                        : "bg-white text-[#1C0A00] hover:bg-gray-50"
+                                    }`}
+                            >
+                                {category}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Category tabs */}
-                <div className="flex items-center gap-2">
-                    <button onClick={() => scrollCats("left")} className="shrink-0 p-2 rounded-full border border-bakery-primary/10 hover:bg-bakery-primary hover:text-white transition-all">
-                        <ChevronLeft size={16} />
-                    </button>
-                    <div ref={categoryScrollRef} className="flex gap-3 overflow-x-auto no-scrollbar py-1">
-                        {ALL_CATEGORIES.map((cat) => (
-                            <button key={cat} onClick={() => setSelectedCategory(cat)} className={cn("px-6 py-3 rounded-3xl text-xs font-black uppercase tracking-widest transition-all border-2 whitespace-nowrap", selectedCategory === cat ? "border-bakery-cta bg-bakery-cta text-white shadow-lg shadow-bakery-cta/20" : "border-bakery-primary/5 bg-white text-bakery-primary/40 hover:border-bakery-cta/20")}>
-                                {cat}
-                            </button>
+                {/* Product Grid */}
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3, 4, 5, 6].map((n) => (
+                            <div key={n} className="h-80 bg-gray-100 animate-pulse rounded-3xl" />
                         ))}
                     </div>
-                    <button onClick={() => scrollCats("right")} className="shrink-0 p-2 rounded-full bg-bakery-primary text-white hover:bg-bakery-cta transition-all">
-                        <ChevronRight size={16} />
-                    </button>
-                </div>
-
-                {/* Skeleton loading */}
-                {productsLoading && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[...Array(6)].map((_, i) => <ProductCardSkeleton key={i} />)}
-                    </div>
-                )}
-
-                {/* GROUPED VIEW — when All is selected + no search */}
-                {!productsLoading && isAllSelected && (
-                    <div className="space-y-16">
-                        {grouped.map((group) => {
-                            const shown = group.products.slice(0, 3);
-                            const needPlaceholders = Math.max(0, 3 - shown.length);
-                            return (
-                                <div key={group.name} className="space-y-6">
-                                    <div>
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <span className="text-3xl">{group.emoji}</span>
-                                            <h2 className="text-2xl font-playfair font-black text-bakery-primary">{group.name}</h2>
-                                        </div>
-                                        <p className="text-sm text-bakery-primary/50 font-medium ml-11">{group.description}</p>
-                                        <div className="ml-11 mt-3 border-t border-bakery-primary/5" />
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <AnimatePresence>
+                            {filtered.map((product) => (
+                                <motion.div
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    key={product.id}
+                                    onClick={() => setSelectedProduct(product)}
+                                    className="cursor-pointer group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                                >
+                                    <div className="relative overflow-hidden h-64">
+                                        <img
+                                            src={product.image_url || product.image || "/placeholder-product.jpg"}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        {product.badge && (
+                                            <span className="absolute top-4 left-4 text-[10px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full"
+                                                style={{ background: '#D4421A', color: 'white' }}>
+                                                {product.badge}
+                                            </span>
+                                        )}
                                     </div>
-
-                                    <AnimatePresence mode="popLayout">
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                            {shown.map((p) => (
-                                                <MenuProductCard key={p.id} product={p} onViewDetail={openDetail} />
-                                            ))}
-                                            {/* Fill with Coming Soon placeholders to always show 3 */}
-                                            {needPlaceholders > 0 && Array.from({ length: needPlaceholders }).map((_, i) => (
-                                                <motion.div
-                                                    key={`placeholder-${group.name}-${i}`}
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    className="bg-[#FDF0E6] rounded-[32px] border-2 border-dashed border-bakery-primary/15 flex flex-col items-center justify-center gap-3 p-8 min-h-[200px] text-center"
-                                                >
-                                                    <span className="text-4xl">🔜</span>
-                                                    <p className="text-sm font-bold text-bakery-primary/40">More products<br />coming soon</p>
-                                                </motion.div>
-                                            ))}
+                                    <div className="p-6">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#D4421A] mb-2 block">
+                                            {product.category}
+                                        </span>
+                                        <h3 className="text-xl font-bold text-[#1C0A00] mb-2"
+                                            style={{ fontFamily: "'Playfair Display', serif" }}>
+                                            {product.name}
+                                        </h3>
+                                        <p className="text-sm text-[#7C6B5E] mb-4 line-clamp-2">{product.description}</p>
+                                        <div className="flex items-center justify-between mt-auto">
+                                            <span className="text-2xl font-black text-[#1C0A00]"
+                                                style={{ fontFamily: "'Playfair Display', serif" }}>
+                                                £{Number(product.price).toFixed(2)}
+                                            </span>
+                                            <div className="bg-[#FAF7F2] p-2 rounded-xl group-hover:bg-[#D4421A] group-hover:text-white transition-colors">
+                                                <Plus size={20} />
+                                            </div>
                                         </div>
-                                    </AnimatePresence>
-
-                                    {group.products.length > 3 && (
-                                        <button onClick={() => setSelectedCategory(group.name)} className="text-bakery-cta font-black text-sm uppercase tracking-widest hover:underline flex items-center gap-1">
-                                            View all {group.name} ({group.products.length} items) →
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
                     </div>
                 )}
 
-                {/* FLAT VIEW — when specific category or search active */}
-                {!productsLoading && !isAllSelected && (
-                    <>
-                        <AnimatePresence mode="popLayout">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                {filteredProducts.map((p) => (
-                                    <MenuProductCard key={p.id} product={p} onViewDetail={openDetail} />
-                                ))}
-                            </div>
-                        </AnimatePresence>
-
-                        {filteredProducts.length === 0 && (
-                            <div className="py-20 flex flex-col items-center text-center space-y-6">
-                                <div className="text-8xl">🥐</div>
-                                <h3 className="text-2xl font-bold">Nothing found{searchQuery && ` for "${searchQuery}"`}</h3>
-                                <p className="text-bakery-primary/40">Try searching for something else or browse another category.</p>
-                                <Button onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}>Reset All Filters</Button>
-                            </div>
-                        )}
-                    </>
+                {filtered.length === 0 && !loading && (
+                    <div className="text-center py-20">
+                        <div className="text-6xl mb-4">🥐</div>
+                        <h3 className="text-xl font-bold text-[#1C0A00]">No products found</h3>
+                        <p className="text-[#7C6B5E]">Try adjusting your search or category filters.</p>
+                    </div>
                 )}
             </div>
 
-            <ProductDetailModal product={selectedProduct} isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} />
+            {/* Product detail modal */}
+            <AnimatePresence>
+                {selectedProduct && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setSelectedProduct(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-white rounded-[40px] overflow-hidden max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <button
+                                onClick={() => setSelectedProduct(null)}
+                                className="absolute top-6 right-6 z-10 bg-white/90 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center text-[#1C0A00] font-bold hover:bg-white shadow-lg transition-all"
+                            >
+                                <X size={20} />
+                            </button>
+
+                            <div className="flex flex-col md:flex-row">
+                                <div className="md:w-1/2 h-80 md:h-auto overflow-hidden">
+                                    <img
+                                        src={selectedProduct.image_url || selectedProduct.image || "/placeholder-product.jpg"}
+                                        alt={selectedProduct.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+
+                                <div className="md:w-1/2 p-8 md:p-10 flex flex-col">
+                                    <div className="mb-6">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#D4421A] mb-2 block">
+                                            {selectedProduct.category}
+                                        </span>
+                                        <h2 className="text-3xl font-bold text-[#1C0A00] mb-2"
+                                            style={{ fontFamily: "'Playfair Display', serif" }}>
+                                            {selectedProduct.name}
+                                        </h2>
+                                        <div className="flex items-center gap-1 mb-4">
+                                            {[1, 2, 3, 4, 5].map((_, i) => (
+                                                <Star key={i} size={14} className="fill-[#D4AF37] text-[#D4AF37]" />
+                                            ))}
+                                            <span className="text-xs font-bold text-[#7C6B5E] ml-2">5.0 (Reviewer Choice)</span>
+                                        </div>
+                                        <p className="text-[#7C6B5E] leading-relaxed text-sm">
+                                            {selectedProduct.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 mb-8">
+                                        <div className="bg-[#FAF7F2] rounded-2xl p-4">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#7C6B5E] mb-1">Serving</p>
+                                            <p className="text-sm font-bold text-[#1C0A00]">Perfect for sharing</p>
+                                        </div>
+                                        <div className="bg-[#FAF7F2] rounded-2xl p-4">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#7C6B5E] mb-1">Notice</p>
+                                            <p className="text-sm font-bold text-[#1C0A00]">Freshly Baked</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-auto space-y-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#7C6B5E]">Total Price</span>
+                                            <span className="text-3xl font-black text-[#1C0A00]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                                £{Number(selectedProduct.price).toFixed(2)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    // Add to cart logic would go here
+                                                    setSelectedProduct(null);
+                                                }}
+                                                className="flex-1 py-4 rounded-2xl bg-[#D4421A] text-white font-bold text-sm shadow-xl shadow-[#D4421A]/30 hover:-translate-y-0.5 transition-all"
+                                            >
+                                                Add to Cart 🛒
+                                            </button>
+                                            <a
+                                                href={`https://wa.me/447000000000?text=Hi! I'd like to order: ${selectedProduct.name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-4 rounded-2xl border-2 border-[#25D366] text-[#25D366] font-bold hover:bg-[#25D366] hover:text-white transition-all"
+                                            >
+                                                <MessageCircle size={20} />
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
+
+const Plus = ({ size }: { size: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+);
