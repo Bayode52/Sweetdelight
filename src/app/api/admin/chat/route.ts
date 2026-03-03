@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 // GET all chat sessions for admin dashboard
 export async function GET(req: Request) {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const { searchParams } = new URL(req.url);
         const status = searchParams.get('status'); // optional filter
@@ -27,6 +31,9 @@ export async function GET(req: Request) {
 
 // POST admin human response
 export async function POST(req: Request) {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const { sessionId, content, action } = await req.json();
 

@@ -1,10 +1,22 @@
 import { NextResponse } from 'next/server';
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rateLimit";
+import { sanitiseText, sanitiseEmail } from "@/lib/sanitise";
 
 export async function POST(req: Request) {
+    const limit = await rateLimit(req, 3, 60); // Strict limit for custom orders
+    if (!limit.success) return limit.response!;
+
     try {
         const body = await req.json();
         const { productType, answers, aiPreview, customerDetails, totalEstimate } = body;
+
+        // Sanitize customer details
+        const cleanName = sanitiseText(customerDetails.name || '');
+        const cleanEmail = sanitiseEmail(customerDetails.email || '');
+        const cleanPhone = sanitiseText(customerDetails.phone || '');
+        const cleanNotes = sanitiseText(customerDetails.notes || '');
+        const cleanAddress = sanitiseText(customerDetails.address || '');
 
         const supabase = await createClient();
 
@@ -19,9 +31,9 @@ export async function POST(req: Request) {
         const orderData = {
             order_reference,
             customer_id,
-            customer_name: customerDetails.name,
-            customer_email: customerDetails.email,
-            customer_phone: customerDetails.phone,
+            customer_name: cleanName,
+            customer_email: cleanEmail,
+            customer_phone: cleanPhone,
             order_type: 'custom',
             custom_spec: {
                 productType,
@@ -30,8 +42,8 @@ export async function POST(req: Request) {
             },
             status: 'pending',
             delivery_type: customerDetails.deliveryType || 'collection',
-            delivery_address: customerDetails.address || null,
-            special_instructions: customerDetails.notes || '',
+            delivery_address: cleanAddress || null,
+            special_instructions: cleanNotes || '',
             total: totalEstimate ? parseFloat(totalEstimate.replace(/[^0-9.]/g, '')) : 0, // Fallback parsing
             payment_method: customerDetails.paymentMethod || 'dm_whatsapp',
             payment_status: 'pending'

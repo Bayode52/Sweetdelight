@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export async function GET() {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         // Fetch configurations
         const { data: configs, error: configError } = await supabaseAdmin
@@ -28,6 +32,9 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const body = await req.json();
         const { id, is_active, config } = body;

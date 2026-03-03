@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -9,21 +9,10 @@ const adminClient = createSupabaseClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-async function verifyAdmin() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    // Use regular supabase with session since RLS policy "Admins can read all" 
-    // allows admins to check their own role via is_admin() function.
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-    if (profile?.role !== "admin") return null;
-    return user;
-}
 
 export async function GET() {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
 
     const today = new Date();
     const todayStr = today.toISOString().substring(0, 10);

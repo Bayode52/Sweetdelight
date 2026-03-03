@@ -1,7 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/requireAdmin'
 
 export async function GET(request: Request) {
+    const auth = await requireAdmin()
+    if ('error' in auth) return auth.error
+
     try {
         const { searchParams } = new URL(request.url)
         const page = searchParams.get('page')
@@ -24,23 +28,11 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+    const auth = await requireAdmin()
+    if ('error' in auth) return auth.error
+    const { supabase } = auth
+
     try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-
-        if (profile?.role !== 'admin') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-        }
 
         const { page, section, field, value } = await request.json()
 

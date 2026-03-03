@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { emailTemplates } from "@/lib/email-templates";
+import { requireAdmin } from "@/lib/requireAdmin";
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,6 +19,9 @@ function getResend() {
 }
 
 export async function POST(req: Request) {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const { orderId, status, adminNotes, estimatedTime } = await req.json();
 

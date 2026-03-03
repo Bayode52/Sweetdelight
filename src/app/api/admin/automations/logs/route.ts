@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export async function GET(req: Request) {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const { searchParams } = new URL(req.url);
         const automation_id = searchParams.get('automation_id');

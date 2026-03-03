@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 // GET all knowledge base entries
 export async function GET() {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const { data: entries, error } = await supabaseAdmin
             .from('chat_knowledge_base')
@@ -18,6 +22,9 @@ export async function GET() {
 
 // POST new knowledge base entry
 export async function POST(req: Request) {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const { question, answer, category } = await req.json();
 
@@ -45,6 +52,9 @@ export async function POST(req: Request) {
 
 // DELETE a knowledge base entry
 export async function DELETE(req: Request) {
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+
     try {
         const { id } = await req.json();
 

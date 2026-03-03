@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rateLimit";
+import { sanitiseText } from "@/lib/sanitise";
 
 export const dynamic = 'force-dynamic';
 
-// Use standard client for operations
-
 export async function POST(req: Request) {
+    const limit = await rateLimit(req, 5, 60);
+    if (!limit.success) return limit.response!;
+
     const supabase = await createClient();
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -15,6 +18,10 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
+
+        // Sanitize inputs
+        const cleanTitle = sanitiseText(body.title || '');
+        const cleanText = sanitiseText(body.text || '');
 
         // 🛡️ Anti-Spam Guard
         const { data: profile } = await supabase
@@ -30,7 +37,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Security check: Account must be 24h old to post reviews" }, { status: 403 });
         }
 
-        if (body.text.toLowerCase().includes("http") || body.text.toLowerCase().includes("www") || body.text.toLowerCase().includes(".com")) {
+        if (cleanText.toLowerCase().includes("http") || cleanText.toLowerCase().includes("www") || cleanText.toLowerCase().includes(".com")) {
             return NextResponse.json({ error: "No external links allowed in reviews" }, { status: 400 });
         }
 
@@ -39,7 +46,7 @@ export async function POST(req: Request) {
             .from("reviews")
             .select("id")
             .eq("user_id", session.user.id)
-            .eq("text", body.text)
+            .eq("text", cleanText)
             .maybeSingle();
 
         if (existing) return NextResponse.json({ error: "Duplicate review detected" }, { status: 400 });
@@ -51,9 +58,9 @@ export async function POST(req: Request) {
                 order_id: body.orderId,
                 product_id: body.productId,
                 rating: body.rating,
-                title: body.title,
-                text: body.text,
-                original_text: body.text, // Save original
+                title: cleanTitle,
+                text: cleanText,
+                original_text: cleanText, // Save original
                 media_urls: body.mediaUrls,
                 status: 'pending', // Always start pending
                 helpful_count: 0

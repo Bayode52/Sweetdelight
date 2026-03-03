@@ -1,33 +1,17 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { requireAdmin } from "@/lib/requireAdmin";
 
-const adminClient = createClient(
+const adminClient = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-async function verifyAdmin() {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) { return cookieStore.get(name)?.value },
-            },
-        }
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data: p } = await adminClient.from("profiles").select("role").eq("id", user.id).single();
-    return p?.role === "admin" ? user : null;
-}
 
 export async function GET() {
-    const admin = await verifyAdmin();
-    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
+    const { serviceClient: adminClient } = auth;
 
     try {
         const checks = [];

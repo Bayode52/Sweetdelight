@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/requireAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -9,18 +9,11 @@ const adminClient = createSupabaseClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-async function verifyAdmin() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data: p } = await adminClient.from("profiles").select("role").eq("id", user.id).single();
-    return p?.role === "admin" ? user : null;
-}
 
 // GET /api/admin/blog/[id]
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
 
     const { data, error } = await adminClient
         .from("blog_posts")
@@ -34,8 +27,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 // PATCH /api/admin/blog/[id]
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
 
     try {
         const body = await req.json();
@@ -55,8 +48,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 // DELETE /api/admin/blog/[id]
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-    const user = await verifyAdmin();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if ('error' in auth) return auth.error;
 
     const { error } = await adminClient
         .from("blog_posts")

@@ -1,4 +1,7 @@
-export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
+import { rateLimit } from '@/lib/rateLimit'
+import { sanitiseChatMessage } from '@/lib/sanitise'
+import { NextResponse } from 'next/server'
 
 // ── Intelligent conversation engine ──────────────
 // This handles conversations naturally even without AI
@@ -91,9 +94,13 @@ function buildSmartReply(message: string): string {
 }
 
 export async function POST(req: Request) {
+    const limit = await rateLimit(req, 10, 60); // 10 messages per minute
+    if (!limit.success) return limit.response;
+
     try {
         const body = await req.json().catch(() => ({}))
-        const message = String(body?.message || '').trim()
+        const rawMessage = String(body?.message || '').trim()
+        const message = sanitiseChatMessage(rawMessage)
         const history = Array.isArray(body?.history) ? body.history : []
 
         if (!message) {
