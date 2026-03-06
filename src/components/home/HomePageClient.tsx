@@ -77,99 +77,250 @@ export function HomePageClient({ content, settings }: { content: ContentMap, set
   return (
     <div className="w-full">
       {/* ────────── HERO SECTION — LUXURY REDESIGN ────────── */}
-      <section className="relative min-h-[92vh] flex items-center pt-20 overflow-hidden px-5 md:px-20" style={{ background: 'var(--cream)' }}>
+      <section className="relative" style={{
+        background: 'var(--cream)',
+        minHeight: '100vh',
+        paddingTop: '68px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 480px), 1fr))',
+        alignItems: 'stretch',
+        overflow: 'hidden'
+      }}>
         {/* Decorative elements */}
         <div className="absolute top-[-10%] right-[-5%] w-[65%] h-[65%] rounded-full blur-[120px] opacity-40 -z-10" style={{ background: 'var(--gold-light)' }} />
         <div className="absolute bottom-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[100px] opacity-20 -z-10" style={{ background: 'var(--orange-brand)' }} />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center w-full">
-          <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: "easeOut" }} className="space-y-10">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-bakery-cta/10 text-bakery-cta text-[11px] font-black uppercase tracking-[0.2em] shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-bakery-cta animate-ping" />
-              {content['hero.badge'] || '🇬🇧 Proudly Serving London & Beyond'}
+        <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: "easeOut" }} style={{
+          padding: 'clamp(32px, 6vw, 80px)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          paddingTop: 'clamp(48px, 8vw, 80px)',
+        }}>
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-bakery-cta/10 text-bakery-cta text-[11px] font-black uppercase tracking-[0.2em] shadow-sm">
+            <span className="flex h-2 w-2 rounded-full bg-bakery-cta animate-ping" />
+            {content['hero.badge'] || '🇬🇧 Proudly Serving London & Beyond'}
+          </div>
+
+          <h1 style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontWeight: 700,
+            color: '#1A0800',
+            lineHeight: 1.08,
+            letterSpacing: '-0.01em',
+            fontSize: 'clamp(2.2rem, 8vw, 5rem)',
+            marginBottom: '20px',
+          }}>
+            <span style={{ display: 'block' }}>Baking Joy,</span>
+            <span style={{ display: 'block' }}>
+              <span style={{ color: '#C8401A', fontStyle: 'italic' }}>One Bite</span>
+            </span>
+            <span style={{ display: 'block' }}>At A Time.</span>
+          </h1>
+
+          <p style={{
+            fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)',
+            color: '#7A6555',
+            lineHeight: 1.75,
+            maxWidth: '480px',
+            marginBottom: '32px',
+          }}>
+            Premium Nigerian pastries handcrafted with love —
+            from celebration cakes to party platters,
+            delivered fresh across the UK.
+          </p>
+
+          <div className="sm:flex sm:flex-row sm:items-center sm:gap-3">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              marginBottom: '32px',
+            }}>
+              <a href="/menu" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                background: '#C8401A',
+                color: 'white',
+                padding: '16px 32px',
+                borderRadius: '50px',
+                fontWeight: 700,
+                fontSize: '14px',
+                letterSpacing: '0.02em',
+                textDecoration: 'none',
+                boxShadow: '0 8px 24px rgba(200,64,26,0.32)',
+                transition: 'all 0.2s',
+                width: '100%',
+                maxWidth: '320px',
+              }}>
+                🛒 Order Fresh Now
+              </a>
+              <a href="/menu" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                background: 'transparent',
+                color: '#C8401A',
+                padding: '15px 32px',
+                borderRadius: '50px',
+                fontWeight: 700,
+                fontSize: '14px',
+                border: '1.5px solid rgba(200,64,26,0.4)',
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+                width: '100%',
+                maxWidth: '320px',
+              }}>
+                View Our Menu →
+              </a>
             </div>
+          </div>
 
-            <h1 className="font-playfair font-black text-bakery-primary leading-[0.88] tracking-[-0.04em]" style={{ fontSize: 'clamp(2rem, 6vw, 5rem)' }}>
-              {content['hero.line1'] || 'Artisan'}<br />
-              <span className="text-bakery-cta italic pr-4">{content['hero.line2'] || 'Baking'}</span>
-              <span className="font-light text-bakery-primary/40">{content['hero.line3'] || 'Reimagined.'}</span>
-            </h1>
-
-            <p className="text-xl text-[#5C4D42] max-w-lg leading-relaxed font-medium opacity-90">
-              {content['hero.subtext'] || 'Discover the perfect fusion of classic French technique and bold West African flavours. Delivered fresh to your door.'}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-5 pt-4">
-              <Link href="/menu">
-                <button className="px-10 py-5 rounded-2xl bg-[#1C0A00] text-white font-bold text-sm uppercase tracking-widest hover:bg-[#D4421A] transition-all duration-300 shadow-2xl shadow-black/20 flex items-center group">
-                  {content['hero.cta_text'] || 'Explore the Menu'}
-                  <ArrowRight size={18} className="ml-3 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </Link>
-              <Link href="/custom-order">
-                <button className="px-10 py-5 rounded-2xl border-2 border-[#1C0A00]/10 text-[#1C0A00] font-bold text-sm uppercase tracking-widest hover:bg-white hover:border-white transition-all duration-300 shadow-sm">
-                  Custom Orders
-                </button>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 md:flex md:gap-10 pt-10 border-t border-[#1C0A00]/5">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-12 h-12 rounded-full border-4 border-white overflow-hidden bg-gray-200">
-                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-                <div className="w-12 h-12 rounded-full border-4 border-white bg-[#D4421A] flex items-center justify-center text-white text-[10px] font-black tracking-tighter">
-                  4.9/5
+          {/* ── SOCIAL PROOF STRIP ── */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flexWrap: 'wrap',
+            marginTop: '32px',
+            paddingTop: '24px',
+            borderTop: '1px solid rgba(184,134,11,0.2)',
+          }}>
+            {/* Stacked avatars — emoji based, never breaks */}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {['👩🏾🦱', '👨🏿', '👩🏽', '👩🏾'].map((emoji, i) => (
+                <div key={i} style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  background: ['#FEE2E2', '#FEF3C7', '#DCFCE7', '#DBEAFE'][i],
+                  border: '2px solid white',
+                  marginLeft: i === 0 ? 0 : '-10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  position: 'relative',
+                  zIndex: 4 - i,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                }}>
+                  {emoji}
                 </div>
+              ))}
+            </div>
+
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                marginBottom: '2px',
+              }}>
+                {'★★★★★'.split('').map((s, i) => (
+                  <span key={i} style={{ color: '#D4A843', fontSize: '13px' }}>{s}</span>
+                ))}
+                <span style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  color: '#1A0800',
+                  marginLeft: '4px',
+                }}>4.9/5</span>
               </div>
-              <p className="text-sm font-bold text-[#7C6B5E] max-w-[140px] leading-tight">
-                Trusted by <span className="text-[#1C0A00]">12,000+</span> pastry lovers across the UK
+              <p style={{ fontSize: '11px', color: '#7A6555', fontWeight: 500 }}>
+                from 500+ happy customers
               </p>
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          {/* Right side — Image Showcase */}
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }} className="relative">
-            <div className="relative aspect-square rounded-[60px] overflow-hidden luxury-shadow border-[12px] border-white/50 rotate-3 hover:rotate-0 transition-all duration-700 group">
-              <Image
-                src={content['hero.image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1200"}
-                alt="Luxury Pastry"
-                fill
-                className="object-cover group-hover:scale-110 transition-transform duration-1000"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#1C0A00]/40 to-transparent" />
+        {/* Right side — Image Showcase */}
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }} style={{
+          minHeight: 'clamp(320px, 50vw, 100vh)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div className="relative aspect-square rounded-[60px] overflow-hidden luxury-shadow border-[12px] border-white/50 rotate-3 hover:rotate-0 transition-all duration-700 group">
+            <Image
+              src={content['hero.image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1200"}
+              alt="Luxury Pastry"
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-1000"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#1C0A00]/40 to-transparent" />
 
-              {/* Floating Price Tag */}
-              <div className="absolute top-10 right-10 bg-white/90 backdrop-blur-md px-6 py-4 rounded-3xl shadow-2xl border border-white/20">
-                <p className="text-[10px] font-black text-bakery-cta uppercase tracking-[0.2em] mb-1">Starting from</p>
-                <p className="text-3xl font-black text-bakery-primary">£45.00</p>
-              </div>
+            {/* Floating Price Tag */}
+            <div className="absolute top-10 right-10 bg-white/90 backdrop-blur-md px-6 py-4 rounded-3xl shadow-2xl border border-white/20">
+              <p className="text-[10px] font-black text-bakery-cta uppercase tracking-[0.2em] mb-1">Starting from</p>
+              <p className="text-3xl font-black text-bakery-primary">£45.00</p>
             </div>
+          </div>
 
-            {/* Floating Badges */}
-            <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -top-6 -left-6 bg-[#C9A84C] text-white p-5 rounded-[32px] shadow-2xl z-10">
-              <ShieldCheck size={32} />
-            </motion.div>
-
-            <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 1 }} className="absolute -bottom-10 -right-6 bg-white p-6 rounded-[40px] shadow-2xl z-10 border border-bakery-primary/5 flex items-center gap-4">
-              <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-bakery-cta">
-                <Clock size={28} />
-              </div>
-              <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rapid Delivery</p>
-                <p className="text-lg font-black text-bakery-primary">Today 18:00</p>
-              </div>
-            </motion.div>
+          {/* Floating Badges */}
+          <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity }} className="absolute -top-6 -left-6 bg-[#C9A84C] text-white p-5 rounded-[32px] shadow-2xl z-10">
+            <ShieldCheck size={32} />
           </motion.div>
-        </div>
+
+          <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 5, repeat: Infinity, delay: 1 }} className="absolute -bottom-10 -right-6 bg-white p-6 rounded-[40px] shadow-2xl z-10 border border-bakery-primary/5 flex items-center gap-4">
+            <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-bakery-cta">
+              <Clock size={28} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Rapid Delivery</p>
+              <p className="text-lg font-black text-bakery-primary">Today 18:00</p>
+            </div>
+          </motion.div>
+        </motion.div>
       </section>
+
+      {/* ── STATS BAR ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '16px',
+        padding: 'clamp(20px, 4vw, 40px) clamp(16px, 4vw, 80px)',
+        background: 'white',
+        borderTop: '1px solid rgba(184,134,11,0.1)',
+        borderBottom: '1px solid rgba(184,134,11,0.1)',
+      }}>
+        {[
+          { num: '500+', label: 'Happy Customers' },
+          { num: '4.9/5', label: 'Star Rating' },
+          { num: '45min', label: 'Fast Delivery' },
+          { num: '100%', label: 'Fresh Daily' },
+        ].map((stat, i) => (
+          <div key={i} style={{
+            textAlign: 'center',
+            padding: '16px 8px',
+            borderRadius: '16px',
+            background: i % 2 === 0 ? '#FAF7F2' : 'white',
+          }}>
+            <div style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 'clamp(1.4rem, 4vw, 1.9rem)',
+              fontWeight: 700,
+              color: '#1A0800',
+              lineHeight: 1,
+              marginBottom: '4px',
+            }}>{stat.num}</div>
+            <div style={{
+              fontSize: '10px',
+              color: '#7A6555',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              fontWeight: 600,
+            }}>{stat.label}</div>
+          </div>
+        ))}
+      </div>
 
       {/* ────────── DELIVERY BANNER ────────── */}
       <div className="bg-bakery-cta/5 border-y border-bakery-cta/10 py-4 px-6 overflow-hidden">
-        <motion.p animate={{ x: [0, -800, 0] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }} className="text-sm font-bold text-bakery-primary/60 whitespace-nowrap">
+        <motion.p animate={{ x: [0, -800, 0] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }} style={{ fontSize: 'clamp(9px, 2.5vw, 11px)', whiteSpace: 'nowrap' }} className="font-bold text-bakery-primary/60">
           {`🚚 Free delivery on orders over £${settings?.free_delivery_over || '50'} · Minimum order £${settings?.min_order || '20'} · 🕐 Allow ${settings?.custom_cake_notice || '48h'} notice for custom cakes · 📍 ${settings?.delivery_areas || 'Delivering across the UK'}`} &nbsp;·&nbsp; {`🚚 Free delivery on orders over £${settings?.free_delivery_over || '50'} · Minimum order £${settings?.min_order || '20'} · 🕐 Allow ${settings?.custom_cake_notice || '48h'} notice for custom cakes · 📍 ${settings?.delivery_areas || 'Delivering across the UK'}`}
         </motion.p>
       </div>
