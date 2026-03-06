@@ -1,272 +1,224 @@
-"use client";
+'use client'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import AuthButton from '@/components/AuthButton'
+import { ShoppingCart } from "lucide-react"
+import { useCartStore } from "@/store/useCartStore"
+import { useUIStore } from "@/store/useUIStore"
 
-import * as React from "react";
-import { useEffect, useState, useRef } from 'react';
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { ShoppingCart, Menu, X } from "lucide-react";
-import { useCartStore } from "@/store/useCartStore";
-import { useUIStore } from "@/store/useUIStore";
-import { Button } from "@/components/ui";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { createBrowserClient } from '@supabase/ssr';
-
-function AuthButton() {
-    const [open, setOpen] = useState(false)
-    const [isAdmin, setIsAdmin] = useState(false)
-    const [name, setName] = useState('')
-    const [loaded, setLoaded] = useState(false)
-    const router = useRouter()
-    const ref = useRef<HTMLDivElement>(null)
-
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) {
-                fetch('/api/auth/profile')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data?.full_name) {
-                            setName(data.full_name.split(' ')[0])
-                        } else {
-                            setName('Account')
-                        }
-                        setIsAdmin(data?.role === 'admin')
-                        setLoaded(true)
-                    })
-                    .catch(() => {
-                        setName('Account')
-                        setLoaded(true)
-                    })
-            } else {
-                setLoaded(true)
-            }
-        })
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
-                if (session?.user) {
-                    fetch('/api/auth/profile')
-                        .then(res => res.json())
-                        .then(data => {
-                            setName(data?.full_name?.split(' ')[0] || 'Account')
-                            setIsAdmin(data?.role === 'admin')
-                        })
-                } else {
-                    setName('')
-                    setIsAdmin(false)
-                    setOpen(false)
-                }
-                router.refresh()
-            }
-        )
-
-        const handleClickOutside = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
-                setOpen(false)
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside)
-
-        return () => {
-            subscription.unsubscribe()
-            document.removeEventListener('mousedown', handleClickOutside)
-        }
-    }, [router, supabase])
-
-    if (!loaded) {
-        return <div className="w-24 h-9 bg-gray-100 rounded-full animate-pulse" />
-    }
-
-    if (!name) {
-        return (
-            <Link
-                href="/auth/signup"
-                className="bg-[#2C1810] text-white px-6 py-2 rounded-full font-semibold text-sm hover:bg-[#3d2418] transition-colors whitespace-nowrap"
-            >
-                Sign Up
-            </Link>
-        )
-    }
-
-    return (
-        <div ref={ref} className="relative">
-            <button
-                onClick={() => setOpen(!open)}
-                className="bg-[#D4421A] text-white px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2 hover:bg-[#b8381a] transition-colors whitespace-nowrap"
-            >
-                <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold">
-                    {name.charAt(0).toUpperCase()}
-                </span>
-                {name}
-                <svg
-                    className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`}
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            {open && (
-                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-[999]">
-                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                        <p className="font-semibold text-gray-800 text-sm">{name}</p>
-                        <p className="text-xs text-[#D4421A]">{isAdmin ? '⚡ Admin' : 'Customer'}</p>
-                    </div>
-                    <Link href="/account" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-[#D4421A] transition-colors">👤 My Account</Link>
-                    <Link href="/account/orders" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-[#D4421A] transition-colors">📦 My Orders</Link>
-                    <Link href="/track-order" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-[#D4421A] transition-colors">🚚 Track Order</Link>
-                    {isAdmin && (
-                        <>
-                            <div className="border-t border-gray-100 my-1" />
-                            <p className="px-4 py-1 text-xs text-gray-400 uppercase tracking-wide">Admin</p>
-                            <Link href="/admin" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#D4421A] hover:bg-orange-50 transition-colors">⚡ Admin Dashboard</Link>
-                            <Link href="/admin/products" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors">🛍️ Products</Link>
-                            <Link href="/admin/orders" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors">📦 Orders</Link>
-                            <Link href="/admin/content" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#D4421A] hover:bg-orange-50 transition-colors">✏️ Edit Website</Link>
-                        </>
-                    )}
-                    <div className="border-t border-gray-100 my-1" />
-                    <button onClick={async () => { setOpen(false); await supabase.auth.signOut(); router.push('/'); router.refresh(); }} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors w-full text-left">🚪 Sign Out</button>
-                </div>
-            )}
-        </div>
-    )
-}
+const NAV_LINKS = [
+    { href: '/', label: 'Home' },
+    { href: '/menu', label: 'Menu' },
+    { href: '/custom-order', label: 'Custom Order' },
+    { href: '/about', label: 'About Us' },
+    { href: '/contact', label: 'Contact' },
+    { href: '/blog', label: 'Blog' },
+    { href: '/reviews', label: 'Reviews' },
+]
 
 export function Navbar({ settings }: { settings?: Record<string, string> }) {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false)
+    const [scrolled, setScrolled] = useState(false)
+    const pathname = usePathname()
+
     const itemCount = useCartStore((state) => state.itemCount);
     const openCart = useUIStore((state) => state.openCart);
 
-    const navLinks = [
-        { href: '/', label: 'Home' },
-        { href: '/menu', label: 'Menu' },
-        { href: '/custom-order', label: 'Custom Order' },
-        { href: '/about', label: 'About Us' },
-        { href: '/contact', label: 'Contact' },
-        { href: '/blog', label: 'Blog' },
-        { href: '/reviews', label: 'Reviews' },
-    ];
+    // Close menu on route change
+    useEffect(() => { setMobileOpen(false) }, [pathname])
+
+    // Shadow on scroll
+    useEffect(() => {
+        const handler = () => setScrolled(window.scrollY > 8)
+        window.addEventListener('scroll', handler)
+        return () => window.removeEventListener('scroll', handler)
+    }, [])
+
+    // Prevent body scroll when menu open
+    useEffect(() => {
+        document.body.style.overflow = mobileOpen ? 'hidden' : ''
+        return () => { document.body.style.overflow = '' }
+    }, [mobileOpen])
 
     return (
-        <header
-            className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-            style={{
-                background: '#FFFDF9',
-                boxShadow: '0 2px 20px rgba(28,10,0,0.08)',
-                borderBottom: '1px solid rgba(201,168,76,0.3)'
-            }}
-        >
-            <div className="max-w-7xl mx-auto px-8 h-[72px] flex items-center">
+        <>
+            {/* ── MAIN NAVBAR ── */}
+            <header
+                className="fixed top-0 left-0 right-0 z-[100]"
+                style={{
+                    background: 'rgba(251,248,243,0.97)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    borderBottom: '1px solid rgba(184,134,11,0.15)',
+                    boxShadow: scrolled ? '0 2px 20px rgba(26,8,0,0.08)' : 'none',
+                    transition: 'box-shadow 0.3s ease',
+                    height: '68px',
+                }}
+            >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between gap-4">
 
-                {/* Logo */}
-                <Link href="/" className="flex items-baseline gap-1 shrink-0 mr-12 group">
-                    <span style={{
-                        fontFamily: "'Playfair Display', Georgia, serif",
-                        fontSize: '1.55rem', fontWeight: 700, fontStyle: 'italic',
-                        background: 'linear-gradient(135deg, #1C0A00 30%, #D4421A 100%)',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text', letterSpacing: '-0.01em'
-                    }}>Sweet</span>
-                    <span style={{
-                        fontFamily: "'Playfair Display', Georgia, serif",
-                        fontSize: '1.55rem', fontWeight: 700, fontStyle: 'italic',
-                        color: '#D4421A', letterSpacing: '-0.01em', position: 'relative'
-                    }}>
-                        Delight
+                    {/* LOGO */}
+                    <Link href="/" className="flex items-baseline gap-1 flex-shrink-0">
                         <span style={{
-                            position: 'absolute', bottom: '-1px', left: 0, right: 0,
-                            height: '1.5px',
-                            background: 'linear-gradient(90deg, #D4421A, #C9A84C)',
-                            borderRadius: '2px'
-                        }} />
-                    </span>
-                    <span style={{ color: '#C9A84C', fontSize: '11px', marginLeft: '2px' }}>✦</span>
-                </Link>
+                            fontFamily: "'Playfair Display', Georgia, serif",
+                            fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+                            fontWeight: 700,
+                            fontStyle: 'italic',
+                            background: 'linear-gradient(135deg, #1A0800 30%, #C8401A 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                        }}>Sweet</span>
+                        <span style={{
+                            fontFamily: "'Playfair Display', Georgia, serif",
+                            fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+                            fontWeight: 700,
+                            fontStyle: 'italic',
+                            color: '#C8401A',
+                            position: 'relative',
+                        }}>
+                            Delight
+                            <span style={{
+                                position: 'absolute', bottom: '-2px', left: 0, right: 0,
+                                height: '1.5px',
+                                background: 'linear-gradient(90deg, #C8401A, #D4A843)',
+                                borderRadius: '2px',
+                            }} />
+                        </span>
+                        <span style={{ color: '#D4A843', fontSize: '10px', marginLeft: '2px' }}>✦</span>
+                    </Link>
 
-                {/* Nav links — desktop */}
-                <nav className="hidden lg:flex items-center gap-7 flex-1">
-                    {navLinks.map(link => (
-                        <Link key={link.href} href={link.href}
-                            className="text-[12px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200"
-                            style={{ color: '#7C6B5E' }}
-                            onMouseEnter={e => (e.target as HTMLElement).style.color = '#D4421A'}
-                            onMouseLeave={e => (e.target as HTMLElement).style.color = '#7C6B5E'}>
-                            {link.label}
-                        </Link>
-                    ))}
-                </nav>
-
-                {/* Right: cart + auth */}
-                <div className="flex items-center gap-3 ml-auto">
-                    {/* Cart icon */}
-                    <button
-                        onClick={openCart}
-                        className="p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-[#D4421A] transition-all relative group"
-                    >
-                        <ShoppingCart size={22} className="group-hover:scale-110 transition-transform" />
-                        {itemCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-[#D4421A] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
-                                {itemCount}
-                            </span>
-                        )}
-                    </button>
-
-                    <div className="hidden lg:block">
-                        <AuthButton />
-                    </div>
-
-                    {/* Mobile menu button */}
-                    <button
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="lg:hidden p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-[#D4421A] transition-all"
-                    >
-                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-            </div>
-
-            {/* Mobile Menu Overlay */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl lg:hidden overflow-hidden"
-                    >
-                        <div className="flex flex-col p-6 gap-4">
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="text-lg font-semibold text-gray-800 hover:text-[#D4421A] transition-colors py-2 border-b border-gray-50 last:border-0"
+                    {/* DESKTOP NAV LINKS */}
+                    <nav className="hidden lg:flex items-center gap-7 flex-1 justify-center">
+                        {NAV_LINKS.map(link => {
+                            const active = pathname === link.href ||
+                                (link.href !== '/' && pathname.startsWith(link.href))
+                            return (
+                                <Link key={link.href} href={link.href}
+                                    className="text-[11.5px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200 relative py-1"
+                                    style={{ color: active ? '#C8401A' : '#7A6555' }}
                                 >
                                     {link.label}
+                                    {active && (
+                                        <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                                            style={{ background: '#C8401A' }} />
+                                    )}
                                 </Link>
-                            ))}
-                            <div className="pt-4 flex justify-between items-center">
-                                <AuthButton />
-                                <button
-                                    onClick={() => { setIsMobileMenuOpen(false); openCart(); }}
-                                    className="flex items-center gap-2 bg-orange-50 text-[#D4421A] px-5 py-2.5 rounded-full font-bold text-sm"
-                                >
-                                    <ShoppingCart size={18} />
-                                    Cart ({itemCount})
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </header>
-    );
-}
+                            )
+                        })}
+                    </nav>
 
+                    {/* RIGHT SIDE — cart + auth + hamburger */}
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        {/* Cart */}
+                        <button
+                            onClick={openCart}
+                            className="p-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-[#D4421A] transition-all relative group"
+                        >
+                            <ShoppingCart size={22} className="group-hover:scale-110 transition-transform" />
+                            {itemCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-[#D4421A] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+                                    {itemCount}
+                                </span>
+                            )}
+                        </button>
+
+                        {/* Auth button */}
+                        <AuthButton />
+
+                        {/* HAMBURGER — mobile only */}
+                        <button
+                            onClick={() => setMobileOpen(prev => !prev)}
+                            className="lg:hidden flex flex-col justify-center items-center w-10 h-10 rounded-xl transition-colors active:scale-95"
+                            style={{ background: mobileOpen ? '#fff5f2' : 'transparent' }}
+                            aria-label="Toggle menu"
+                            aria-expanded={mobileOpen}
+                        >
+                            <span className="block w-5 h-0.5 bg-gray-700 transition-all duration-300"
+                                style={{
+                                    transform: mobileOpen ? 'rotate(45deg) translate(3px, 3px)' : 'none',
+                                    marginBottom: mobileOpen ? 0 : '4px'
+                                }} />
+                            <span className="block w-5 h-0.5 bg-gray-700 transition-all duration-300"
+                                style={{ opacity: mobileOpen ? 0 : 1, marginBottom: '4px' }} />
+                            <span className="block w-5 h-0.5 bg-gray-700 transition-all duration-300"
+                                style={{
+                                    transform: mobileOpen ? 'rotate(-45deg) translate(3px, -4px)' : 'none',
+                                }} />
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* ── MOBILE MENU OVERLAY ── */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 z-[99] lg:hidden"
+                    style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
+
+            {/* ── MOBILE MENU DRAWER ── */}
+            <div
+                className="fixed top-[68px] left-0 right-0 z-[99] lg:hidden overflow-y-auto"
+                style={{
+                    background: '#FFFDF9',
+                    borderBottom: '1px solid rgba(184,134,11,0.2)',
+                    maxHeight: 'calc(100vh - 68px)',
+                    transform: mobileOpen ? 'translateY(0)' : 'translateY(-110%)',
+                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: '0 8px 32px rgba(26,8,0,0.12)',
+                }}
+            >
+                <nav className="px-4 py-4">
+                    {NAV_LINKS.map((link, i) => {
+                        const active = pathname === link.href ||
+                            (link.href !== '/' && pathname.startsWith(link.href))
+                        return (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                onClick={() => setMobileOpen(false)}
+                                className="flex items-center justify-between py-4 border-b transition-colors"
+                                style={{
+                                    borderColor: 'rgba(184,134,11,0.1)',
+                                    color: active ? '#C8401A' : '#1A0800',
+                                    animationDelay: `${i * 0.04}s`,
+                                }}
+                            >
+                                <span className="font-semibold text-base">{link.label}</span>
+                                {active
+                                    ? <span style={{ color: '#C8401A' }}>●</span>
+                                    : <span className="text-gray-300">›</span>
+                                }
+                            </Link>
+                        )
+                    })}
+
+                    {/* Quick actions */}
+                    <div className="pt-4 pb-2 flex flex-col gap-3">
+                        <Link
+                            href="/custom-order"
+                            onClick={() => setMobileOpen(false)}
+                            className="w-full py-3.5 rounded-2xl text-center font-bold text-white text-sm"
+                            style={{ background: '#C8401A' }}
+                        >
+                            🎂 Build Custom Cake
+                        </Link>
+                        <a
+                            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '447000000000'}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-3.5 rounded-2xl text-center font-bold text-sm border-2 flex items-center justify-center gap-2"
+                            style={{ borderColor: '#25D366', color: '#25D366' }}
+                        >
+                            💬 WhatsApp Us
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </>
+    )
+}

@@ -5,7 +5,7 @@
 -- Replace 'your-email@example.com' with the email you use to sign in
 UPDATE public.profiles 
 SET role = 'admin' 
-WHERE email = 'your-email@example.com';
+WHERE email = 'bayodeadegboyega@gmail.com';
 
 -- 2. Verify the update
 SELECT id, email, role FROM public.profiles WHERE role = 'admin';

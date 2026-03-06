@@ -77,19 +77,19 @@ export function HomePageClient({ content, settings }: { content: ContentMap, set
   return (
     <div className="w-full">
       {/* ────────── HERO SECTION — LUXURY REDESIGN ────────── */}
-      <section className="relative min-h-[92vh] flex items-center pt-20 overflow-hidden px-8 md:px-16" style={{ background: 'var(--cream)' }}>
+      <section className="relative min-h-[92vh] flex items-center pt-20 overflow-hidden px-5 md:px-20" style={{ background: 'var(--cream)' }}>
         {/* Decorative elements */}
         <div className="absolute top-[-10%] right-[-5%] w-[65%] h-[65%] rounded-full blur-[120px] opacity-40 -z-10" style={{ background: 'var(--gold-light)' }} />
         <div className="absolute bottom-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full blur-[100px] opacity-20 -z-10" style={{ background: 'var(--orange-brand)' }} />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center w-full">
           <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: "easeOut" }} className="space-y-10">
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-bakery-cta/10 text-bakery-cta text-[11px] font-black uppercase tracking-[0.2em] shadow-sm">
               <span className="flex h-2 w-2 rounded-full bg-bakery-cta animate-ping" />
               {content['hero.badge'] || '🇬🇧 Proudly Serving London & Beyond'}
             </div>
 
-            <h1 className="text-7xl md:text-[6.5rem] font-playfair font-black text-bakery-primary leading-[0.88] tracking-[-0.04em]">
+            <h1 className="font-playfair font-black text-bakery-primary leading-[0.88] tracking-[-0.04em]" style={{ fontSize: 'clamp(2rem, 6vw, 5rem)' }}>
               {content['hero.line1'] || 'Artisan'}<br />
               <span className="text-bakery-cta italic pr-4">{content['hero.line2'] || 'Baking'}</span>
               <span className="font-light text-bakery-primary/40">{content['hero.line3'] || 'Reimagined.'}</span>
@@ -113,7 +113,7 @@ export function HomePageClient({ content, settings }: { content: ContentMap, set
               </Link>
             </div>
 
-            <div className="flex items-center gap-10 pt-10 border-t border-[#1C0A00]/5">
+            <div className="grid grid-cols-2 gap-4 md:flex md:gap-10 pt-10 border-t border-[#1C0A00]/5">
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="w-12 h-12 rounded-full border-4 border-white overflow-hidden bg-gray-200">

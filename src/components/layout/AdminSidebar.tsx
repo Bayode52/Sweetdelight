@@ -39,6 +39,7 @@ export function AdminSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const [userProfile, setUserProfile] = useState<{ full_name: string | null; email: string | null }>({ full_name: null, email: null });
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         async function getProfile() {
@@ -63,63 +64,83 @@ export function AdminSidebar() {
     };
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 bg-bakery-primary text-white flex flex-col border-r border-white/5 z-40">
-            {/* Header */}
-            <div className="p-8 pb-6">
-                <Link href="/" className="text-2xl font-playfair font-black tracking-tighter block mb-6 uppercase">
-                    <span className="text-bakery-cta">Sweet</span> Delight<span className="text-bakery-cta text-xs">.</span>Admin
-                </Link>
+        <>
+            <button
+                onClick={() => setSidebarOpen(true)}
+                className="md:hidden fixed top-4 left-4 z-[150] bg-white rounded-xl p-2.5 shadow-lg border border-gray-100"
+            >
+                <div className="w-5 h-0.5 bg-gray-700 mb-1" />
+                <div className="w-5 h-0.5 bg-gray-700 mb-1" />
+                <div className="w-5 h-0.5 bg-gray-700" />
+            </button>
 
-                <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-bakery-cta flex items-center justify-center font-bold text-white uppercase shrink-0">
-                        {userProfile.full_name?.charAt(0) || "A"}
-                    </div>
-                    <div className="overflow-hidden">
-                        <p className="text-sm font-bold truncate">{userProfile.full_name || "Admin User"}</p>
-                        <span className="inline-block px-2 py-0.5 bg-bakery-cta/20 text-bakery-cta text-[10px] font-black uppercase tracking-widest rounded-full">
-                            Admin
-                        </span>
+            {sidebarOpen && (
+                <div className="fixed inset-0 bg-black/50 z-[140] md:hidden"
+                    onClick={() => setSidebarOpen(false)} />
+            )}
+
+            <aside className={`fixed top-0 left-0 h-full w-64 bg-bakery-primary text-white flex flex-col border-r border-white/5 z-[145] transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex-shrink-0`}>
+                <button onClick={() => setSidebarOpen(false)}
+                    className="md:hidden absolute top-4 right-4 text-white/60 hover:text-white">
+                    ✕
+                </button>
+                {/* Header */}
+                <div className="p-8 pb-6">
+                    <Link href="/" className="text-2xl font-playfair font-black tracking-tighter block mb-6 uppercase">
+                        <span className="text-bakery-cta">Sweet</span> Delight<span className="text-bakery-cta text-xs">.</span>Admin
+                    </Link>
+
+                    <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-bakery-cta flex items-center justify-center font-bold text-white uppercase shrink-0">
+                            {userProfile.full_name?.charAt(0) || "A"}
+                        </div>
+                        <div className="overflow-hidden">
+                            <p className="text-sm font-bold truncate">{userProfile.full_name || "Admin User"}</p>
+                            <span className="inline-block px-2 py-0.5 bg-bakery-cta/20 text-bakery-cta text-[10px] font-black uppercase tracking-widest rounded-full">
+                                Admin
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Nav */}
-            <nav className="flex-1 px-4 space-y-2">
-                {ADMIN_LINKS.map((link) => {
-                    const isActive = pathname === link.href;
-                    return (
-                        <Link
-                            key={link.name}
-                            href={link.href}
-                            className={cn(
-                                "group flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300",
-                                isActive
-                                    ? "bg-bakery-cta text-white luxury-shadow"
-                                    : "text-white/60 hover:bg-white/5 hover:text-white"
-                            )}
-                        >
-                            <div className="flex items-center gap-4">
-                                <link.icon size={20} className={cn("transition-transform", isActive ? "scale-110" : "group-hover:scale-110")} />
-                                <span className="font-bold text-sm tracking-wide">{link.name}</span>
-                            </div>
-                            {isActive && <ChevronRight size={16} />}
-                        </Link>
-                    );
-                })}
-            </nav>
+                {/* Nav */}
+                <nav className="flex-1 px-4 space-y-2">
+                    {ADMIN_LINKS.map((link) => {
+                        const isActive = pathname === link.href;
+                        return (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className={cn(
+                                    "group flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300",
+                                    isActive
+                                        ? "bg-bakery-cta text-white luxury-shadow"
+                                        : "text-white/60 hover:bg-white/5 hover:text-white"
+                                )}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <link.icon size={20} className={cn("transition-transform", isActive ? "scale-110" : "group-hover:scale-110")} />
+                                    <span className="font-bold text-sm tracking-wide">{link.name}</span>
+                                </div>
+                                {isActive && <ChevronRight size={16} />}
+                            </Link>
+                        );
+                    })}
+                </nav>
 
-            {/* Footer */}
-            <div className="p-4 mt-auto">
-                <Button
-                    variant="ghost"
-                    fullWidth
-                    className="text-white/60 hover:text-white hover:bg-bakery-error/20"
-                    onClick={handleSignOut}
-                >
-                    <LogOut size={18} className="mr-2" />
-                    Sign Out
-                </Button>
-            </div>
-        </aside>
+                {/* Footer */}
+                <div className="p-4 mt-auto">
+                    <Button
+                        variant="ghost"
+                        fullWidth
+                        className="text-white/60 hover:text-white hover:bg-bakery-error/20"
+                        onClick={handleSignOut}
+                    >
+                        <LogOut size={18} className="mr-2" />
+                        Sign Out
+                    </Button>
+                </div>
+            </aside>
+        </>
     );
 }
