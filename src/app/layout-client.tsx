@@ -21,11 +21,13 @@ const outfit = Outfit({
 export default function LayoutClient({
     children,
     footerNode,
-    settings
+    settings,
+    whatsapp
 }: {
     children: React.ReactNode,
     footerNode?: React.ReactNode,
-    settings?: Record<string, string>
+    settings?: Record<string, string>,
+    whatsapp?: string
 }) {
     const pathname = usePathname();
     const isAdminPage = pathname.startsWith("/admin");
@@ -43,7 +45,7 @@ export default function LayoutClient({
                     <main className="flex-1 pt-[68px] min-h-screen flex flex-col">{children}</main>
                     {footerNode}
                     <ChatWidget />
-                    <WhatsAppButton />
+                    <WhatsAppButton phoneNumber={whatsapp} />
                 </div>
             )}
             <PWAInstallPrompt />

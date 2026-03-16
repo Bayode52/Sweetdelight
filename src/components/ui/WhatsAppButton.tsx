@@ -4,9 +4,10 @@ import { MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
-export function WhatsAppButton() {
+export function WhatsAppButton({ phoneNumber }: { phoneNumber?: string }) {
     const [isVisible, setIsVisible] = useState(false);
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP || '447000000000';
+    const whatsappNumber = phoneNumber || process.env.NEXT_PUBLIC_WHATSAPP || '447000000000';
+    const waNumberStr = whatsappNumber.replace(/\D/g, '');
 
     useEffect(() => {
         const timer = setTimeout(() => setIsVisible(true), 2000);
@@ -17,7 +18,7 @@ export function WhatsAppButton() {
         <AnimatePresence>
             {isVisible && (
                 <motion.a
-                    href={`https://wa.me/${whatsappNumber}?text=Hi%20Sweet%20Delight!%20I'd%20like%20to%20enquire%20about...`}
+                    href={`https://wa.me/${waNumberStr}?text=Hi%20Sweet%20Delites!%20I'd%20like%20to%20enquire%20about...`}
                     target="_blank"
                     rel="noopener noreferrer"
                     initial={{ opacity: 0, scale: 0.5, y: 20 }}

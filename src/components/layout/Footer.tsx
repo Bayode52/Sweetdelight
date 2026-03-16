@@ -1,6 +1,7 @@
 // src/components/layout/Footer.tsx
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { Instagram, Phone, Mail, MessageCircle, Facebook, Music2 } from 'lucide-react'
 
 export default async function Footer() {
   let phone = '+44 7000 000000'
@@ -79,20 +80,28 @@ export default async function Footer() {
               {instagram && (
                 <a href={`https://instagram.com/${instagram.replace('@','')}`}
                   target="_blank" rel="noopener noreferrer"
-                  style={socialStyle} title="Instagram">📸</a>
+                  style={socialStyle} title="Instagram">
+                  <Instagram size={18} />
+                </a>
               )}
               {waNumber && (
                 <a href={`https://wa.me/${waNumber}`}
                   target="_blank" rel="noopener noreferrer"
-                  style={socialStyle} title="WhatsApp">💬</a>
+                  style={socialStyle} title="WhatsApp">
+                  <MessageCircle size={18} />
+                </a>
               )}
               {facebook && (
                 <a href={facebook} target="_blank" rel="noopener noreferrer"
-                  style={socialStyle} title="Facebook">📘</a>
+                  style={socialStyle} title="Facebook">
+                  <Facebook size={18} />
+                </a>
               )}
               {tiktok && (
                 <a href={tiktok} target="_blank" rel="noopener noreferrer"
-                  style={socialStyle} title="TikTok">🎵</a>
+                  style={socialStyle} title="TikTok">
+                  <Music2 size={18} />
+                </a>
               )}
             </div>
           </div>
@@ -139,27 +148,27 @@ export default async function Footer() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {phone && (
                 <a href={`tel:${phone.replace(/\s/g,'')}`} style={contactItemStyle}>
-                  <span style={{ color: '#C8401A', fontSize: '15px' }}>📞</span>
+                  <Phone size={16} color="#C8401A" />
                   <span style={{ fontSize: '13px' }}>{phone}</span>
                 </a>
               )}
               {instagram && (
                 <a href={`https://instagram.com/${instagram.replace('@','')}`}
                   target="_blank" rel="noopener noreferrer" style={contactItemStyle}>
-                  <span style={{ color: '#C8401A', fontSize: '15px' }}>📸</span>
+                  <Instagram size={16} color="#C8401A" />
                   <span style={{ fontSize: '13px' }}>{instagram}</span>
                 </a>
               )}
               {email && (
                 <a href={`mailto:${email}`} style={contactItemStyle}>
-                  <span style={{ color: '#C8401A', fontSize: '15px' }}>✉️</span>
+                  <Mail size={16} color="#C8401A" />
                   <span style={{ fontSize: '13px' }}>{email}</span>
                 </a>
               )}
               {waNumber && (
                 <a href={`https://wa.me/${waNumber}`}
                   target="_blank" rel="noopener noreferrer" style={contactItemStyle}>
-                  <span style={{ color: '#25D366', fontSize: '15px' }}>💬</span>
+                  <MessageCircle size={16} color="#25D366" />
                   <span style={{ fontSize: '13px' }}>WhatsApp Us</span>
                 </a>
               )}

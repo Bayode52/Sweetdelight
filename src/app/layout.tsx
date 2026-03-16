@@ -3,7 +3,7 @@ import { Providers } from "@/components/Providers";
 import { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
 import LayoutClient from "./layout-client";
-import { getSettings } from "@/lib/settings";
+import { getSettings, getContent } from "@/lib/settings";
 import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
@@ -62,6 +62,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getSettings();
+  const siteContent = await getContent('footer');
+  const whatsapp = siteContent?.footer?.contact?.whatsapp || '447000000000';
   return (
     <html lang="en" style={{ scrollBehavior: 'smooth' }}>
       <head>
@@ -87,7 +89,7 @@ export default async function RootLayout({
       </head>
       <body className="antialiased bg-bakery-background text-bakery-primary">
         <Providers>
-          <LayoutClient footerNode={<Footer />} settings={settings}>{children}</LayoutClient>
+          <LayoutClient footerNode={<Footer />} settings={settings} whatsapp={whatsapp}>{children}</LayoutClient>
           <CartDrawer />
           <Toaster position="bottom-right" />
         </Providers>
