@@ -15,7 +15,7 @@ export default function ChatWidget() {
         {
             id: '1',
             role: 'assistant',
-            content: "Hello! Welcome to Sweet Delight 🍰 I'm Chloe. How can I help you today?",
+            content: "Hello! Welcome to Sweet Delites 🍰 I'm Chloe. How can I help you today?",
         }
     ]);
     const [input, setInput] = useState("");
@@ -62,7 +62,7 @@ export default function ChatWidget() {
 
     const smart = (m: string) => {
         const t = m.toLowerCase()
-        if (/hi|hello|hey/.test(t)) return "Hello! Welcome to Sweet Delight 🍰 How can I help?"
+        if (/hi|hello|hey/.test(t)) return "Hello! Welcome to Sweet Delites 🍰 How can I help?"
         if (/price|cost/.test(t)) return "Cakes from £45, small chops from £35, puff puff £6/dozen! Free delivery over £50."
         if (/deliver/.test(t)) return "We deliver across the UK! Free delivery over £50 🚚"
         return "For quickest help, WhatsApp us Mon–Fri 9am–7pm! 🍰"
@@ -142,7 +142,7 @@ export default function ChatWidget() {
                         <div className="flex justify-between items-start relative z-10">
                             <div className="space-y-1">
                                 <h3 className="font-playfair font-black text-2xl flex items-center gap-2 drop-shadow-sm">
-                                    Sweet Delight <span className="text-2xl animate-in zoom-in spin-in-12 duration-500 delay-150">🧁</span>
+                                    Sweet Delites <span className="text-2xl animate-in zoom-in spin-in-12 duration-500 delay-150">🧁</span>
                                 </h3>
                                 <p className="text-xs text-white/80 font-medium tracking-wide flex items-center gap-1.5">
                                     <span className={`w-2 h-2 rounded-full ${status === 'human' ? 'bg-green-400' : 'bg-bakery-cta'} animate-pulse`} />

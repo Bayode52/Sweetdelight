@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Navbar, Footer, AdminSidebar } from "@/components/layout";
+import { Navbar, AdminSidebar } from "@/components/layout";
 import { PWAInstallPrompt } from "@/components/ui/PWAInstallPrompt";
 import ChatWidget from "@/components/chat/ChatWidget";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
@@ -20,11 +20,11 @@ const outfit = Outfit({
 
 export default function LayoutClient({
     children,
-    footerContent,
+    footerNode,
     settings
 }: {
     children: React.ReactNode,
-    footerContent?: ContentMap,
+    footerNode?: React.ReactNode,
     settings?: Record<string, string>
 }) {
     const pathname = usePathname();
@@ -41,7 +41,7 @@ export default function LayoutClient({
                 <div className="flex flex-col min-h-screen">
                     <Navbar settings={settings} />
                     <main className="flex-1 pt-[68px] min-h-screen flex flex-col">{children}</main>
-                    <Footer content={footerContent} settings={settings} />
+                    {footerNode}
                     <ChatWidget />
                     <WhatsAppButton />
                 </div>

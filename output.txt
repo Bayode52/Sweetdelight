@@ -1,3 +1,4 @@
+﻿=== NAVBAR COMPONENT ===
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -43,7 +44,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
 
     return (
         <>
-            {/* ── MAIN NAVBAR ── */}
+            {/* â”€â”€ MAIN NAVBAR â”€â”€ */}
             <header
                 className="fixed top-0 left-0 right-0 z-[100]"
                 style={{
@@ -53,74 +54,40 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                     borderBottom: '1px solid rgba(184,134,11,0.15)',
                     boxShadow: scrolled ? '0 2px 20px rgba(26,8,0,0.08)' : 'none',
                     transition: 'box-shadow 0.3s ease',
-                    height: '72px',
+                    height: '68px',
                 }}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between gap-4">
 
                     {/* LOGO */}
-                    <Link href="/" className="flex items-end gap-0 flex-shrink-0 group">
-                      {/* Main name */}
-                      <span style={{
-                        fontFamily: "'Playfair Display', Georgia, serif",
-                        fontSize: 'clamp(1.15rem, 3.5vw, 1.5rem)',
-                        fontWeight: 700,
-                        fontStyle: 'italic',
-                        background: 'linear-gradient(135deg, #1A0800 30%, #C8401A 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        letterSpacing: '-0.01em',
-                        lineHeight: 1,
-                      }}>
-                        Sweet{' '}
-                      </span>
-                      <span style={{
-                        fontFamily: "'Playfair Display', Georgia, serif",
-                        fontSize: 'clamp(1.15rem, 3.5vw, 1.5rem)',
-                        fontWeight: 700,
-                        fontStyle: 'italic',
-                        color: '#C8401A',
-                        position: 'relative',
-                        lineHeight: 1,
-                      }}>
-                        Delites
-                        {/* Decorative underline */}
+                    <Link href="/" className="flex items-baseline gap-1 flex-shrink-0">
                         <span style={{
-                          position: 'absolute',
-                          bottom: '-2px',
-                          left: 0,
-                          right: 0,
-                          height: '1.5px',
-                          background: 'linear-gradient(90deg, #C8401A, #D4A843)',
-                          borderRadius: '2px',
-                        }} />
-                        {/* Subscript cakesnmore */}
+                            fontFamily: "'Playfair Display', Georgia, serif",
+                            fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+                            fontWeight: 700,
+                            fontStyle: 'italic',
+                            background: 'linear-gradient(135deg, #1A0800 30%, #C8401A 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                        }}>Sweet</span>
                         <span style={{
-                          position: 'absolute',
-                          bottom: '-14px',
-                          right: 0,
-                          fontSize: '8.5px',
-                          fontStyle: 'normal',
-                          fontWeight: 600,
-                          color: '#D4A843',
-                          letterSpacing: '0.12em',
-                          textTransform: 'lowercase',
-                          fontFamily: "'DM Sans', sans-serif",
-                          WebkitTextFillColor: '#D4A843',
-                          background: 'none',
-                          whiteSpace: 'nowrap',
+                            fontFamily: "'Playfair Display', Georgia, serif",
+                            fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+                            fontWeight: 700,
+                            fontStyle: 'italic',
+                            color: '#C8401A',
+                            position: 'relative',
                         }}>
-                          cakesnmore
+                            Delight
+                            <span style={{
+                                position: 'absolute', bottom: '-2px', left: 0, right: 0,
+                                height: '1.5px',
+                                background: 'linear-gradient(90deg, #C8401A, #D4A843)',
+                                borderRadius: '2px',
+                            }} />
                         </span>
-                      </span>
-                      <span style={{
-                        color: '#D4A843',
-                        fontSize: '10px',
-                        marginLeft: '4px',
-                        marginBottom: '2px',
-                        lineHeight: 1,
-                      }}>✦</span>
+                        <span style={{ color: '#D4A843', fontSize: '10px', marginLeft: '2px' }}>âœ¦</span>
                     </Link>
 
                     {/* DESKTOP NAV LINKS */}
@@ -143,7 +110,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                         })}
                     </nav>
 
-                    {/* RIGHT SIDE — cart + auth + hamburger */}
+                    {/* RIGHT SIDE â€” cart + auth + hamburger */}
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         {/* Cart */}
                         <button
@@ -161,7 +128,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                         {/* Auth button */}
                         <AuthButton />
 
-                        {/* HAMBURGER — mobile only */}
+                        {/* HAMBURGER â€” mobile only */}
                         <button
                             onClick={() => setMobileOpen(prev => !prev)}
                             className="lg:hidden flex flex-col justify-center items-center w-10 h-10 rounded-xl transition-colors active:scale-95"
@@ -185,7 +152,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                 </div>
             </header>
 
-            {/* ── MOBILE MENU OVERLAY ── */}
+            {/* â”€â”€ MOBILE MENU OVERLAY â”€â”€ */}
             {mobileOpen && (
                 <div
                     className="fixed inset-0 z-[99] lg:hidden"
@@ -194,13 +161,13 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                 />
             )}
 
-            {/* ── MOBILE MENU DRAWER ── */}
+            {/* â”€â”€ MOBILE MENU DRAWER â”€â”€ */}
             <div
-                className="fixed top-[72px] left-0 right-0 z-[99] lg:hidden overflow-y-auto"
+                className="fixed top-[68px] left-0 right-0 z-[99] lg:hidden overflow-y-auto"
                 style={{
                     background: '#FFFDF9',
                     borderBottom: '1px solid rgba(184,134,11,0.2)',
-                    maxHeight: 'calc(100vh - 72px)',
+                    maxHeight: 'calc(100vh - 68px)',
                     transform: mobileOpen ? 'translateY(0)' : 'translateY(-110%)',
                     transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     boxShadow: '0 8px 32px rgba(26,8,0,0.12)',
@@ -224,8 +191,8 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                             >
                                 <span className="font-semibold text-base">{link.label}</span>
                                 {active
-                                    ? <span style={{ color: '#C8401A' }}>●</span>
-                                    : <span className="text-gray-300">›</span>
+                                    ? <span style={{ color: '#C8401A' }}>â—</span>
+                                    : <span className="text-gray-300">â€º</span>
                                 }
                             </Link>
                         )
@@ -239,7 +206,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                             className="w-full py-3.5 rounded-2xl text-center font-bold text-white text-sm"
                             style={{ background: '#C8401A' }}
                         >
-                            🎂 Build Custom Cake
+                            ðŸŽ‚ Build Custom Cake
                         </Link>
                         <a
                             href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '447000000000'}`}
@@ -248,7 +215,7 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
                             className="w-full py-3.5 rounded-2xl text-center font-bold text-sm border-2 flex items-center justify-center gap-2"
                             style={{ borderColor: '#25D366', color: '#25D366' }}
                         >
-                            💬 WhatsApp Us
+                            ðŸ’¬ WhatsApp Us
                         </a>
                     </div>
                 </nav>
@@ -256,3 +223,91 @@ export function Navbar({ settings }: { settings?: Record<string, string> }) {
         </>
     )
 }
+
+=== FOOTER COMPONENT ===
+
+layout\Footer.tsx
+
+
+
+=== CONTACT PAGE ===
+import { getContent } from "@/lib/content";
+import { getSettings } from "@/lib/settings";
+import { ContactPageClient } from "@/components/contact/ContactPageClient";
+
+export const revalidate = 60; // Revalidate every 60 seconds (or 0 for always dynamic)
+
+export default async function ContactPage() {
+    const content = await getContent("contact");
+    const settings = await getSettings();
+
+    return <ContactPageClient content={content} settings={settings} />;
+}
+
+=== REVIEWS PAGE ===
+
+=== ADMIN CONTENT API ===
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/requireAdmin'
+
+export async function GET(request: Request) {
+    const auth = await requireAdmin()
+    if ('error' in auth) return auth.error
+
+    try {
+        const { searchParams } = new URL(request.url)
+        const page = searchParams.get('page')
+
+        const supabase = await createClient()
+        let query = supabase.from('site_content').select('*')
+
+        if (page) {
+            query = query.eq('page', page)
+        }
+
+        const { data, error } = await query
+        if (error) throw error
+
+        return NextResponse.json(data)
+    } catch (error) {
+        console.error('Content GET error:', error)
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    }
+}
+
+export async function PATCH(request: Request) {
+    const auth = await requireAdmin()
+    if ('error' in auth) return auth.error
+    const { supabase } = auth
+
+    try {
+
+        const { page, section, field, value } = await request.json()
+
+        const { error } = await supabase
+            .from('site_content')
+            .upsert({
+                page,
+                section,
+                field,
+                value: String(value),
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'page,section,field' })
+
+        if (error) throw error
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Content PATCH error:', error)
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    }
+}
+
+=== SITE CONTENT TABLE CHECK ===
+
+components\admin\WebsiteConte
+ntEditor.tsx
+
+
+

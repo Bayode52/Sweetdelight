@@ -1,0 +1,140 @@
+﻿
+> pastry-web@0.1.0 build
+> next build
+
+  Ôû▓ Next.js 14.2.14
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Ô£ô Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/79) ...
+   Generating static pages (19/79) 
+   Generating static pages (39/79) 
+   Generating static pages (59/79) 
+ Ô£ô Generating static pages (79/79)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+Ôöî ãÆ /                                    7.14 kB         224 kB
+Ôö£ ãÆ /_not-found                          143 B          87.5 kB
+Ôö£ ãÆ /about                               3.74 kB         142 kB
+Ôö£ ãÆ /account                             7.53 kB         221 kB
+Ôö£ ãÆ /account/orders                      6.49 kB         225 kB
+Ôö£ ãÆ /account/referrals                   3.77 kB         153 kB
+Ôö£ ãÆ /admin                               112 kB          314 kB
+Ôö£ ãÆ /admin/automations                   3.35 kB         144 kB
+Ôö£ ãÆ /admin/automations/logs              2.44 kB         143 kB
+Ôö£ ãÆ /admin/blog                          7.69 kB         218 kB
+Ôö£ ãÆ /admin/chat                          3.88 kB        95.8 kB
+Ôö£ ãÆ /admin/chat/knowledge                3.81 kB        91.2 kB
+Ôö£ ãÆ /admin/content                       6.7 kB          171 kB
+Ôö£ ãÆ /admin/customers                     9 kB            156 kB
+Ôö£ ãÆ /admin/debug                         1.4 kB          145 kB
+Ôö£ ãÆ /admin/messages                      4.13 kB         221 kB
+Ôö£ ãÆ /admin/orders                        4.5 kB          162 kB
+Ôö£ ãÆ /admin/products                      5.4 kB          149 kB
+Ôö£ ãÆ /admin/referrals                     2.97 kB         147 kB
+Ôö£ ãÆ /admin/reviews                       1.87 kB         146 kB
+Ôö£ ãÆ /admin/security                      6.14 kB         145 kB
+Ôö£ ãÆ /admin/settings                      2.99 kB         104 kB
+Ôö£ ãÆ /api/admin/automations               0 B                0 B
+Ôö£ ãÆ /api/admin/automations/logs          0 B                0 B
+Ôö£ ãÆ /api/admin/blog                      0 B                0 B
+Ôö£ ãÆ /api/admin/blog/[id]                 0 B                0 B
+Ôö£ ãÆ /api/admin/chat                      0 B                0 B
+Ôö£ ãÆ /api/admin/content                   0 B                0 B
+Ôö£ ãÆ /api/admin/content/upload            0 B                0 B
+Ôö£ ãÆ /api/admin/customers                 0 B                0 B
+Ôö£ ãÆ /api/admin/customers/[id]            0 B                0 B
+Ôö£ ãÆ /api/admin/customers/[id]/ban        0 B                0 B
+Ôö£ ãÆ /api/admin/customers/[id]/bot        0 B                0 B
+Ôö£ ãÆ /api/admin/customers/[id]/credit     0 B                0 B
+Ôö£ ãÆ /api/admin/customers/[id]/mark-bot   0 B                0 B
+Ôö£ ãÆ /api/admin/customers/[id]/unban      0 B                0 B
+Ôö£ ãÆ /api/admin/dashboard                 0 B                0 B
+Ôö£ ãÆ /api/admin/knowledge                 0 B                0 B
+Ôö£ ãÆ /api/admin/migrate-products          0 B                0 B
+Ôö£ ãÆ /api/admin/orders/status             0 B                0 B
+Ôö£ ãÆ /api/admin/products                  0 B                0 B
+Ôö£ ãÆ /api/admin/products/[id]             0 B                0 B
+Ôö£ ãÆ /api/admin/products/[id]/toggle      0 B                0 B
+Ôö£ ãÆ /api/admin/products/upload           0 B                0 B
+Ôö£ ãÆ /api/admin/readiness                 0 B                0 B
+Ôö£ ãÆ /api/admin/reviews/actions           0 B                0 B
+Ôö£ ãÆ /api/admin/security                  0 B                0 B
+Ôö£ ãÆ /api/admin/seed-products             0 B                0 B
+Ôö£ ãÆ /api/admin/settings                  0 B                0 B
+Ôö£ ãÆ /api/admin/upload                    0 B                0 B
+Ôö£ ãÆ /api/auth/profile                    0 B                0 B
+Ôö£ ãÆ /api/blog                            0 B                0 B
+Ôö£ ãÆ /api/cart/save                       0 B                0 B
+Ôö£ ãÆ /api/chat                            0 B                0 B
+Ôö£ Ôùï /api/chat-test                       0 B                0 B
+Ôö£ ãÆ /api/chat/messages                   0 B                0 B
+Ôö£ ãÆ /api/checkout/stripe                 0 B                0 B
+Ôö£ ãÆ /api/contact                         0 B                0 B
+Ôö£ ãÆ /api/cron/daily                      0 B                0 B
+Ôö£ ãÆ /api/cron/frequent                   0 B                0 B
+Ôö£ ãÆ /api/cron/weekly                     0 B                0 B
+Ôö£ ãÆ /api/custom-order/preview            0 B                0 B
+Ôö£ ãÆ /api/custom-order/submit             0 B                0 B
+Ôö£ ãÆ /api/dev/cms                         0 B                0 B
+Ôö£ ãÆ /api/dev/reviews                     0 B                0 B
+Ôö£ ãÆ /api/notifications                   0 B                0 B
+Ôö£ ãÆ /api/orders                          0 B                0 B
+Ôö£ ãÆ /api/orders/[id]                     0 B                0 B
+Ôö£ ãÆ /api/orders/[id]/cancel              0 B                0 B
+Ôö£ ãÆ /api/orders/[id]/status              0 B                0 B
+Ôö£ ãÆ /api/orders/track                    0 B                0 B
+Ôö£ ãÆ /api/products                        0 B                0 B
+Ôö£ ãÆ /api/referrals/validate              0 B                0 B
+Ôö£ ãÆ /api/reviews                         0 B                0 B
+Ôö£ ãÆ /api/reviews/[id]/helpful            0 B                0 B
+Ôö£ ãÆ /api/reviews/upload                  0 B                0 B
+Ôö£ ãÆ /api/security/log                    0 B                0 B
+Ôö£ ãÆ /api/upload                          0 B                0 B
+Ôö£ ãÆ /api/webhooks/stripe                 0 B                0 B
+Ôö£ ãÆ /api/webhooks/supabase/orders        0 B                0 B
+Ôö£ ãÆ /auth/callback                       0 B                0 B
+Ôö£ ãÆ /auth/forgot-password                1.99 kB         197 kB
+Ôö£ ãÆ /auth/login                          3.56 kB         246 kB
+Ôö£ ãÆ /auth/signup                         5.06 kB         247 kB
+Ôö£ ãÆ /banned                              2.69 kB         136 kB
+Ôö£ ãÆ /blog                                2.47 kB         228 kB
+Ôö£ ÔùÅ /blog/[slug]                         3.08 kB         220 kB
+Ôö£   Ôö£ /blog/what-are-small-chops
+Ôö£   Ôö£ /blog/plan-nigerian-party-uk
+Ôö£   Ôö£ /blog/chin-chin-west-africa
+Ôö£   Ôöö /blog/order-custom-birthday-cake
+Ôö£ ãÆ /checkout                            9.43 kB         266 kB
+Ôö£ ãÆ /checkout/cancel                     1.63 kB         219 kB
+Ôö£ ãÆ /checkout/success                    3.12 kB         220 kB
+Ôö£ ãÆ /contact                             7.14 kB         193 kB
+Ôö£ ãÆ /custom-order                        8.39 kB         101 kB
+Ôö£ ãÆ /dev/make-me-admin                   1.47 kB         145 kB
+Ôö£ ãÆ /maintenance                         2.24 kB         219 kB
+Ôö£ Ôùï /manifest.webmanifest                0 B                0 B
+Ôö£ ãÆ /menu                                3.84 kB         147 kB
+Ôö£ ãÆ /offline                             2.42 kB         129 kB
+Ôö£ ãÆ /privacy                             182 B          94.4 kB
+Ôö£ ãÆ /ref/[code]                          2.62 kB         220 kB
+Ôö£ ãÆ /reviews                             3.91 kB         148 kB
+Ôö£ ãÆ /sitemap.xml                         0 B                0 B
+Ôö£ ãÆ /terms                               182 B          94.4 kB
+Ôöö ãÆ /track-order                         4.45 kB         215 kB
++ First Load JS shared by all            87.4 kB
+  Ôö£ chunks/2117-bb73e62cd3f5d4be.js      31.8 kB
+  Ôö£ chunks/fd9d1056-e2f00043ae9ddb43.js  53.6 kB
+  Ôöö other shared chunks (total)          2 kB
+
+
+ãÆ Middleware                             74.6 kB
+
+Ôùï  (Static)   prerendered as static content
+ÔùÅ  (SSG)      prerendered as static HTML (uses getStaticProps)
+ãÆ  (Dynamic)  server-rendered on demand
+

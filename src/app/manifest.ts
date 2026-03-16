@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Sweet Delight',
+        name: 'Sweet Delites',
         short_name: 'SweetDelight',
         description: 'Artisanal pastries with Nigerian soul',
         start_url: '/',

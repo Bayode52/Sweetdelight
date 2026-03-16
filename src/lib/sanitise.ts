@@ -34,7 +34,7 @@ export const sanitiseChatMessage = (input: string): string => {
 
     for (const pattern of injectionPatterns) {
         if (pattern.test(text)) {
-            return "I'm Chloe from Sweet Delight 🍰 I can help with orders, pricing and delivery. What would you like to know?"
+            return "I'm Chloe from Sweet Delites 🍰 I can help with orders, pricing and delivery. What would you like to know?"
         }
     }
 

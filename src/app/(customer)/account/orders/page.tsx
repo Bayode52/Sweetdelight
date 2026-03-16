@@ -54,7 +54,7 @@ const STATUS_CONFIG: Record<string, { icon: any; color: string; label: string; d
     confirmed: { icon: CheckCircle2, color: "text-blue-500 bg-blue-500/10", label: "Confirmed", desc: "Order is being processed" },
     preparing: { icon: Package, color: "text-purple-500 bg-purple-500/10", label: "Preparing", desc: "We're crafting your treats" },
     ready: { icon: ShoppingBag, color: "text-orange-500 bg-orange-500/10", label: "Ready", desc: "Ready for collection" },
-    delivered: { icon: Truck, color: "text-green-500 bg-green-500/10", label: "Delivered", desc: "Enjoy your Sweet Delight!" },
+    delivered: { icon: Truck, color: "text-green-500 bg-green-500/10", label: "Delivered", desc: "Enjoy your Sweet Delites!" },
     cancelled: { icon: XCircle, color: "text-bakery-error bg-bakery-error/10", label: "Cancelled", desc: "This order was cancelled" },
 };
 

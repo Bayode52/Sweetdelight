@@ -1,430 +1,138 @@
-"use client";
+'use client'
+import { useState, useEffect } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Star, MessageSquareQuote, Check, X, Search, Image as ImageIcon, Sparkles } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { supabase } from "@/lib/supabase";
-import { Badge } from "@/components/ui/Badge";
-import { toast } from "react-hot-toast";
+const sb = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
-type ReviewStatus = "pending" | "approved" | "rejected" | "featured" | "hidden";
+export default function AdminReviews() {
+  const [reviews, setReviews] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<'pending'|'approved'|'all'>('pending')
+  const [toast, setToast] = useState('')
 
-export default function AdminReviewsPage() {
-    const queryClient = useQueryClient();
-    const [statusFilter, setStatusFilter] = useState<ReviewStatus | "all">("all");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedReview, setSelectedReview] = useState<any>(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState({ title: "", text: "", rating: 5 });
-    const [selectedBulk, setSelectedBulk] = useState<string[]>([]);
+  const t = (m: string) => { setToast(m); setTimeout(() => setToast(''), 3000) }
 
-    const bulkAction = async (status: ReviewStatus) => {
-        try {
-            await Promise.all(selectedBulk.map(id =>
-                fetch('/api/admin/reviews/actions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, action: "status_update", payload: { status } })
-                })
-            ));
-            toast.success(`Successfully updated ${selectedBulk.length} reviews`);
-            setSelectedBulk([]);
-            queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
-        } catch (err) {
-            toast.error("Failed to perform bulk action");
-        }
-    };
+  async function load() {
+    setLoading(true)
+    let q = sb.from('reviews').select('*').order('created_at', { ascending: false })
+    if (filter === 'pending') q = q.eq('is_approved', false)
+    if (filter === 'approved') q = q.eq('is_approved', true)
+    const { data } = await q
+    setReviews(data || [])
+    setLoading(false)
+  }
 
-    const { data: reviews, isLoading } = useQuery({
-        queryKey: ["admin-reviews", statusFilter],
-        queryFn: async () => {
-            let query = supabase
-                .from("reviews")
-                .select(`
-                    *,
-                    profiles:customer_id(full_name, email),
-                    products:product_id(name)
-                `)
-                .order("created_at", { ascending: false });
+  useEffect(() => { load() }, [filter])
 
-            if (statusFilter !== "all") {
-                query = query.eq("status", statusFilter);
-            }
+  async function approve(id: string) {
+    await sb.from('reviews').update({ is_approved: true }).eq('id', id)
+    setReviews(p => p.filter(r => r.id !== id))
+    t('✅ Review approved and published!')
+  }
 
-            const { data, error } = await query;
-            if (error) throw error;
-            return data;
-        }
-    });
+  async function reject(id: string) {
+    if (!confirm('Delete this review permanently?')) return
+    await sb.from('reviews').delete().eq('id', id)
+    setReviews(p => p.filter(r => r.id !== id))
+    t('🗑️ Review deleted')
+  }
 
-    const reviewActionMutation = useMutation({
-        mutationFn: async ({ id, action, payload }: { id: string, action: string, payload?: any }) => {
-            const res = await fetch('/api/admin/reviews/actions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, action, payload })
-            });
+  const pending = reviews.filter(r => !r.is_approved).length
 
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.error || "Failed to update review");
-            }
-        },
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
-            if (variables.action === "delete") {
-                toast.success("Review deleted successfully.");
-                setSelectedReview(null);
-            } else {
-                toast.success(`Review updated successfully.`);
-            }
-            setIsEditing(false);
-            if (selectedReview && variables.payload) {
-                setSelectedReview({ ...selectedReview, ...variables.payload });
-            }
-        },
-        onError: (err: any) => {
-            toast.error(err.message || "Failed to perform action");
-        }
-    });
+  return (
+    <div className="p-6 max-w-4xl">
+      {toast && <div className="fixed top-4 right-4 z-50 bg-gray-900 text-white px-5 py-3 rounded-xl text-sm shadow-xl">{toast}</div>}
 
-    const filteredReviews = (reviews || []).filter(r =>
-        r.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.products?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.review_text?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    const stats = {
-        total: reviews?.length || 0,
-        pending: reviews?.filter(r => r.status === 'pending').length || 0,
-        avgRating: reviews?.length ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : "0.0"
-    };
-
-    return (
-        <div className="space-y-8">
-            <h1 className="text-4xl font-black font-playfair text-bakery-primary tracking-tighter">Reviews Management</h1>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                    { label: "Total Reviews", value: stats.total, icon: MessageSquareQuote, color: "text-bakery-primary" },
-                    { label: "Pending Approval", value: stats.pending, icon: Search, color: "text-amber-500" },
-                    { label: "Average Rating", value: `${stats.avgRating} / 5.0`, icon: Star, color: "text-bakery-cta" },
-                ].map((stat) => (
-                    <div key={stat.label} className="bg-white p-6 rounded-[32px] luxury-shadow border border-bakery-primary/5">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xs font-black uppercase tracking-widest text-bakery-primary/40 leading-tight w-24">
-                                {stat.label}
-                            </h3>
-                            <div className={`p-3 rounded-2xl bg-bakery-primary/5 ${stat.color}`}>
-                                <stat.icon size={24} />
-                            </div>
-                        </div>
-                        <p className="text-4xl font-black text-bakery-primary tracking-tighter">{stat.value}</p>
-                    </div>
-                ))}
-            </div>
-
-            {/* Controls */}
-            <div className="bg-white p-4 rounded-[32px] luxury-shadow border border-bakery-primary/5 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-                    <div className="flex gap-2">
-                        {["all", "pending", "approved", "featured", "rejected", "hidden"].map((status) => (
-                            <button
-                                key={status}
-                                onClick={() => setStatusFilter(status as any)}
-                                className={`px-6 h-12 rounded-2xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all ${statusFilter === status
-                                    ? "bg-bakery-primary text-white"
-                                    : "bg-bakery-primary/5 text-bakery-primary/60 hover:bg-bakery-primary/10"
-                                    }`}
-                            >
-                                {status}
-                            </button>
-                        ))}
-                    </div>
-
-                    {selectedBulk.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-bakery-cta/10 rounded-2xl animate-in fade-in zoom-in duration-200">
-                            <span className="text-xs font-black text-bakery-cta uppercase tracking-widest whitespace-nowrap">{selectedBulk.length} Selected</span>
-                            <div className="flex gap-1">
-                                <button onClick={() => bulkAction("approved")} className="p-2 bg-white rounded-lg text-green-600 hover:bg-green-600 hover:text-white transition-all shadow-sm"><Check size={14} /></button>
-                                <button onClick={() => bulkAction("hidden")} className="p-2 bg-white rounded-lg text-amber-600 hover:bg-amber-600 hover:text-white transition-all shadow-sm"><X size={14} /></button>
-                                <button onClick={() => bulkAction("rejected")} className="p-2 bg-white rounded-lg text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm"><X size={14} /></button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="relative w-full md:w-auto">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-bakery-primary/40" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search reviews..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full md:w-80 h-12 bg-bakery-primary/5 border-none rounded-2xl pl-12 pr-6 font-bold text-bakery-primary placeholder:text-bakery-primary/30"
-                    />
-                </div>
-            </div>
-
-            {/* Reviews List */}
-            {isLoading ? (
-                <div className="space-y-4">
-                    {[1, 2, 3].map(i => <div key={i} className="h-32 bg-white rounded-[32px] animate-pulse" />)}
-                </div>
-            ) : filteredReviews?.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-[32px] luxury-shadow border border-bakery-primary/5">
-                    <MessageSquareQuote size={48} className="mx-auto text-bakery-primary/20 mb-4" />
-                    <p className="text-bakery-primary/40 font-bold uppercase tracking-widest">No reviews found</p>
-                </div>
-            ) : (
-                <div className="grid gap-4">
-                    {filteredReviews?.map((review) => (
-                        <div
-                            key={review.id}
-                            className="bg-white p-6 rounded-[32px] luxury-shadow border border-bakery-primary/5 hover:border-bakery-cta/30 transition-all cursor-pointer flex flex-col md:flex-row gap-6 items-start md:items-center group relative overflow-hidden"
-                            onClick={(e) => {
-                                // Prevent modal if clicking checkbox
-                                if ((e.target as any).tagName === "INPUT") return;
-                                setSelectedReview(review);
-                                setIsEditing(false);
-                                setEditData({ title: review.title || "", text: review.review_text || "", rating: review.rating || 5 });
-                            }}
-                        >
-                            <div className="shrink-0 pt-1">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedBulk.includes(review.id)}
-                                    onChange={(e) => {
-                                        if (e.target.checked) setSelectedBulk(prev => [...prev, review.id]);
-                                        else setSelectedBulk(prev => prev.filter(id => id !== review.id));
-                                    }}
-                                    className="w-5 h-5 rounded-lg border-bakery-primary/20 text-bakery-cta focus:ring-bakery-cta transition-all"
-                                />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="flex gap-1">
-                                        {[1, 2, 3, 4, 5].map(star => (
-                                            <Star key={star} size={14} fill={star <= review.rating ? "#F97316" : "transparent"} className={star <= review.rating ? "text-bakery-cta" : "text-bakery-primary/20"} />
-                                        ))}
-                                    </div>
-                                    <Badge status={review.status === 'approved' ? 'success' : review.status === 'rejected' ? 'error' : review.status === 'featured' ? 'success' : 'pending'}>
-                                        {review.status}
-                                    </Badge>
-                                    {review.media_urls?.length > 0 && (
-                                        <div className="bg-bakery-primary/5 text-bakery-primary/60 px-2 py-1 rounded w-fit flex gap-1 items-center">
-                                            <ImageIcon size={12} /> {review.media_urls.length}
-                                        </div>
-                                    )}
-                                </div>
-                                <h4 className="font-bold text-bakery-primary truncate flex items-center gap-2">
-                                    {review.is_pinned && <span className="text-xl" title="Pinned Review">📌</span>}
-                                    {review.title || 'No Title'}
-                                    {review.admin_edited && <span className="text-[9px] font-black uppercase bg-bakery-primary/5 text-bakery-primary/40 px-2 py-0.5 rounded ml-2">Edited</span>}
-                                </h4>
-                                <p className="text-sm text-bakery-primary/60 truncate mt-1">{review.review_text}</p>
-                            </div>
-
-                            <div className="shrink-0 text-left md:text-right hidden sm:block">
-                                <p className="font-bold text-bakery-primary">{review.profiles?.full_name}</p>
-                                <p className="text-xs text-bakery-primary/60">{review.products?.name}</p>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-bakery-primary/40 mt-2">
-                                    {new Date(review.created_at).toLocaleDateString()}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Review Details Modal */}
-            <AnimatePresence>
-                {selectedReview && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-bakery-primary/40 backdrop-blur-sm"
-                            onClick={() => setSelectedReview(null)}
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative w-full max-w-2xl bg-white rounded-[40px] luxury-shadow border border-bakery-primary/10 overflow-hidden flex flex-col max-h-[90vh]"
-                        >
-                            <div className="p-8 border-b border-bakery-primary/5 flex justify-between items-start bg-bakery-background">
-                                <div>
-                                    <h2 className="text-2xl font-black font-playfair text-bakery-primary mb-2">Review Details</h2>
-                                    <p className="text-sm text-bakery-primary/60 font-medium">By {selectedReview.profiles?.full_name} ({selectedReview.profiles?.email})</p>
-                                </div>
-                                <button onClick={() => setSelectedReview(null)} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-bakery-primary hover:bg-bakery-error hover:text-white transition-all shadow-sm">
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                            <div className="p-8 overflow-y-auto space-y-8">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="text-xs font-black uppercase tracking-widest text-bakery-primary/40 mb-1">Product</p>
-                                        <p className="font-bold text-bakery-primary">{selectedReview.products?.name}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-xs font-black uppercase tracking-widest text-bakery-primary/40 mb-1">Rating</p>
-                                        {isEditing ? (
-                                            <div className="flex gap-1 justify-end">
-                                                {[1, 2, 3, 4, 5].map(star => (
-                                                    <Star key={star} size={20}
-                                                        fill={star <= editData.rating ? "#F97316" : "transparent"}
-                                                        className={`cursor-pointer ${star <= editData.rating ? "text-bakery-cta" : "text-bakery-primary/20 hover:text-bakery-cta"}`}
-                                                        onClick={() => setEditData({ ...editData, rating: star })}
-                                                    />
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="flex gap-1 justify-end">
-                                                {[1, 2, 3, 4, 5].map(star => (
-                                                    <Star key={star} size={16} fill={star <= selectedReview.rating ? "#F97316" : "transparent"} className={star <= selectedReview.rating ? "text-bakery-cta" : "text-bakery-primary/20"} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <p className="text-xs font-black uppercase tracking-widest text-bakery-primary/40">Content {selectedReview.admin_edited && "(Admin Edited)"}</p>
-                                        {!isEditing && (
-                                            <button onClick={() => setIsEditing(true)} className="text-xs font-bold text-bakery-cta hover:underline">
-                                                Edit Content
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div className="bg-bakery-primary/5 rounded-3xl p-6 space-y-4">
-                                        {isEditing ? (
-                                            <>
-                                                <input
-                                                    type="text"
-                                                    value={editData.title}
-                                                    onChange={e => setEditData({ ...editData, title: e.target.value })}
-                                                    className="w-full bg-white p-3 rounded-xl border border-bakery-primary/10 font-bold text-bakery-primary"
-                                                    placeholder="Review Title"
-                                                />
-                                                <textarea
-                                                    value={editData.text}
-                                                    onChange={e => setEditData({ ...editData, text: e.target.value })}
-                                                    rows={4}
-                                                    className="w-full bg-white p-3 rounded-xl border border-bakery-primary/10 text-bakery-primary/70 font-medium"
-                                                    placeholder="Review Content"
-                                                />
-                                                <div className="flex gap-2 justify-end pt-2">
-                                                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 text-sm font-bold text-bakery-primary/60 hover:text-bakery-primary">Cancel</button>
-                                                    <button
-                                                        onClick={() => {
-                                                            reviewActionMutation.mutate({
-                                                                id: selectedReview.id,
-                                                                action: "edit_content",
-                                                                payload: {
-                                                                    title: editData.title,
-                                                                    text: editData.text,
-                                                                    rating: editData.rating,
-                                                                    original_text: selectedReview.original_text || selectedReview.review_text
-                                                                }
-                                                            });
-                                                        }}
-                                                        className="px-6 py-2 bg-bakery-cta text-white text-sm font-black rounded-xl hover:brightness-110"
-                                                    >
-                                                        Save Changes
-                                                    </button>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                {selectedReview.title && <h4 className="font-bold text-bakery-primary text-lg flex items-center gap-2">{selectedReview.is_pinned && "📌"} {selectedReview.title}</h4>}
-                                                <p className="text-bakery-primary/70 leading-relaxed font-medium">"{selectedReview.review_text}"</p>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {selectedReview.media_urls?.length > 0 && (
-                                    <div>
-                                        <p className="text-xs font-black uppercase tracking-widest text-bakery-primary/40 mb-2">Media Attached</p>
-                                        <div className="flex gap-4 overflow-x-auto pb-4">
-                                            {selectedReview.media_urls.map((url: string, i: number) => (
-                                                <div key={i} className="relative w-32 h-32 rounded-2xl overflow-hidden shrink-0 border border-bakery-primary/10">
-                                                    {url.endsWith('.mp4') || url.endsWith('.mov') ? (
-                                                        <video src={url} controls className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <Image src={url} alt={`Review media ${i + 1}`} fill className="object-cover" />
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="p-8 border-t border-bakery-primary/5 bg-bakery-background flex flex-col gap-4">
-                                {/* State Modifiers */}
-                                <div className="flex gap-2 flex-wrap pb-4 border-b border-bakery-primary/5">
-                                    <p className="w-full text-xs font-black uppercase tracking-widest text-bakery-primary/40">Status & Visiblity Actions</p>
-
-                                    {selectedReview.status !== 'approved' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'approved' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-cta/10 text-bakery-cta rounded-2xl font-black text-sm hover:bg-bakery-cta hover:text-white transition-all flex items-center justify-center gap-2">
-                                            <Check size={16} /> Approve
-                                        </button>
-                                    )}
-
-                                    {selectedReview.status !== 'featured' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'featured' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-primary text-white rounded-2xl font-black text-sm hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
-                                            <Sparkles size={16} /> Feature
-                                        </button>
-                                    )}
-
-                                    {selectedReview.status !== 'hidden' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'hidden' } })} className="flex-1 min-w-[120px] h-12 bg-zinc-200 text-zinc-700 rounded-2xl font-black text-sm hover:bg-zinc-300 transition-all flex items-center justify-center gap-2">
-                                            Hold (Hide)
-                                        </button>
-                                    )}
-
-                                    {selectedReview.status !== 'rejected' && (
-                                        <button onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "status_update", payload: { status: 'rejected' } })} className="flex-1 min-w-[120px] h-12 bg-bakery-error/10 text-bakery-error rounded-2xl font-black text-sm hover:bg-bakery-error hover:text-white transition-all flex items-center justify-center gap-2">
-                                            <X size={16} /> Reject
-                                        </button>
-                                    )}
-                                </div>
-
-                                {/* Danger / Meta Actions */}
-                                <div className="flex justify-between items-center pt-2">
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => reviewActionMutation.mutate({ id: selectedReview.id, action: "toggle_pin", payload: { is_pinned: !selectedReview.is_pinned } })}
-                                            className={`h-12 px-6 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${selectedReview.is_pinned ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-bakery-primary/5 text-bakery-primary/60 hover:bg-bakery-primary/10'}`}
-                                        >
-                                            📌 {selectedReview.is_pinned ? "Unpin Review" : "Pin Review"}
-                                        </button>
-                                    </div>
-
-                                    <button
-                                        onClick={() => {
-                                            if (window.confirm("Are you sure you want to permanently delete this review?")) {
-                                                reviewActionMutation.mutate({ id: selectedReview.id, action: "delete" })
-                                            }
-                                        }}
-                                        className="h-12 px-6 text-bakery-error font-bold text-sm hover:underline"
-                                    >
-                                        Delete Permanently
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Customer Reviews
+          </h1>
+          {pending > 0 && (
+            <p className="text-sm text-orange-600 font-bold mt-1">
+              ⚠️ {pending} review{pending > 1 ? 's' : ''} waiting for approval
+            </p>
+          )}
         </div>
-    );
+        <div className="flex gap-2">
+          {(['pending','approved','all'] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className="px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all"
+              style={{
+                background: filter === f ? '#C8401A' : 'white',
+                color: filter === f ? 'white' : '#7A6555',
+                border: filter === f ? 'none' : '1.5px solid #e5e0d8',
+              }}>
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse" />)}
+        </div>
+      ) : reviews.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-3xl border border-gray-100">
+          <p className="text-4xl mb-3">🌟</p>
+          <p className="font-bold text-gray-700">No {filter} reviews</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {reviews.map(r => (
+            <div key={r.id} className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <div className="flex gap-0.5">
+                      {[1,2,3,4,5].map(s => (
+                        <span key={s} style={{ color: s <= r.rating ? '#D4A843' : '#e5e7eb', fontSize: '14px' }}>★</span>
+                      ))}
+                    </div>
+                    <span className="text-xs font-bold text-gray-500">{r.product}</span>
+                    <span className="text-xs text-gray-400">
+                      {new Date(r.created_at).toLocaleDateString('en-GB')}
+                    </span>
+                  </div>
+                  {r.title && <p className="font-bold text-gray-900 mb-1">"{r.title}"</p>}
+                  <p className="text-sm text-gray-600 leading-relaxed mb-2">{r.body}</p>
+                  <p className="text-xs text-gray-400">
+                    by <strong>{r.name}</strong>
+                    {r.email && ` · ${r.email}`}
+                  </p>
+                </div>
+                {!r.is_approved && (
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button onClick={() => approve(r.id)}
+                      className="px-4 py-2 rounded-xl bg-green-50 text-green-700 font-bold text-sm hover:bg-green-100">
+                      ✅ Approve
+                    </button>
+                    <button onClick={() => reject(r.id)}
+                      className="px-4 py-2 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100">
+                      🗑️ Delete
+                    </button>
+                  </div>
+                )}
+                {r.is_approved && (
+                  <div className="flex gap-2 flex-shrink-0">
+                    <span className="px-3 py-1.5 rounded-xl bg-green-50 text-green-700 text-xs font-bold">
+                      ✓ Live
+                    </span>
+                    <button onClick={() => reject(r.id)}
+                      className="px-3 py-1.5 rounded-xl bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100">
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }

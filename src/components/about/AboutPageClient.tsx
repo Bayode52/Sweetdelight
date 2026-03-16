@@ -17,7 +17,7 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
 }
 
 export function AboutPageClient({ content, settings }: { content: ContentMap, settings?: Record<string, string> }) {
-    const businessName = settings?.business_name || "Sweet Delight";
+    const businessName = settings?.business_name || "Sweet Delites";
     const bakerImage = content['story.baker_image'] || "/baker-placeholder.jpg";
     const STATS = [
         { value: content['hero.stats_years'] || "Fresh To Order", label: content['hero.stats_years_label'] || "Every single time" },
@@ -78,7 +78,7 @@ export function AboutPageClient({ content, settings }: { content: ContentMap, se
 
                         <div className="space-y-6 text-bakery-primary/70 leading-relaxed text-lg whitespace-pre-line">
                             <p>
-                                {content['story.para1'] || 'Sweet Delight was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
+                                {content['story.para1'] || 'Sweet Delites was born from a simple longing — the taste of home. When our founder moved to the UK from Nigeria, she quickly discovered that while London offered almost everything, one thing was missing: the authentic flavour of her mother\'s baking.'}
                             </p>
                             <p>
                                 {content['story.para2'] || ''}
@@ -96,7 +96,7 @@ export function AboutPageClient({ content, settings }: { content: ContentMap, se
                 <div className="max-w-7xl mx-auto space-y-16">
                     <FadeIn className="text-center space-y-4">
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bakery-cta/10 text-bakery-cta text-xs font-black uppercase tracking-widest">
-                            {content['why_different.badge'] || 'Why Sweet Delight?'}
+                            {content['why_different.badge'] || 'Why Sweet Delites?'}
                         </span>
                         <h2 className="text-4xl md:text-5xl font-playfair font-black text-bakery-primary">{content['why_different.heading'] || 'Why We\'re Different'}</h2>
                     </FadeIn>

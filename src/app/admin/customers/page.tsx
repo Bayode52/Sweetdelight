@@ -117,7 +117,7 @@ export default function CustomersPage() {
     if (isLoading) return (
         <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
             <Loader2 size={40} className="text-bakery-cta animate-spin" />
-            <p className="font-playfair font-black text-bakery-primary/40 uppercase tracking-widest text-sm">Gathering the Sweet Delight community...</p>
+            <p className="font-playfair font-black text-bakery-primary/40 uppercase tracking-widest text-sm">Gathering the Sweet Delites community...</p>
         </div>
     );
 

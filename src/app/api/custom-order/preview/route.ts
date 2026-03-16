@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         }
 
         const prompt = `
-        You are a Master Artisan Baker at "Sweet Delight". 
+        You are a Master Artisan Baker at "Sweet Delites". 
         A customer wants a custom order for a "${productType}".
         Requirements: ${JSON.stringify(answers)}
 

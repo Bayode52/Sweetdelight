@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
         switch (type) {
             case 'welcome':
-                subject = 'Welcome to Sweet Delight 🥐';
+                subject = 'Welcome to Sweet Delites 🥐';
                 html = emailTemplates.welcome(data.name);
                 break;
             case 'order_confirmed':
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
         const resend = getResend();
         if (resend) {
             const resendRes = await resend.emails.send({
-                from: 'Sweet Delight <onboarding@resend.dev>', // Use verified sender identity once added to Resend
+                from: 'Sweet Delites <onboarding@resend.dev>', // Use verified sender identity once added to Resend
                 to: email,
                 subject,
                 html,

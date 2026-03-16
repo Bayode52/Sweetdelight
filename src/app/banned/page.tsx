@@ -19,7 +19,7 @@ export default function BannedPage() {
                 <div className="space-y-4">
                     <h1 className="text-4xl font-playfair font-black text-bakery-primary italic">Account Restricted</h1>
                     <p className="text-bakery-primary/60 font-medium leading-relaxed">
-                        Your account has been restricted from accessing certain features of Sweet Delight.
+                        Your account has been restricted from accessing certain features of Sweet Delites.
                         If you believe this is a mistake, please contact our support team.
                     </p>
                 </div>

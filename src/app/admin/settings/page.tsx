@@ -101,7 +101,7 @@ export default function SettingsPage() {
                             value={settings.business_name || ''}
                             onChange={e => handleChange('business_name', e.target.value)}
                             className={inputClass}
-                            placeholder="e.g. Sweet Delight"
+                            placeholder="e.g. Sweet Delites"
                         />
                         <p className="text-[10px] text-gray-400 mt-1">This name appears in the navbar, footer and browser tab</p>
                     </div>

@@ -29,13 +29,13 @@ function withBaseTemplate(content: string) {
 <body>
     <div class="container">
         <div class="header">
-            <a href="https://sweetdelight-eta.vercel.app" class="logo">Sweet Delight<span className="logo-cta">.</span></a>
+            <a href="https://sweetdelight-eta.vercel.app" class="logo">Sweet Delites<span className="logo-cta">.</span></a>
         </div>
         <div class="box">
             ${content}
         </div>
         <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Sweet Delight. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Sweet Delites. All rights reserved.</p>
             <p>Made with ❤️ in the UK — with Nigerian Soul</p>
         </div>
     </div>
@@ -47,7 +47,7 @@ function withBaseTemplate(content: string) {
 export const emailTemplates = {
     welcome: (name: string) => withBaseTemplate(`
         <h1>Welcome to the Family, ${name}! 🥐</h1>
-        <p>We're absolutely thrilled to have you here at Sweet Delight. Prepare your tastebuds for a journey of rich flavors, premium ingredients, and a touch of Nigerian soul.</p>
+        <p>We're absolutely thrilled to have you here at Sweet Delites. Prepare your tastebuds for a journey of rich flavors, premium ingredients, and a touch of Nigerian soul.</p>
         <p>As a welcome gift, dive into our menu and explore our daily fresh batches. We promise you won't be disappointed.</p>
         <div style="text-align: center">
             <a href="https://sweetdelight-eta.vercel.app/menu" class="btn">Explore the Menu</a>
@@ -167,7 +167,7 @@ export const emailTemplates = {
             </div>
 
             <div style="text-align: center">
-                <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hi ${encodeURIComponent(customer.name.split(' ')[0])}, I'm reaching out from Sweet Delight regarding your custom order for a ${encodeURIComponent(customSpec.productType)}." class="btn" style="background-color: #25D366; margin-right: 10px;">Message on WhatsApp</a>
+                <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hi ${encodeURIComponent(customer.name.split(' ')[0])}, I'm reaching out from Sweet Delites regarding your custom order for a ${encodeURIComponent(customSpec.productType)}." class="btn" style="background-color: #25D366; margin-right: 10px;">Message on WhatsApp</a>
                 <a href="https://sweetdelight-eta.vercel.app/admin/orders" class="btn">View in Dashboard</a>
             </div>
         `);

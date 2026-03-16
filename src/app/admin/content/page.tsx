@@ -183,7 +183,7 @@ export default function ContentEditor() {
             {tab === 'navbar' && (
                 <>
                     <Section title="Business Name & Logo">
-                        <Field label="Business Name" defaultValue="Sweet Delight" page="navbar" section="logo" field="name" hint="Appears in the top-left navbar" />
+                        <Field label="Business Name" defaultValue="Sweet Delites" page="navbar" section="logo" field="name" hint="Appears in the top-left navbar" />
                         <Field label="Logo Tagline (optional small text)" defaultValue="" page="navbar" section="logo" field="tagline" />
                         <ImageField label="Logo Image (optional — leave empty to use text logo)" page="navbar" section="logo" field="image" hint="Upload a PNG logo file (transparent background recommended)" />
                     </Section>
@@ -280,7 +280,7 @@ export default function ContentEditor() {
                     <Section title="Your Story">
                         <Field label="Story Section Title" defaultValue="From Lagos to London" page="about" section="story" field="heading" />
                         <Field label="Paragraph 1" page="about" section="story" field="para1" multiline
-                            defaultValue="Sweet Delight was born from a simple longing — the taste of home." />
+                            defaultValue="Sweet Delites was born from a simple longing — the taste of home." />
                         <Field label="Paragraph 2" page="about" section="story" field="para2" multiline />
                         <Field label="Paragraph 3" page="about" section="story" field="para3" multiline />
                     </Section>
@@ -337,7 +337,7 @@ export default function ContentEditor() {
                 <>
                     <Section title="Brand">
                         <Field label="Footer Tagline" defaultValue="Handcrafting moments of joy with premium ingredients and traditional Nigerian warmth." page="footer" section="brand" field="tagline" multiline />
-                        <Field label="Copyright Text" defaultValue="© 2026 Sweet Delight. All rights reserved." page="footer" section="brand" field="copyright" />
+                        <Field label="Copyright Text" defaultValue="© 2026 Sweet Delites. All rights reserved." page="footer" section="brand" field="copyright" />
                         <Field label="Made In Text" defaultValue="Made within the UK 🇬🇧 — with Nigerian Soul" page="footer" section="brand" field="made_in" />
                     </Section>
                     <Section title="Contact Details in Footer">
@@ -361,7 +361,7 @@ export default function ContentEditor() {
                 <>
                     <Section title="Blog Page">
                         <Field label="Page Title" defaultValue="Sweet News" page="blog" section="header" field="title" />
-                        <Field label="Subtitle" defaultValue="Stories, recipes and news from the Sweet Delight kitchen" page="blog" section="header" field="subtitle" multiline />
+                        <Field label="Subtitle" defaultValue="Stories, recipes and news from the Sweet Delites kitchen" page="blog" section="header" field="subtitle" multiline />
                         <ImageField label="Blog Header Image" page="blog" section="header" field="image" />
                     </Section>
                     <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">

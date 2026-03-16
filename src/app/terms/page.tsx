@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Terms & Conditions | Sweet Delight",
-    description: "Terms and Conditions for Sweet Delight custom orders and deliveries.",
+    title: "Terms & Conditions | Sweet Delites",
+    description: "Terms and Conditions for Sweet Delites custom orders and deliveries.",
 };
 
 export default function TermsPage() {
@@ -25,7 +25,7 @@ export default function TermsPage() {
                         <section>
                             <h2 className="text-2xl font-playfair font-black text-[#4A3222] mb-4">1. Business Information</h2>
                             <p>
-                                Sweet Delight operates in the United Kingdom.
+                                Sweet Delites operates in the United Kingdom.
                                 By placing an order with us, you agree to these Terms and Conditions.
                             </p>
                         </section>
@@ -78,7 +78,7 @@ export default function TermsPage() {
                         <section>
                             <h2 className="text-2xl font-playfair font-black text-[#4A3222] mb-4">7. Intellectual Property</h2>
                             <p>
-                                All content on this website, including images, designs, and text, is the property of Sweet Delight
+                                All content on this website, including images, designs, and text, is the property of Sweet Delites
                                 and may not be reproduced without our written permission.
                             </p>
                         </section>

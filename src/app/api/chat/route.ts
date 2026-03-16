@@ -19,7 +19,7 @@ function buildSmartReply(message: string): string {
 
     // Greetings
     if (/^(hi|hello|hey|good morning|good afternoon|good evening|howdy|hiya)/.test(m))
-        return `Hello! 👋 Welcome to Sweet Delight! I'm Chloe, your bakery assistant. We make premium Nigerian pastries — from celebration cakes to party platters, all freshly baked and delivered across the UK. What can I help you with today? 🍰`
+        return `Hello! 👋 Welcome to Sweet Delites! I'm Chloe, your bakery assistant. We make premium Nigerian pastries — from celebration cakes to party platters, all freshly baked and delivered across the UK. What can I help you with today? 🍰`
 
     // Products / menu inquiry
     if (/product|menu|what do you (sell|have|make|offer)|tell me more|what can i order|what.*available/.test(m))
@@ -90,7 +90,7 @@ function buildSmartReply(message: string): string {
         return `Goodbye! 👋 It was lovely chatting with you! Don't forget to browse our menu — something sweet is always waiting! Come back anytime. 🍰✨`
 
     // Default — much more helpful than before
-    return `Thanks for reaching out! 😊 I'm Chloe from Sweet Delight. I can help you with:\n\n🎂 Cake orders and custom designs\n🍢 Party platters and small chops\n🚚 Delivery information\n💰 Pricing\n⏰ Business hours\n\nWhat would you like to know? Or WhatsApp us directly for the quickest response! 🍰`
+    return `Thanks for reaching out! 😊 I'm Chloe from Sweet Delites. I can help you with:\n\n🎂 Cake orders and custom designs\n🍢 Party platters and small chops\n🚚 Delivery information\n💰 Pricing\n⏰ Business hours\n\nWhat would you like to know? Or WhatsApp us directly for the quickest response! 🍰`
 }
 
 export async function POST(req: Request) {
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
 
         if (!message) {
             return Response.json({
-                message: "Hello! Welcome to Sweet Delight 🍰 I'm Chloe. What can I help you with today?"
+                message: "Hello! Welcome to Sweet Delites 🍰 I'm Chloe. What can I help you with today?"
             })
         }
 
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
                         body: JSON.stringify({
                             system_instruction: {
                                 parts: [{
-                                    text: `You are Chloe, the Sweet Delight bakery assistant in the UK.
+                                    text: `You are Chloe, the Sweet Delites bakery assistant in the UK.
 You are warm, enthusiastic, and knowledgeable about Nigerian pastries.
 Always be conversational and helpful. Use emojis naturally but not excessively.
 Keep replies to 3-4 sentences maximum unless listing products.
@@ -184,7 +184,7 @@ RULES:
     } catch (err) {
         console.error('Chat route error:', err)
         return Response.json({
-            message: "Quick hiccup on my end! 😊 I'm Chloe from Sweet Delight. Can you try again? Or WhatsApp us directly for immediate help! 🍰"
+            message: "Quick hiccup on my end! 😊 I'm Chloe from Sweet Delites. Can you try again? Or WhatsApp us directly for immediate help! 🍰"
         })
     }
 }

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-    title: "Privacy Policy | Sweet Delight",
-    description: "Privacy Policy and GDPR information for Sweet Delight.",
+    title: "Privacy Policy | Sweet Delites",
+    description: "Privacy Policy and GDPR information for Sweet Delites.",
 };
 
 export default function PrivacyPage() {

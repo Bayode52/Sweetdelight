@@ -87,7 +87,7 @@ export function AdminSidebar() {
                 {/* Header */}
                 <div className="p-8 pb-6">
                     <Link href="/" className="text-2xl font-playfair font-black tracking-tighter block mb-6 uppercase">
-                        <span className="text-bakery-cta">Sweet</span> Delight<span className="text-bakery-cta text-xs">.</span>Admin
+                        <span className="text-bakery-cta">Sweet</span> Delites<span className="text-bakery-cta text-xs">.</span>Admin
                     </Link>
 
                     <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3">
