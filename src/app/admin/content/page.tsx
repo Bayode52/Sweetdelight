@@ -1,10 +1,16 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
+import { ImageUploader } from '@/components/admin/ImageUploader'
 
 type ContentMap = Record<string, string>
 
 // All editable fields organised by tab
 const TABS = [
+  {
+    id: 'images',
+    label: '🖼️ Images',
+    sections: [] // handled separately below
+  },
   {
     id: 'contact',
     label: '📞 Contact & Footer',
@@ -73,6 +79,155 @@ const TABS = [
     ]
   },
 ]
+
+function ImagesTab({ 
+  content, 
+  onSave 
+}: { 
+  content: ContentMap
+  onSave: (page: string, section: string, field: string, value: string) => Promise<void>
+}) {
+
+  const IMAGE_FIELDS = [
+    {
+      group: '🏠 Homepage Hero',
+      hint: 'The main large image customers see first when they visit',
+      items: [
+        {
+          label: 'Hero Image',
+          hint: 'Best size: 900×900px or larger. Shows on the right side of the homepage.',
+          page: 'homepage', section: 'hero', field: 'image',
+          aspect: '3:2' as const,
+          currentUrl: content['homepage__hero__image'] || '',
+        },
+      ]
+    },
+    {
+      group: '📦 Category Cards',
+      hint: 'Images shown in the "Explore Categories" section on the homepage',
+      items: [
+        {
+          label: 'Celebration Cakes',
+          hint: 'Best: a beautiful cake photo. Landscape works best.',
+          page: 'homepage', section: 'category', field: 'cakes_image',
+          aspect: '4:3' as const,
+          currentUrl: content['homepage__category__cakes_image'] || '',
+        },
+        {
+          label: 'Small Chops',
+          hint: 'Best: platter or spread photo. Landscape works best.',
+          page: 'homepage', section: 'category', field: 'smallchops_image',
+          aspect: '4:3' as const,
+          currentUrl: content['homepage__category__smallchops_image'] || '',
+        },
+        {
+          label: 'Chin Chin & Snacks',
+          hint: 'Best: chin chin or snack photo. Landscape works best.',
+          page: 'homepage', section: 'category', field: 'chinchin_image',
+          aspect: '4:3' as const,
+          currentUrl: content['homepage__category__chinchin_image'] || '',
+        },
+        {
+          label: 'Party Boxes',
+          hint: 'Best: gift box or spread photo. Landscape works best.',
+          page: 'homepage', section: 'category', field: 'partybox_image',
+          aspect: '4:3' as const,
+          currentUrl: content['homepage__category__partybox_image'] || '',
+        },
+      ]
+    },
+    {
+      group: '📋 Menu Page Banner',
+      hint: 'Background image shown at the top of the menu page',
+      items: [
+        {
+          label: 'Menu Page Hero Image',
+          hint: 'Best: wide food photo. 1400×400px recommended.',
+          page: 'menu', section: 'hero', field: 'image',
+          aspect: '16:9' as const,
+          currentUrl: content['menu__hero__image'] || '',
+        },
+      ]
+    },
+    {
+      group: '👩🍳 About Page',
+      hint: 'Photo shown on the About Us page',
+      items: [
+        {
+          label: 'Baker / Owner Photo',
+          hint: 'A warm personal photo of the baker. Square or portrait works best.',
+          page: 'about', section: 'story', field: 'baker_image',
+          aspect: '1:1' as const,
+          currentUrl: content['about__story__baker_image'] || '',
+        },
+      ]
+    },
+  ]
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      
+      {/* Instructions banner */}
+      <div style={{
+        background: 'linear-gradient(135deg, #fff5f2, #fffbeb)',
+        border: '1.5px solid rgba(200,64,26,0.15)',
+        borderRadius: '16px', padding: '16px 20px',
+        display: 'flex', gap: '12px', alignItems: 'flex-start',
+      }}>
+        <span style={{ fontSize: '24px', flexShrink: 0 }}>💡</span>
+        <div>
+          <p style={{ fontWeight: 700, color: '#1A0800', fontSize: '14px', marginBottom: '4px' }}>
+            How to update images
+          </p>
+          <p style={{ fontSize: '13px', color: '#7A6555', lineHeight: 1.6 }}>
+            Click any upload box or drag your photo onto it. 
+            The image uploads automatically and shows on your 
+            website within seconds. Use your own bakery photos 
+            for the best results — real food photos always 
+            perform better than stock images!
+          </p>
+        </div>
+      </div>
+
+      {IMAGE_FIELDS.map(group => (
+        <div key={group.group} style={{
+          background: 'white', borderRadius: '20px',
+          border: '1px solid #f0ebe3',
+          overflow: 'hidden',
+          boxShadow: '0 2px 12px rgba(26,8,0,0.04)',
+        }}>
+          {/* Group header */}
+          <div style={{
+            padding: '14px 20px',
+            background: '#FAF7F2',
+            borderBottom: '1px solid #f0ebe3',
+          }}>
+            <p style={{ fontWeight: 700, color: '#1A0800', fontSize: '14px' }}>
+              {group.group}
+            </p>
+            <p style={{ fontSize: '11px', color: '#7A6555', marginTop: '2px' }}>
+              {group.hint}
+            </p>
+          </div>
+
+          {/* Image uploaders */}
+          {group.items.map(item => (
+            <ImageUploader
+              key={`${item.page}__${item.section}__${item.field}`}
+              label={item.label}
+              hint={item.hint}
+              aspect={item.aspect}
+              currentUrl={item.currentUrl}
+              onSave={async (url) => {
+                await onSave(item.page, item.section, item.field, url)
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 // Single field key for lookup
 function key(page: string, section: string, field: string) {
@@ -209,6 +364,8 @@ export default function AdminContent() {
             }} />
           ))}
         </div>
+      ) : activeTab === 'images' ? (
+        <ImagesTab content={content} onSave={saveField} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {currentTab.sections.map(section => (

@@ -1,0 +1,114 @@
+﻿
+> pastry-web@0.1.0 build
+> next build
+
+  Ôû▓ Next.js 14.2.14
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+node.exe : Failed to 
+compile.
+At line:1 char:1
++ & "C:\Program Files\
+nodejs/node.exe" "C:\U
+sers\bayod\AppData\Roa
+ming\ ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Failed to    
+ compile.:String)     
+[], RemoteExcepti    
+on
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+
+./src/app/admin/produc
+ts/page.tsx
+Error: 
+  [31mx[0m You're 
+importing a component 
+that needs useState. 
+It only works in a 
+Client Component but 
+none of its parents 
+are marked with "use 
+client", so they're 
+Server Components by 
+default.
+  [31m|[0m Learn 
+more: https://nextjs.o
+rg/docs/getting-starte
+d/react-essentials
+  [31m|[0m 
+  [31m|[0m 
+   ,-[[36;1;4mC:\User
+s\bayod\OneDrive\Deskt
+op\Pastry\src\app\admi
+n\products\page.tsx[0
+m:1:1]
+ [2m1[0m | import { 
+useState, useEffect } 
+from 'react'
+   : [31;1m         
+^^^^^^^^[0m
+ [2m2[0m | import { 
+createBrowserClient } 
+from '@supabase/ssr'
+ [2m3[0m | import { 
+ImageUploader } from '
+@/components/admin/Ima
+geUploader'
+ [2m3[0m | 
+   `----
+
+  [31mx[0m You're 
+importing a component 
+that needs useEffect. 
+It only works in a 
+Client Component but 
+none of its parents 
+are marked with "use 
+client", so they're 
+Server Components by 
+default.
+  [31m|[0m Learn 
+more: https://nextjs.o
+rg/docs/getting-starte
+d/react-essentials
+  [31m|[0m 
+  [31m|[0m 
+   ,-[[36;1;4mC:\User
+s\bayod\OneDrive\Deskt
+op\Pastry\src\app\admi
+n\products\page.tsx[0
+m:1:1]
+ [2m1[0m | import { 
+useState, useEffect } 
+from 'react'
+   : [31;1m          
+         ^^^^^^^^^[0m
+ [2m2[0m | import { 
+createBrowserClient } 
+from '@supabase/ssr'
+ [2m3[0m | import { 
+ImageUploader } from '
+@/components/admin/Ima
+geUploader'
+ [2m3[0m | 
+   `----
+
+Import trace for 
+requested module:
+./src/app/admin/produc
+ts/page.tsx
+
+
+> Build failed 
+because of webpack 
+errors

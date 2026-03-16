@@ -15,32 +15,7 @@ import React from "react";
 import toast from "react-hot-toast";
 import { ContentMap } from "@/lib/content";
 
-const CATEGORIES = [
-  {
-    name: "Celebration Cakes",
-    count: 14,
-    href: "/menu?category=Celebration Cakes",
-    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    name: "Small Chops",
-    count: 12,
-    href: "/menu?category=Small Chops",
-    image: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    name: "Chin Chin & Snacks",
-    count: 8,
-    href: "/menu?category=Chin Chin & Snacks",
-    image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    name: "Party Boxes",
-    count: 6,
-    href: "/menu?category=Party Boxes",
-    image: "https://images.unsplash.com/photo-1548940740-204726a19be3?auto=format&fit=crop&q=80&w=600",
-  },
-];
+// We'll move CATEGORIES inside the component to use images
 
 const FEATURED_ITEMS = [
   { id: "f1", name: "Gold Tier Celebration Cake", price: 65.00, originalPrice: undefined, badge: "BEST SELLER" as const, rating: 4.9, image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600", category: "Celebration Cakes", description: "Luxurious 3-tier vanilla sponge with Italian meringue buttercream.", reviewCount: 84, isAvailable: true, isFeatured: true },
@@ -58,11 +33,48 @@ const BADGE_COLORS: Record<string, string> = {
   "MUST TRY": "bg-red-600 text-white",
 };
 
-export function HomePageClient({ content, settings }: { content: ContentMap, settings?: Record<string, string> }) {
+export function HomePageClient({ content, settings, images }: { content: ContentMap, settings?: Record<string, string>, images?: Record<string, string> }) {
   const addItem = useCartStore((s) => s.addItem);
   const carouselRef = React.useRef<HTMLDivElement>(null);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+
+  const fallbackImages = {
+    heroImage: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=85&w=900",
+    cakesImage: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600",
+    smallchopsImage: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=600",
+    chinChinImage: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=600",
+    partyBoxImage: "https://images.unsplash.com/photo-1548940740-204726a19be3?auto=format&fit=crop&q=80&w=600"
+  };
+
+  const imgs = images || fallbackImages;
+
+  const CATEGORIES = [
+    {
+      name: "Celebration Cakes",
+      count: 14,
+      href: "/menu?category=Celebration Cakes",
+      image: imgs.cakesImage,
+    },
+    {
+      name: "Small Chops",
+      count: 12,
+      href: "/menu?category=Small Chops",
+      image: imgs.smallchopsImage,
+    },
+    {
+      name: "Chin Chin & Snacks",
+      count: 8,
+      href: "/menu?category=Chin Chin & Snacks",
+      image: imgs.chinChinImage,
+    },
+    {
+      name: "Party Boxes",
+      count: 6,
+      href: "/menu?category=Party Boxes",
+      image: imgs.partyBoxImage,
+    },
+  ];
 
   const scroll = (dir: "left" | "right") => {
     if (!carouselRef.current) return;
@@ -70,7 +82,7 @@ export function HomePageClient({ content, settings }: { content: ContentMap, set
   };
 
   const openProduct = (item: typeof FEATURED_ITEMS[0]) => {
-    setSelectedProduct(item as Product);
+    setSelectedProduct(item as unknown as Product);
     setIsDetailOpen(true);
   };
 
@@ -245,7 +257,7 @@ export function HomePageClient({ content, settings }: { content: ContentMap, set
         }}>
           <div className="relative aspect-square rounded-[60px] overflow-hidden luxury-shadow border-[12px] border-white/50 rotate-3 hover:rotate-0 transition-all duration-700 group">
             <Image
-              src={content['hero.image'] || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1200"}
+              src={imgs.heroImage}
               alt="Luxury Pastry"
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-1000"
@@ -459,7 +471,7 @@ export function HomePageClient({ content, settings }: { content: ContentMap, set
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      addItem({ id: item.id, name: item.name, price: item.price, image: item.image, category: item.category, description: item.description, rating: item.rating, reviewCount: 0, isAvailable: true, isFeatured: true });
+                      addItem({ id: item.id, name: item.name, price: item.price, image_url: item.image, category: item.category, description: item.description, rating: item.rating, reviewCount: 0, is_available: true, is_featured: true });
                       toast.success(`${item.name} added!`, { icon: "🧁", style: { borderRadius: "20px", background: "#3D1A0F", color: "#fff", fontWeight: "bold" } });
                     }}
                     className="w-full py-4 rounded-2xl bg-bakery-cta text-white font-black text-sm uppercase tracking-widest hover:brightness-110 transition-all"

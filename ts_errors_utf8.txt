@@ -1,0 +1,10 @@
+﻿src/app/(customer)/account/AccountDashboard.tsx(83,17): error TS2561: Object literal may only specify known properties, but 'image' does not exist in type 'Product'. Did you mean to write 'images'?
+src/app/api/admin/migrate-products/route.ts(30,61): error TS2551: Property 'catch' does not exist on type 'PostgrestFilterBuilder<any, any, any, any, "exec_sql", null, "RPC">'. Did you mean 'match'?
+src/components/admin/WebsiteContentEditor.tsx(4,22): error TS2305: Module '"@/lib/content"' has no exported member 'updateContent'.
+src/components/checkout/Step1OrderReview.tsx(45,46): error TS2551: Property 'image' does not exist on type 'CartItem'. Did you mean 'images'?
+src/components/layout/CartDrawer.tsx(100,66): error TS2551: Property 'image' does not exist on type 'CartItem'. Did you mean 'images'?
+src/components/ui/ProductDetailModal.tsx(32,50): error TS2551: Property 'image' does not exist on type 'Product'. Did you mean 'images'?
+src/components/ui/ProductDetailModal.tsx(112,41): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+src/components/ui/ProductDetailModal.tsx(119,34): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+src/components/ui/ProductDetailModal.tsx(120,111): error TS2339: Property 'originalPrice' does not exist on type 'Product'.

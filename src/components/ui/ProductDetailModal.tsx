@@ -29,7 +29,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
 
     if (!product) return null;
 
-    const allImages = product.images || [product.image];
+    const allImages = product.images || [product.image_url];
 
     const handleAddToCart = () => {
         for (let i = 0; i < quantity; i++) {
@@ -109,8 +109,8 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                             {product.name}
                         </h1>
                         <div className="flex items-center gap-4">
-                            <StarRating rating={product.rating} size="sm" />
-                            <span className="text-sm font-bold text-bakery-primary/40">({product.reviewCount} Reviews)</span>
+                            <StarRating rating={product.rating || 0} size="sm" />
+                            <span className="text-sm font-bold text-bakery-primary/40">({product.reviewCount || 0} Reviews)</span>
                         </div>
                     </div>
 

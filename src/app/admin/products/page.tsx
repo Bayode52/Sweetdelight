@@ -1,6 +1,6 @@
-'use client'
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { ImageUploader } from '@/components/admin/ImageUploader'
 
 const sb = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -171,26 +171,31 @@ export default function AdminProducts() {
             <div className="space-y-5 pb-16">
 
                 {/* Image upload */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                    <label className={lbl}>Product Photo</label>
-                    {editing.image_url && (
-                        <div className="relative mb-3">
-                            <img src={editing.image_url} className="w-full h-44 object-cover rounded-xl border" alt="preview" />
-                            <button onClick={() => setEditing(p => ({ ...p, image_url: '' }))}
-                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 text-sm flex items-center justify-center font-bold shadow">
-                                ✕
-                            </button>
-                        </div>
-                    )}
-                    <label className={`flex items-center gap-3 p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${uploading ? 'border-orange-300 bg-orange-50' : 'border-gray-200 hover:border-orange-400 hover:bg-orange-50'}`}>
-                        <span className="text-2xl">{uploading ? '⏳' : '📸'}</span>
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">{uploading ? 'Uploading...' : 'Upload food photo'}</p>
-                            <p className="text-xs text-gray-400">JPG, PNG, WebP · Max 8MB</p>
-                        </div>
-                        <input type="file" accept="image/*" className="hidden" disabled={uploading}
-                            onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f) }} />
-                    </label>
+                <div style={{
+                  background: 'white', borderRadius: '16px',
+                  border: '1px solid #f0ebe3', overflow: 'hidden',
+                  marginBottom: '16px',
+                }}>
+                  <div style={{
+                    padding: '12px 16px', background: '#FAF7F2',
+                    borderBottom: '1px solid #f0ebe3',
+                  }}>
+                    <p style={{ fontWeight: 700, fontSize: '13px', color: '#1A0800' }}>
+                      Product Photo
+                    </p>
+                    <p style={{ fontSize: '11px', color: '#7A6555', marginTop: '2px' }}>
+                      Upload a clear, appetising photo of this product
+                    </p>
+                  </div>
+                  <ImageUploader
+                    label="Product Image"
+                    hint="Best: square or 4:3 photo on white/neutral background"
+                    aspect="4:3"
+                    currentUrl={editing.image_url || ''}
+                    onSave={async (url) => {
+                      setEditing(prev => ({ ...prev, image_url: url }))
+                    }}
+                  />
                 </div>
 
                 {/* Basic info */}

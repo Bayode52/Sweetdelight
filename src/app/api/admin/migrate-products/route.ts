@@ -27,7 +27,13 @@ export async function POST() {
 
     const results = []
     for (const sql of migrations) {
-        const { error } = await sb.rpc('exec_sql', { sql }).catch(() => ({ error: null }))
+        let error = null
+        try {
+            const res = await sb.rpc('exec_sql', { sql })
+            error = res.error
+        } catch (err: any) {
+            error = { message: err.message } as any
+        }
         results.push({ sql: sql.slice(0, 50), error: error?.message || 'ok' })
     }
 

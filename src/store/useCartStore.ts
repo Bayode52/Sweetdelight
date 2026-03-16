@@ -6,6 +6,7 @@ export interface Product {
     name: string;
     price: number;
     sale_price?: number | null;
+    originalPrice?: number;
     on_sale?: boolean;
     rating?: number;
     reviewCount?: number;

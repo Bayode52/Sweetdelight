@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getContent, updateContent, ContentMap } from "@/lib/content";
+import { getContent, ContentMap } from "@/lib/content";
 import { Button, Input, Textarea } from "@/components/ui";
 import { Check, Edit2, ImageIcon, Loader2, X } from "lucide-react";
 import toast from "react-hot-toast";

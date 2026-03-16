@@ -42,7 +42,7 @@ export default function Step1OrderReview({ onNext }: Step1Props) {
                 {items.map((item) => (
                     <div key={item.id} className="flex gap-4 bg-white rounded-3xl p-4 border border-bakery-primary/5 shadow-sm">
                         <div className="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden bg-bakery-accent/40">
-                            <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />
+                            <Image src={item.image_url} alt={item.name} fill sizes="80px" className="object-cover" />
                         </div>
                         <div className="flex-1 space-y-2">
                             <div className="flex justify-between gap-2">

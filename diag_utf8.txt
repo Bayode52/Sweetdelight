@@ -1,0 +1,77 @@
+﻿import { getContent } from "@/lib/content";
+import { getSettings } from "@/lib/settings";
+import { HomePageClient } from "@/components/home/HomePageClient";
+
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const content = await getContent("home");
+  const settings = await getSettings();
+
+  return <HomePageClient content={content} settings={settings} />;
+}
+'use client'
+import { useState, useEffect, useCallback } from 'react'
+
+type ContentMap = Record<string, string>
+
+// All editable fields organised by tab
+const TABS = [
+  {
+    id: 'contact',
+    label: 'ðŸ“ž Contact & Footer',
+    sections: [
+      {
+        title: 'Contact Details',
+        hint: 'These show in the footer and contact page',
+        fields: [
+          { page: 'footer', section: 'contact', field: 'phone',     label: 'Phone Number',     placeholder: '+44 7000 000000',          type: 'text' },
+          { page: 'footer', section: 'contact', field: 'whatsapp',  label: 'WhatsApp Number',  placeholder: '447000000000 (no + or spaces)', type: 'text' },
+          { page: 'footer', section: 'contact', field: 'email',     label: 'Email Address',    placeholder: 'hello@sweetdelites.co.uk', type: 'email' },
+          { page: 'footer', section: 'contact', field: 'instagram', label: 'Instagram Handle', placeholder: '@sweetdelites',            type: 'text' },
+          { page: 'footer', section: 'social',  field: 'facebook',  label: 'Facebook URL',     placeholder: 'https://facebook.com/...',  type: 'url' },
+          { page: 'footer', section: 'social',  field: 'tiktok',   label: 'TikTok URL',       placeholder: 'https://tiktok.com/@...',  type: 'url' },
+        ]
+      },
+      {
+        title: 'Footer Brand Text',
+        hint: 'Shown at the bottom of every page',
+        fields: [
+          { page: 'footer', section: 'brand', field: 'tagline',   label: 'Tagline',        placeholder: 'Handcrafting moments of joy...', type: 'textarea' },
+          { page: 'footer', section: 'brand', field: 'copyright', label: 'Copyright Text', placeholder: 'Â© 2026 Sweet Delites. All rights reserved.', type: 'text' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'homepage',
+    label: 'ðŸ  Homepage',
+    sections: [
+      {
+        title: 'Hero Section',
+        hint: 'The main banner customers see first',
+
+Filename            Line     
+--------            ----     
+BlogEditorModal.tsx       ...
+page.tsx                  ...
+page.tsx                  ...
+page.tsx                  ...
+page.tsx                  ...
+page.tsx                  ...
+page.tsx                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                //...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+route.ts                  ...
+
+
