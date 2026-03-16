@@ -1,3 +1,4 @@
+'use client'
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { ImageUploader } from '@/components/admin/ImageUploader'
