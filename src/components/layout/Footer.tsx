@@ -2,36 +2,42 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
-async function getContent(page: string, section: string, field: string, fallback: string) {
+export default async function Footer() {
+  let phone = '+44 7000 000000'
+  let whatsapp = '447000000000'
+  let email = 'hello@sweetdelites.co.uk'
+  let instagram = '@sweetdelites'
+  let facebook = ''
+  let tiktok = ''
+  let tagline = 'Handcrafting moments of joy with premium ingredients and Nigerian warmth.'
+  let copyright = '© 2026 Sweet Delites. All rights reserved.'
+
   try {
     const sb = await createClient()
     const { data } = await sb
       .from('site_content')
-      .select('value')
-      .eq('page', page)
-      .eq('section', section)
-      .eq('field', field)
-      .single()
-    return data?.value || fallback
-  } catch {
-    return fallback
+      .select('section, field, value')
+      .eq('page', 'footer')
+
+    data?.forEach(row => {
+      if (row.section === 'contact') {
+        if (row.field === 'phone')     phone     = row.value
+        if (row.field === 'whatsapp')  whatsapp  = row.value
+        if (row.field === 'email')     email     = row.value
+        if (row.field === 'instagram') instagram = row.value
+      }
+      if (row.section === 'social') {
+        if (row.field === 'facebook') facebook = row.value
+        if (row.field === 'tiktok')   tiktok   = row.value
+      }
+      if (row.section === 'brand') {
+        if (row.field === 'tagline')   tagline   = row.value
+        if (row.field === 'copyright') copyright = row.value
+      }
+    })
+  } catch (err) {
+    console.error('Footer content fetch error:', err)
   }
-}
-
-export default async function Footer() {
-  // Fetch all contact/footer fields from database
-  const [phone, instagram, whatsapp, email, facebook, tiktok, tagline, copyright] = 
-    await Promise.all([
-      getContent('footer', 'contact', 'phone', '+44 7000 000000'),
-      getContent('footer', 'contact', 'instagram', '@sweetdelites'),
-      getContent('footer', 'contact', 'whatsapp', '447000000000'),
-      getContent('footer', 'contact', 'email', 'hello@sweetdelites.co.uk'),
-      getContent('footer', 'social', 'facebook', ''),
-      getContent('footer', 'social', 'tiktok', ''),
-      getContent('footer', 'brand', 'tagline', 'Handcrafting moments of joy with premium ingredients and Nigerian warmth.'),
-      getContent('footer', 'brand', 'copyright', '© 2026 Sweet Delites. All rights reserved.'),
-    ])
-
   const waNumber = whatsapp.replace(/\D/g, '')
 
   return (

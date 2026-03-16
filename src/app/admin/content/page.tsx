@@ -1,378 +1,368 @@
-"use client";
+'use client'
+import { useState, useEffect, useCallback } from 'react'
 
-import { useState, useRef, useCallback } from 'react'
-import Link from 'next/link'
-import { CropUpload } from '@/components/admin/CropUpload'
-import toast from 'react-hot-toast'
+type ContentMap = Record<string, string>
 
-// ─── Supabase client ───────────────────────────────
-function getSupabase() {
-    const { createBrowserClient } = require('@supabase/ssr')
-    return createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+// All editable fields organised by tab
+const TABS = [
+  {
+    id: 'contact',
+    label: '📞 Contact & Footer',
+    sections: [
+      {
+        title: 'Contact Details',
+        hint: 'These show in the footer and contact page',
+        fields: [
+          { page: 'footer', section: 'contact', field: 'phone',     label: 'Phone Number',     placeholder: '+44 7000 000000',          type: 'text' },
+          { page: 'footer', section: 'contact', field: 'whatsapp',  label: 'WhatsApp Number',  placeholder: '447000000000 (no + or spaces)', type: 'text' },
+          { page: 'footer', section: 'contact', field: 'email',     label: 'Email Address',    placeholder: 'hello@sweetdelites.co.uk', type: 'email' },
+          { page: 'footer', section: 'contact', field: 'instagram', label: 'Instagram Handle', placeholder: '@sweetdelites',            type: 'text' },
+          { page: 'footer', section: 'social',  field: 'facebook',  label: 'Facebook URL',     placeholder: 'https://facebook.com/...',  type: 'url' },
+          { page: 'footer', section: 'social',  field: 'tiktok',   label: 'TikTok URL',       placeholder: 'https://tiktok.com/@...',  type: 'url' },
+        ]
+      },
+      {
+        title: 'Footer Brand Text',
+        hint: 'Shown at the bottom of every page',
+        fields: [
+          { page: 'footer', section: 'brand', field: 'tagline',   label: 'Tagline',        placeholder: 'Handcrafting moments of joy...', type: 'textarea' },
+          { page: 'footer', section: 'brand', field: 'copyright', label: 'Copyright Text', placeholder: '© 2026 Sweet Delites. All rights reserved.', type: 'text' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'homepage',
+    label: '🏠 Homepage',
+    sections: [
+      {
+        title: 'Hero Section',
+        hint: 'The main banner customers see first',
+        fields: [
+          { page: 'homepage', section: 'hero', field: 'badge',    label: 'Badge Text',    placeholder: '🇬🇧 Proudly Serving the UK', type: 'text' },
+          { page: 'homepage', section: 'hero', field: 'headline', label: 'Main Headline', placeholder: 'Baking Joy, One Bite At A Time.', type: 'text' },
+          { page: 'homepage', section: 'hero', field: 'subtext',  label: 'Subtext',       placeholder: 'Premium Nigerian pastries...', type: 'textarea' },
+          { page: 'homepage', section: 'hero', field: 'btn1',     label: 'Button 1 Text', placeholder: 'Order Fresh Now', type: 'text' },
+          { page: 'homepage', section: 'hero', field: 'btn2',     label: 'Button 2 Text', placeholder: 'View Our Menu', type: 'text' },
+        ]
+      },
+      {
+        title: 'Announcement Strip',
+        hint: 'The scrolling bar across the top',
+        fields: [
+          { page: 'homepage', section: 'announcement', field: 'text', label: 'Announcement Text', placeholder: '🚚 Free delivery over £50 · Custom cakes 5 days notice', type: 'textarea' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'about',
+    label: '👩🍳 About Us',
+    sections: [
+      {
+        title: 'About Page Content',
+        hint: 'Your story and mission',
+        fields: [
+          { page: 'about', section: 'header', field: 'heading',    label: 'Page Heading',  placeholder: 'Our Story', type: 'text' },
+          { page: 'about', section: 'header', field: 'subheading', label: 'Subheading',    placeholder: 'Made with love since...', type: 'text' },
+          { page: 'about', section: 'story',  field: 'paragraph1', label: 'Paragraph 1',   placeholder: 'Our journey began...', type: 'textarea' },
+          { page: 'about', section: 'story',  field: 'paragraph2', label: 'Paragraph 2',   placeholder: 'We believe that...', type: 'textarea' },
+          { page: 'about', section: 'story',  field: 'paragraph3', label: 'Paragraph 3',   placeholder: 'Today we serve...', type: 'textarea' },
+        ]
+      },
+    ]
+  },
+]
+
+// Single field key for lookup
+function key(page: string, section: string, field: string) {
+  return `${page}__${section}__${field}`
 }
 
-// ─── Save content to DB ────────────────────────────
-async function saveField(page: string, section: string, field: string, value: string) {
-    const res = await fetch('/api/admin/content', {
-        method: 'PATCH',
+export default function AdminContent() {
+  const [activeTab, setActiveTab] = useState('contact')
+  const [content, setContent] = useState<ContentMap>({})
+  const [editing, setEditing] = useState<ContentMap>({})
+  const [saving, setSaving] = useState<string | null>(null)
+  const [saved, setSaved]   = useState<string | null>(null)
+  const [error, setError]   = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  // Load all content from database on mount
+  const loadContent = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/content')
+      const json = await res.json()
+      if (json.error) throw new Error(json.error)
+
+      const map: ContentMap = {}
+      for (const row of json.data || []) {
+        map[key(row.page, row.section, row.field)] = row.value
+      }
+      setContent(map)
+      setEditing(map) // editing starts as a copy of saved values
+    } catch (err: any) {
+      setError('Failed to load content: ' + err.message)
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { loadContent() }, [loadContent])
+
+  // Save a single field
+  async function saveField(
+    page: string, section: string, field: string, value: string
+  ) {
+    const k = key(page, section, field)
+    setSaving(k)
+    setError(null)
+
+    try {
+      const res = await fetch('/api/admin/content', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page, section, field, value })
-    })
-    return res.ok
-}
+        body: JSON.stringify({ page, section, field, value }),
+      })
 
-// ─── Upload image to Supabase storage ─────────────
-async function uploadImage(file: File, bucket: string = 'site-images'): Promise<string | null> {
-    const supabase = getSupabase()
-    const ext = file.name.split('.').pop()
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(path, file, { upsert: true })
-    if (error || !data) return null
-    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(data.path)
-    return publicUrl
-}
+      const json = await res.json()
 
-// ─── Reusable text field ──────────────────────────
-function Field({ label, defaultValue, page, section, field, multiline = false, hint }: {
-    label: string; defaultValue?: string; page: string
-    section: string; field: string; multiline?: boolean; hint?: string
-}) {
-    const [editing, setEditing] = useState(false)
-    const [value, setValue] = useState(defaultValue || '')
-    const [saving, setSaving] = useState(false)
-    const [ok, setOk] = useState(false)
+      if (!res.ok || json.error) {
+        throw new Error(json.error || `HTTP ${res.status}`)
+      }
 
-    const save = async () => {
-        setSaving(true)
-        const success = await saveField(page, section, field, value)
-        setSaving(false)
-        if (success) { setOk(true); setEditing(false); setTimeout(() => setOk(false), 3000) }
+      // Update local state so UI reflects saved value immediately
+      setContent(prev => ({ ...prev, [k]: value }))
+      setSaved(k)
+      setTimeout(() => setSaved(null), 2500)
+
+    } catch (err: any) {
+      console.error('Save error:', err)
+      setError(`Failed to save "${field}": ${err.message}`)
     }
 
-    return (
-        <div className="py-3 border-b border-gray-100 last:border-0">
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-                    {hint && <p className="text-xs text-orange-500 mb-1">{hint}</p>}
-                    {!editing ? (
-                        <p className="text-gray-700 text-sm leading-relaxed truncate">{value || <span className="text-gray-300 italic">Not set</span>}</p>
-                    ) : multiline ? (
-                        <textarea value={value} onChange={e => setValue(e.target.value)} rows={4}
-                            className="w-full border-2 border-orange-300 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 resize-none" />
-                    ) : (
-                        <input value={value} onChange={e => setValue(e.target.value)}
-                            className="w-full border-2 border-orange-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-500" />
-                    )}
-                </div>
-                <div className="flex items-center gap-2 pt-5 shrink-0">
-                    {ok && <span className="text-green-500 text-xs font-bold">✅</span>}
-                    {!editing ? (
-                        <button onClick={() => setEditing(true)}
-                            className="text-xs font-semibold text-orange-500 hover:text-orange-700 px-3 py-1.5 rounded-lg hover:bg-orange-50">
-                            Edit
+    setSaving(null)
+  }
+
+  const currentTab = TABS.find(t => t.id === activeTab)!
+
+  return (
+    <div style={{ padding: 'clamp(16px, 3vw, 32px)', maxWidth: '780px' }}>
+
+      {/* Header */}
+      <div style={{ marginBottom: '28px' }}>
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+          fontWeight: 700, color: '#1A0800', marginBottom: '6px'
+        }}>
+          Edit Website Content
+        </h1>
+        <p style={{ fontSize: '13px', color: '#7A6555' }}>
+          Changes save instantly and show on the website straight away.
+        </p>
+      </div>
+
+      {/* Global error */}
+      {error && (
+        <div style={{
+          background: '#fef2f2', border: '2px solid #fecaca',
+          borderRadius: '12px', padding: '12px 16px',
+          color: '#dc2626', fontSize: '13px', marginBottom: '20px',
+          display: 'flex', alignItems: 'center', gap: '8px'
+        }}>
+          ❌ {error}
+          <button onClick={() => setError(null)}
+            style={{ marginLeft: 'auto', background: 'none', border: 'none',
+              cursor: 'pointer', fontSize: '16px', color: '#dc2626' }}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div style={{
+        display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px'
+      }}>
+        {TABS.map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            style={{
+              padding: '8px 16px', borderRadius: '50px',
+              fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+              border: activeTab === tab.id ? 'none' : '1.5px solid #e5e0d8',
+              background: activeTab === tab.id ? '#C8401A' : 'white',
+              color: activeTab === tab.id ? 'white' : '#7A6555',
+              transition: 'all 0.2s',
+            }}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[1,2,3].map(i => (
+            <div key={i} style={{
+              height: '80px', background: '#f3f4f6',
+              borderRadius: '16px', animation: 'pulse 1.5s infinite'
+            }} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {currentTab.sections.map(section => (
+            <div key={section.title} style={{
+              background: 'white', borderRadius: '20px',
+              border: '1px solid #f0ebe3',
+              overflow: 'hidden',
+              boxShadow: '0 2px 12px rgba(26,8,0,0.04)',
+            }}>
+              {/* Section header */}
+              <div style={{
+                padding: '14px 20px',
+                background: '#FAF7F2',
+                borderBottom: '1px solid #f0ebe3',
+              }}>
+                <p style={{ fontWeight: 700, color: '#1A0800', fontSize: '14px' }}>
+                  {section.title}
+                </p>
+                {section.hint && (
+                  <p style={{ fontSize: '11px', color: '#7A6555', marginTop: '2px' }}>
+                    {section.hint}
+                  </p>
+                )}
+              </div>
+
+              {/* Fields */}
+              <div style={{ padding: '4px 0' }}>
+                {section.fields.map(f => {
+                  const k = key(f.page, f.section, f.field)
+                  const currentVal = editing[k] ?? ''
+                  const savedVal   = content[k]  ?? ''
+                  const isDirty    = currentVal !== savedVal
+                  const isSaving   = saving === k
+                  const isSaved    = saved  === k
+
+                  return (
+                    <div key={k} style={{
+                      padding: '16px 20px',
+                      borderBottom: '1px solid #faf7f2',
+                    }}>
+                      {/* Label */}
+                      <label style={{
+                        display: 'block',
+                        fontSize: '11px', fontWeight: 700,
+                        textTransform: 'uppercase', letterSpacing: '0.08em',
+                        color: '#7A6555', marginBottom: '8px',
+                      }}>
+                        {f.label}
+                      </label>
+
+                      {/* Input row */}
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                        {f.type === 'textarea' ? (
+                          <textarea
+                            value={currentVal}
+                            placeholder={f.placeholder}
+                            rows={3}
+                            onChange={e => setEditing(prev => ({
+                              ...prev, [k]: e.target.value
+                            }))}
+                            style={{
+                              flex: 1,
+                              border: `2px solid ${isDirty ? '#C8401A' : '#e5e7eb'}`,
+                              borderRadius: '12px',
+                              padding: '10px 14px',
+                              fontSize: '14px',
+                              outline: 'none',
+                              resize: 'vertical',
+                              fontFamily: 'inherit',
+                              lineHeight: 1.6,
+                              transition: 'border-color 0.2s',
+                              background: isDirty ? '#fff8f6' : 'white',
+                            }}
+                          />
+                        ) : (
+                          <input
+                            type={f.type}
+                            value={currentVal}
+                            placeholder={f.placeholder}
+                            onChange={e => setEditing(prev => ({
+                              ...prev, [k]: e.target.value
+                            }))}
+                            style={{
+                              flex: 1,
+                              border: `2px solid ${isDirty ? '#C8401A' : '#e5e7eb'}`,
+                              borderRadius: '12px',
+                              padding: '10px 14px',
+                              fontSize: '14px',
+                              outline: 'none',
+                              fontFamily: 'inherit',
+                              transition: 'border-color 0.2s',
+                              background: isDirty ? '#fff8f6' : 'white',
+                            }}
+                          />
+                        )}
+
+                        {/* Save button */}
+                        <button
+                          onClick={() => saveField(f.page, f.section, f.field, currentVal)}
+                          disabled={isSaving || !isDirty}
+                          style={{
+                            padding: '10px 18px',
+                            borderRadius: '12px',
+                            fontWeight: 700,
+                            fontSize: '13px',
+                            border: 'none',
+                            cursor: isSaving || !isDirty ? 'not-allowed' : 'pointer',
+                            background: isSaved  ? '#16a34a'
+                                      : isSaving ? '#9ca3af'
+                                      : isDirty  ? '#C8401A'
+                                      : '#f3f4f6',
+                            color: isDirty || isSaved ? 'white' : '#9ca3af',
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
+                            minWidth: '80px',
+                          }}>
+                          {isSaving ? '⏳' : isSaved ? '✅ Saved' : isDirty ? 'Save' : 'Saved'}
                         </button>
-                    ) : (
-                        <>
-                            <button onClick={save} disabled={saving}
-                                className="text-xs font-semibold bg-[#D4421A] text-white px-3 py-1.5 rounded-lg hover:bg-[#b8381a]">
-                                {saving ? '...' : 'Save'}
-                            </button>
-                            <button onClick={() => setEditing(false)}
-                                className="text-xs text-gray-400 px-2 py-1.5 rounded-lg hover:bg-gray-100">
-                                ✕
-                            </button>
-                        </>
-                    )}
-                </div>
+                      </div>
+
+                      {/* Dirty indicator */}
+                      {isDirty && !isSaving && (
+                        <div style={{
+                          display: 'flex', alignItems: 'center',
+                          justifyContent: 'space-between', marginTop: '6px'
+                        }}>
+                          <p style={{ fontSize: '11px', color: '#C8401A', fontWeight: 600 }}>
+                            ● Unsaved change
+                          </p>
+                          <button
+                            onClick={() => setEditing(prev => ({ ...prev, [k]: savedVal }))}
+                            style={{ fontSize: '11px', color: '#9ca3af',
+                              background: 'none', border: 'none',
+                              cursor: 'pointer', textDecoration: 'underline' }}>
+                            Revert
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
+          ))}
         </div>
-    )
-}
+      )}
 
-// ─── Image upload field (Powered by CropUpload) ───
-function ImageField({ label, defaultValue, page, section, field, hint, bucket = 'site-images', aspectRatio = 'square' }: {
-    label: string; defaultValue?: string; page: string
-    section: string; field: string; hint?: string; bucket?: string;
-    aspectRatio?: 'square' | 'video' | 'portrait'
-}) {
-    const [value, setValue] = useState(defaultValue || '');
-
-    const handleUpload = async (url: string) => {
-        const success = await saveField(page, section, field, url);
-        if (success) {
-            setValue(url);
-            toast.success(`${label} updated`);
-        } else {
-            toast.error("Failed to save image");
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
-    };
-
-    return (
-        <div className="py-6 border-b border-gray-100 last:border-0">
-            <div className="flex flex-col gap-2 mb-4">
-                <p className="text-xs font-black uppercase tracking-widest text-[#D4421A]">{label}</p>
-                {hint && <p className="text-xs text-gray-400 font-medium">{hint}</p>}
-            </div>
-            <div className="max-w-md">
-                <CropUpload
-                    value={value}
-                    onChange={handleUpload}
-                    bucket={bucket}
-                    aspectRatio={aspectRatio as any}
-                />
-            </div>
-        </div>
-    );
-}
-
-// ─── Section card ─────────────────────────────────
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-    return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 overflow-hidden">
-            <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                <h3 className="font-bold text-gray-800">{title}</h3>
-            </div>
-            <div className="px-6">{children}</div>
-        </div>
-    )
-}
-
-// ─── Main page ────────────────────────────────────
-export default function ContentEditor() {
-    const tabs = [
-        { id: 'navbar', label: '🔝 Navbar' },
-        { id: 'homepage', label: '🏠 Homepage' },
-        { id: 'menu', label: '🍰 Menu' },
-        { id: 'about', label: '👩🍳 About Us' },
-        { id: 'contact', label: '📞 Contact' },
-        { id: 'footer', label: '🔗 Footer' },
-        { id: 'blog', label: '📝 Blog' },
-    ]
-    const [tab, setTab] = useState('homepage')
-
-    return (
-        <div className="p-6 max-w-3xl">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1"
-                style={{ fontFamily: "'Playfair Display', serif" }}>
-                Edit Website
-            </h1>
-            <p className="text-gray-500 mb-6">
-                Every change goes live immediately. No code needed. ✨
-            </p>
-
-            {/* Tab bar */}
-            <div className="flex gap-2 mb-6 flex-wrap">
-                {tabs.map(t => (
-                    <button key={t.id} onClick={() => setTab(t.id)}
-                        className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${tab === t.id
-                            ? 'bg-[#D4421A] text-white shadow-md'
-                            : 'bg-white border border-gray-200 text-gray-600 hover:border-orange-300'
-                            }`}>
-                        {t.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* ── NAVBAR ── */}
-            {tab === 'navbar' && (
-                <>
-                    <Section title="Business Name & Logo">
-                        <Field label="Business Name" defaultValue="Sweet Delites" page="navbar" section="logo" field="name" hint="Appears in the top-left navbar" />
-                        <Field label="Logo Tagline (optional small text)" defaultValue="" page="navbar" section="logo" field="tagline" />
-                        <ImageField label="Logo Image (optional — leave empty to use text logo)" page="navbar" section="logo" field="image" hint="Upload a PNG logo file (transparent background recommended)" />
-                    </Section>
-                    <Section title="Navigation Links">
-                        <Field label="Link 1 Label" defaultValue="Home" page="navbar" section="links" field="link1_label" />
-                        <Field label="Link 2 Label" defaultValue="Menu" page="navbar" section="links" field="link2_label" />
-                        <Field label="Link 3 Label" defaultValue="Custom Order" page="navbar" section="links" field="link3_label" />
-                        <Field label="Link 4 Label" defaultValue="About Us" page="navbar" section="links" field="link4_label" />
-                        <Field label="Link 5 Label" defaultValue="Contact" page="navbar" section="links" field="link5_label" />
-                    </Section>
-                    <Section title="Announcement Banner">
-                        <Field label="Banner Text" defaultValue="🚚 Free delivery on orders over £50 · Minimum order £20" page="navbar" section="banner" field="text" multiline />
-                        <Field label="Banner Background Colour (hex)" defaultValue="#D4421A" page="navbar" section="banner" field="bg_color" hint="e.g. #D4421A for orange, #2C1810 for dark brown" />
-                    </Section>
-                </>
-            )}
-
-            {/* ── HOMEPAGE ── */}
-            {tab === 'homepage' && (
-                <>
-                    <Section title="Hero Section">
-                        <Field label="Top Badge Text" defaultValue="🇬🇧 Proudly Serving the UK" page="home" section="hero" field="badge" />
-                        <Field label="Headline Line 1" defaultValue="Baking Joy," page="home" section="hero" field="line1" />
-                        <Field label="Headline Line 2" defaultValue="One Bite" page="home" section="hero" field="line2" />
-                        <Field label="Headline Line 3" defaultValue="At A Time." page="home" section="hero" field="line3" />
-                        <Field label="Subheading" defaultValue="Experience the perfect blend of London sophistication and Nigerian soul." page="home" section="hero" field="subtext" multiline />
-                        <Field label="Button 1 Text" defaultValue="Order Fresh Now" page="home" section="hero" field="btn1" />
-                        <Field label="Button 2 Text" defaultValue="View Our Menu" page="home" section="hero" field="btn2" />
-                        <ImageField label="Hero Image" page="home" section="hero" field="image" aspectRatio="video" hint="Best size: 1200×800px. Shows on right side of homepage." />
-                    </Section>
-                    <Section title="Stats Bar">
-                        <Field label="Stat 1 Number" defaultValue="500+" page="home" section="stats" field="s1_num" />
-                        <Field label="Stat 1 Label" defaultValue="Happy Customers" page="home" section="stats" field="s1_label" />
-                        <Field label="Stat 2 Number" defaultValue="4.9/5" page="home" section="stats" field="s2_num" />
-                        <Field label="Stat 2 Label" defaultValue="Average Rating" page="home" section="stats" field="s2_label" />
-                        <Field label="Stat 3 Number" defaultValue="45" page="home" section="stats" field="s3_num" />
-                        <Field label="Stat 3 Label" defaultValue="Min Delivery" page="home" section="stats" field="s3_label" />
-                    </Section>
-                    <Section title="Scrolling Announcement Strip">
-                        <Field label="Strip Text" defaultValue="🚚 Free delivery on orders over £50 · Minimum order £20 · 🕐 Allow 48h notice for custom cakes · 📍 Delivering across the UK" page="home" section="strip" field="text" multiline />
-                    </Section>
-                    <Section title="Category Section">
-                        <Field label="Section Heading" defaultValue="Explore Categories" page="home" section="categories" field="heading" />
-                        <ImageField label="Celebration Cakes Photo" page="home" section="categories" field="cat1_img" aspectRatio="portrait" hint="Upload your own cake photo" />
-                        <ImageField label="Small Chops Photo" page="home" section="categories" field="cat2_img" aspectRatio="portrait" />
-                        <ImageField label="Chin Chin & Snacks Photo" page="home" section="categories" field="cat3_img" aspectRatio="portrait" />
-                        <ImageField label="Party Boxes Photo" page="home" section="categories" field="cat4_img" aspectRatio="portrait" />
-                    </Section>
-                    <Section title="Newsletter Section">
-                        <Field label="Heading" defaultValue="Get 10% Off Your First Order" page="home" section="newsletter" field="heading" />
-                        <Field label="Subtext" defaultValue="Be the first to hear about new seasonal drops and exclusive events." page="home" section="newsletter" field="subtext" multiline />
-                        <Field label="Button Text" defaultValue="Join The Club" page="home" section="newsletter" field="btn" />
-                    </Section>
-                </>
-            )}
-
-            {/* ── MENU ── */}
-            {tab === 'menu' && (
-                <>
-                    <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-4">
-                        <p className="text-sm font-semibold text-orange-800">🍰 To edit individual products (name, price, description, photo), go to:</p>
-                        <Link href="/admin/products" className="inline-block mt-2 bg-[#D4421A] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#b8381a]">
-                            → Manage Products
-                        </Link>
-                    </div>
-                    <Section title="Menu Page Header">
-                        <Field label="Page Title" defaultValue="Our Menu" page="menu" section="header" field="title" />
-                        <Field label="Subtitle" defaultValue="Handcrafted with love, baked fresh daily" page="menu" section="header" field="subtitle" />
-                        <ImageField label="Menu Page Banner Image" page="menu" section="header" field="banner_image" hint="Wide banner shown at top of menu page" />
-                    </Section>
-                    <Section title="Category Cover Images">
-                        <Field label="Note" defaultValue="" page="menu" section="note" field="info"
-                            hint="Upload cover photos for each category below. These show on the homepage and menu page." />
-                        <ImageField label="Celebration Cakes Cover" page="menu" section="covers" field="celebration_cakes" bucket="site-images" aspectRatio="portrait" hint="Your best cake photo" />
-                        <ImageField label="Small Chops Cover" page="menu" section="covers" field="small_chops" aspectRatio="portrait" hint="Your platter or small chops photo" />
-                        <ImageField label="Chin Chin & Snacks Cover" page="menu" section="covers" field="chin_chin" aspectRatio="portrait" hint="Chin chin bag or snacks photo" />
-                        <ImageField label="Party Boxes Cover" page="menu" section="covers" field="party_boxes" aspectRatio="portrait" />
-                        <ImageField label="Puff Puff Cover" page="menu" section="covers" field="puff_puff" aspectRatio="portrait" />
-                    </Section>
-                    <Section title="Featured Products Section">
-                        <Field label="Section Heading" defaultValue="Customer Favourites" page="menu" section="featured" field="heading" />
-                        <Field label="Section Subtitle" defaultValue="Signature Items" page="menu" section="featured" field="subtitle" />
-                    </Section>
-                </>
-            )}
-
-            {/* ── ABOUT ── */}
-            {tab === 'about' && (
-                <>
-                    <Section title="Page Header">
-                        <Field label="Main Heading" defaultValue="Made With Love, Baked With Pride" page="about" section="hero" field="heading" />
-                        <Field label="Subheading" defaultValue="Where Nigerian tradition meets London sophistication." page="about" section="hero" field="subheading" />
-                    </Section>
-                    <Section title="Your Story">
-                        <Field label="Story Section Title" defaultValue="From Lagos to London" page="about" section="story" field="heading" />
-                        <Field label="Paragraph 1" page="about" section="story" field="para1" multiline
-                            defaultValue="Sweet Delites was born from a simple longing — the taste of home." />
-                        <Field label="Paragraph 2" page="about" section="story" field="para2" multiline />
-                        <Field label="Paragraph 3" page="about" section="story" field="para3" multiline />
-                    </Section>
-                    <Section title="Your Photo">
-                        <ImageField label="Baker / Owner Photo 📸"
-                            page="about" section="story" field="baker_image"
-                            hint="Upload YOUR photo here — customers love seeing the real baker!" />
-                    </Section>
-                    <Section title="Why Choose Us (3 cards)">
-                        <Field label="Card 1 Title" defaultValue="100% Authentic" page="about" section="why" field="c1_title" />
-                        <Field label="Card 1 Description" defaultValue="Traditional Nigerian recipes passed down through generations." page="about" section="why" field="c1_desc" multiline />
-                        <Field label="Card 2 Title" defaultValue="Always Fresh" page="about" section="why" field="c2_title" />
-                        <Field label="Card 2 Description" defaultValue="Baked fresh to order, never mass-produced." page="about" section="why" field="c2_desc" multiline />
-                        <Field label="Card 3 Title" defaultValue="UK-Wide Delivery" page="about" section="why" field="c3_title" />
-                        <Field label="Card 3 Description" defaultValue="Delivering joy across the whole of the UK." page="about" section="why" field="c3_desc" multiline />
-                    </Section>
-                </>
-            )}
-
-            {/* ── CONTACT ── */}
-            {tab === 'contact' && (
-                <>
-                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4">
-                        <p className="text-sm text-green-800 font-semibold">
-                            ✅ Changes here update everywhere — footer, contact page, chatbot responses.
-                        </p>
-                    </div>
-                    <Section title="Contact Details">
-                        <Field label="WhatsApp Number (447XXXXXXXXX — no + or spaces)" defaultValue="447000000000" page="contact" section="details" field="whatsapp" hint="Used for WhatsApp order links across the site" />
-                        <Field label="Phone Number (displayed to customers)" defaultValue="+44 7000 000000" page="contact" section="details" field="phone" />
-                        <Field label="Instagram Handle" defaultValue="@sweetdelight" page="contact" section="details" field="instagram" />
-                        <Field label="Instagram URL" defaultValue="https://instagram.com/sweetdelight" page="contact" section="details" field="instagram_url" />
-                        <Field label="Facebook URL" defaultValue="" page="contact" section="details" field="facebook" />
-                        <Field label="TikTok Handle" defaultValue="" page="contact" section="details" field="tiktok" />
-                        <Field label="Email Address" defaultValue="hello@sweetdelight.co.uk" page="contact" section="details" field="email" />
-                    </Section>
-                    <Section title="Business Hours">
-                        <Field label="Monday – Friday" defaultValue="9am – 7pm" page="contact" section="hours" field="mon_fri" />
-                        <Field label="Saturday" defaultValue="9am – 5pm" page="contact" section="hours" field="saturday" />
-                        <Field label="Sunday" defaultValue="Custom orders only" page="contact" section="hours" field="sunday" />
-                    </Section>
-                    <Section title="Ordering & Delivery">
-                        <Field label="Custom Cake Notice" defaultValue="5 days" page="contact" section="ordering" field="cake_notice" />
-                        <Field label="Party Platter Notice" defaultValue="48 hours" page="contact" section="ordering" field="platter_notice" />
-                        <Field label="Delivery Areas" defaultValue="We deliver across the UK" page="contact" section="ordering" field="delivery_areas" multiline />
-                        <Field label="Minimum Order" defaultValue="£20" page="contact" section="ordering" field="min_order" />
-                        <Field label="Free Delivery Over" defaultValue="£50" page="contact" section="ordering" field="free_delivery_over" />
-                    </Section>
-                </>
-            )}
-
-            {/* ── FOOTER ── */}
-            {tab === 'footer' && (
-                <>
-                    <Section title="Brand">
-                        <Field label="Footer Tagline" defaultValue="Handcrafting moments of joy with premium ingredients and traditional Nigerian warmth." page="footer" section="brand" field="tagline" multiline />
-                        <Field label="Copyright Text" defaultValue="© 2026 Sweet Delites. All rights reserved." page="footer" section="brand" field="copyright" />
-                        <Field label="Made In Text" defaultValue="Made within the UK 🇬🇧 — with Nigerian Soul" page="footer" section="brand" field="made_in" />
-                    </Section>
-                    <Section title="Contact Details in Footer">
-                        <Field label="Phone Number" defaultValue="+44 7000 000000" page="footer" section="contact" field="phone" hint="Shown in footer contact column" />
-                        <Field label="Instagram Handle" defaultValue="@sweetdelight" page="footer" section="contact" field="instagram" />
-                        <Field label="Instagram URL" defaultValue="https://instagram.com/sweetdelight" page="footer" section="contact" field="instagram_url" />
-                        <Field label="WhatsApp Number (for click-to-chat link)" defaultValue="447000000000" page="footer" section="contact" field="whatsapp" />
-                        <Field label="Email Address" defaultValue="hello@sweetdelight.co.uk" page="footer" section="contact" field="email" />
-                    </Section>
-                    <Section title="Social Media Links">
-                        <Field label="Facebook URL" defaultValue="" page="footer" section="social" field="facebook" />
-                        <Field label="TikTok URL" defaultValue="" page="footer" section="social" field="tiktok" />
-                        <Field label="Twitter/X URL" defaultValue="" page="footer" section="social" field="twitter" />
-                        <Field label="YouTube URL" defaultValue="" page="footer" section="social" field="youtube" />
-                    </Section>
-                </>
-            )}
-
-            {/* ── BLOG ── */}
-            {tab === 'blog' && (
-                <>
-                    <Section title="Blog Page">
-                        <Field label="Page Title" defaultValue="Sweet News" page="blog" section="header" field="title" />
-                        <Field label="Subtitle" defaultValue="Stories, recipes and news from the Sweet Delites kitchen" page="blog" section="header" field="subtitle" multiline />
-                        <ImageField label="Blog Header Image" page="blog" section="header" field="image" />
-                    </Section>
-                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-                        <p className="text-sm text-blue-800 font-semibold">
-                            📝 To write and publish blog posts, go to the Blog section in Products/Content management.
-                            Each post has its own title, content, image and publish date.
-                        </p>
-                    </div>
-                </>
-            )}
-
-        </div>
-    )
+      `}</style>
+    </div>
+  )
 }
