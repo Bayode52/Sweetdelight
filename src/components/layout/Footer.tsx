@@ -118,7 +118,7 @@ export default async function Footer() {
                     rel="noopener noreferrer"
                     style={socialStyle}
                     title="Instagram">
-                    📸
+                    <Instagram size={18} />
                   </a>
                 )
               })()}
@@ -203,7 +203,7 @@ export default async function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={contactItemStyle}>
-                    <span style={{ color: '#C8401A', fontSize: '15px', flexShrink: 0 }}>📸</span>
+                    <Instagram size={16} color="#C8401A" style={{ flexShrink: 0 }} />
                     <span style={{
                       fontSize: '13px',
                       overflow: 'hidden',
