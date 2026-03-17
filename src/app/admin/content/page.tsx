@@ -22,7 +22,13 @@ const TABS = [
           { page: 'footer', section: 'contact', field: 'phone',     label: 'Phone Number',     placeholder: '+44 7000 000000',          type: 'text' },
           { page: 'footer', section: 'contact', field: 'whatsapp',  label: 'WhatsApp Number',  placeholder: '447000000000 (no + or spaces)', type: 'text' },
           { page: 'footer', section: 'contact', field: 'email',     label: 'Email Address',    placeholder: 'hello@sweetdelites.co.uk', type: 'email' },
-          { page: 'footer', section: 'contact', field: 'instagram', label: 'Instagram Handle', placeholder: '@sweetdelites',            type: 'text' },
+          { 
+            page: 'footer', section: 'contact', field: 'instagram',
+            label: 'Instagram',
+            placeholder: '@sweetdelitescakesnmore or full URL',
+            hint: 'Your handle e.g. @sweetdelitescakesnmore — or paste the full Instagram URL',
+            type: 'text' 
+          },
           { page: 'footer', section: 'social',  field: 'facebook',  label: 'Facebook URL',     placeholder: 'https://facebook.com/...',  type: 'url' },
           { page: 'footer', section: 'social',  field: 'tiktok',   label: 'TikTok URL',       placeholder: 'https://tiktok.com/@...',  type: 'url' },
         ]

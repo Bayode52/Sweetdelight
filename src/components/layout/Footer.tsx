@@ -3,6 +3,39 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Instagram, Phone, Mail, MessageCircle, Facebook, Music2 } from 'lucide-react'
 
+function parseInstagram(value: string): { url: string; handle: string } {
+  if (!value) return { url: '', handle: '' }
+  
+  const raw = value.trim()
+  
+  // If it's a full URL, extract the handle from it
+  if (raw.includes('instagram.com')) {
+    // Extract handle from URL like:
+    // https://www.instagram.com/sweetdelitescakesnmore/
+    // https://instagram.com/sweetdelitescakesnmore
+    const match = raw.match(/instagram\.com\/([^/?#]+)/)
+    const handle = match?.[1]?.replace(/\/$/, '') || raw
+    return {
+      url: `https://www.instagram.com/${handle}`,
+      handle: `@${handle}`
+    }
+  }
+  
+  // If it starts with @, use as-is
+  if (raw.startsWith('@')) {
+    return {
+      url: `https://www.instagram.com/${raw.slice(1)}`,
+      handle: raw
+    }
+  }
+  
+  // Plain handle without @
+  return {
+    url: `https://www.instagram.com/${raw}`,
+    handle: `@${raw}`
+  }
+}
+
 export default async function Footer() {
   let phone = '+44 7000 000000'
   let whatsapp = '447000000000'
@@ -77,13 +110,18 @@ export default async function Footer() {
             </p>
             {/* Socials */}
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              {instagram && (
-                <a href={`https://instagram.com/${instagram.replace('@','')}`}
-                  target="_blank" rel="noopener noreferrer"
-                  style={socialStyle} title="Instagram">
-                  <Instagram size={18} />
-                </a>
-              )}
+              {instagram && (() => {
+                const ig = parseInstagram(instagram)
+                return (
+                  <a href={ig.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={socialStyle}
+                    title="Instagram">
+                    📸
+                  </a>
+                )
+              })()}
               {waNumber && (
                 <a href={`https://wa.me/${waNumber}`}
                   target="_blank" rel="noopener noreferrer"
@@ -149,27 +187,59 @@ export default async function Footer() {
               {phone && (
                 <a href={`tel:${phone.replace(/\s/g,'')}`} style={contactItemStyle}>
                   <Phone size={16} color="#C8401A" />
-                  <span style={{ fontSize: '13px' }}>{phone}</span>
+                  <span style={{
+                    fontSize: '13px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '220px',
+                  }}>{phone}</span>
                 </a>
               )}
-              {instagram && (
-                <a href={`https://instagram.com/${instagram.replace('@','')}`}
-                  target="_blank" rel="noopener noreferrer" style={contactItemStyle}>
-                  <Instagram size={16} color="#C8401A" />
-                  <span style={{ fontSize: '13px' }}>{instagram}</span>
-                </a>
-              )}
+              {instagram && (() => {
+                const ig = parseInstagram(instagram)
+                return (
+                  <a href={ig.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={contactItemStyle}>
+                    <span style={{ color: '#C8401A', fontSize: '15px', flexShrink: 0 }}>📸</span>
+                    <span style={{
+                      fontSize: '13px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '200px',
+                      display: 'block',
+                    }}>
+                      {ig.handle}
+                    </span>
+                  </a>
+                )
+              })()}
               {email && (
                 <a href={`mailto:${email}`} style={contactItemStyle}>
                   <Mail size={16} color="#C8401A" />
-                  <span style={{ fontSize: '13px' }}>{email}</span>
+                  <span style={{
+                    fontSize: '13px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '220px',
+                  }}>{email}</span>
                 </a>
               )}
               {waNumber && (
                 <a href={`https://wa.me/${waNumber}`}
                   target="_blank" rel="noopener noreferrer" style={contactItemStyle}>
                   <MessageCircle size={16} color="#25D366" />
-                  <span style={{ fontSize: '13px' }}>WhatsApp Us</span>
+                  <span style={{
+                    fontSize: '13px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '220px',
+                  }}>WhatsApp Us</span>
                 </a>
               )}
             </div>
@@ -211,4 +281,5 @@ const footerLinkStyle: React.CSSProperties = {
 const contactItemStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: '10px',
   textDecoration: 'none', color: 'rgba(255,255,255,0.65)',
+  overflow: 'hidden',
 }
